@@ -1,1 +1,3267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TTTIW</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xIDE1IDY1IDQwIj4KICA8ZyBmaWxsPSIjRTVCMjVEIiB0cmFuc2Zvcm09Im1hdHJpeCgwLjY3NDY1LCAwLCAwLCAwLjY3NDY1LCAwLCAxNykiPgogICAgPHBhdGggZD0iTTAsNTEuMTdsNTkuMjkuMzRMMjkuOTQsMCwwLDUxLjE3Wk0xMC41Nyw0NS4xNkwyOS44NywxMi4xNmwxOC45MiwzMy4yMS0zOC4yMi0uMjJaIi8+CiAgICA8cGF0aCBkPSJNNTYuNDMsNDkuODRsLTUzLjU2LS4zMUwyOS45MiwzLjMxbDI2LjUyLDQ2LjU0Wk00LjYxLDQ4LjU0bDUwLjA5LjI5TDI5LjkxLDUuMzEsNC42MSw0OC41NFpNNTMuMzgsNDguMDZsLTQ3LjQyLS4yN0wyOS45LDYuODVsMjMuNDgsNDEuMlpNNy42OSw0Ni43OWw0My45Ni4yNUwyOS44OSw4Ljg1LDcuNjksNDYuNzlaIi8+CiAgPC9nPgogIDxnPgogICAgPGcgZmlsbD0iI0U1QjI1RCIgdHJhbnNmb3JtPSJtYXRyaXgoMC41MDAyLCAwLCAwLCAwLjUwMDIsIDUuMjQ0MzM3LCAxNi4xNTk2NjIpIiBzdHlsZT0iIj4KICAgICAgPHBhdGggZD0iTTg1LjgzLDEuNjhoLS4yYy0xMy43NSwwLTI0Ljk1LDExLjE3LTI0Ljk5LDI0LjkyLS4wNCwxMy43OCwxMS4xNCwyNS4wMiwyNC45MywyNS4wNmguMmMxMy43NSwwLDI0Ljk1LTExLjE3LDI0Ljk5LTI0LjkyLjA0LTEzLjc4LTExLjE0LTI1LjAyLTI0LjkzLTI1LjA2Wk04Mi40OSw4LjA2bC0uMDksMTUuNDEtMTUuMy0uMDljLjY2LTMuNzksMi40Ni03LjI5LDUuMjMtMTAuMDcsMi44LTIuOCw2LjMzLTQuNiwxMC4xNi01LjI1Wk04Mi4zNiwyOS41NGwtLjA5LDE1LjcxYy0zLjc3LS43LTcuMy0yLjUzLTEwLjAxLTUuMjktMi44Ni0yLjg5LTQuNjUtNi41Ni01LjI0LTEwLjUxbDE1LjM0LjA5Wk04OC4zNSw0NS4zN2wuMDktMTUuNzksMTUuOTEuMDljLTEuMzIsOC4xMi03LjgzLDE0LjU0LTE2LDE1LjdaTTg4LjQ4LDIzLjVsLjA5LTE1LjQ5YzguMDUsMS4yNCwxNC40Myw3LjU3LDE1Ljc3LDE1LjU4bC0xNS44Ni0uMDlaIi8+CiAgICA8L2c+CiAgICA8cmVjdCBzdHlsZT0iZmlsbDogcmdiKDIyOSwgMTc4LCA5Myk7IHRyYW5zZm9ybS1ib3g6IGZpbGwtYm94OyB0cmFuc2Zvcm0tb3JpZ2luOiA1MCUgNTAlOyIgdHJhbnNmb3JtPSJtYXRyaXgoMC44NjYwMjYsIC0wLjUsIDAuNSwgMC44NjYwMjYsIC0xMC4yMDcxODMsIC0xMS44NjcyMjQpIiB4PSI2NC40MDQiIHk9IjQ5LjUxMiIgd2lkdGg9IjUiIGhlaWdodD0iMTQiIHJ4PSIxIiByeT0iMSIvPgogIDwvZz4KICA8cGF0aCBzdHlsZT0iZmlsbDogcmdiKDIyOSwgMTc4LCA5Myk7IiBkPSJNIDQ4LjU4NCA0MS45MzcgQyA1MS41OTUgNDIuMDAzIDUyLjQ4OSA0Mi43MiA1NC4wODkgNDUuMTU3IEwgNTguMzk2IDQyLjUzNCBDIDU3LjI0NyA0MC4wMTEgNTcuMjMzIDM4LjczNiA1OC44NDEgMzUuOTc5IEMgNTUuNzI5IDM3LjI4MiA0OC41NjkgNDEuOTUgNDguNTg0IDQxLjkzNyBaIi8+Cjwvc3ZnPg==">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#1e1018; --surface:#2a1520; --border:#4a2a38;
+  --accent:#E5B25D; --accent3:#c9a0dc;
+  --text:#E1E2EF; --muted:#8a6a78;
+  --win:#7ec8a0; --loss:#d9534f; --admin:#c9a0dc;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at 30% 20%,rgba(229,178,93,.06) 0%,transparent 50%),
+             radial-gradient(ellipse at 70% 80%,rgba(53,30,41,.8) 0%,transparent 50%);
+  pointer-events:none;z-index:0;}
 
+/* HEADER */
+header{width:100%;padding:.9rem 1.25rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.75rem;position:relative;z-index:10;}
+.header-logo{display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.08em;color:var(--accent);line-height:1;}
+.header-sub{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+#decay-status{font-size:.55rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.07em;white-space:nowrap;display:none;}
+@media(min-width:640px){#decay-status{display:block;}}
+
+/* ADMIN BTN */
+#admin-btn{background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:.35rem .65rem;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+#admin-btn:hover{border-color:var(--admin);color:var(--admin);}
+#admin-btn.on{border-color:var(--admin);color:var(--admin);background:rgba(201,160,220,.1);}
+.admin-btn-label{display:none;}
+@media(min-width:480px){.admin-btn-label{display:inline;}}
+
+/* NAV */
+nav{width:100%;border-bottom:1px solid var(--border);position:relative;z-index:9;
+  display:flex;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+nav button{background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;
+  font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;padding:.8rem 1rem;
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent);}
+nav button.admin-tab{color:var(--admin);opacity:.5;}
+nav button.admin-tab.active{color:var(--admin);border-bottom-color:var(--admin);opacity:1;}
+nav button:hover:not(.active){color:var(--text);}
+
+/* MAIN */
+main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
+.panel{display:none;}.panel.active{display:block;width:100%;overflow-x:hidden;}
+
+/* LEADERBOARD */
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);text-align:left;padding:.55rem .5rem;border-bottom:1px solid var(--border);}
+.lb-table td{padding:.6rem .5rem;border-bottom:1px solid rgba(74,42,56,.5);vertical-align:middle;}
+.lb-table tr:hover td{background:rgba(229,178,93,.04);}
+.lb-table tbody tr{cursor:pointer;}
+.rank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--muted);white-space:nowrap;}
+.rank.top1{color:var(--accent);}.rank.top2{color:#c0c0c0;}.rank.top3{color:#cd7f32;}
+.lb-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.lb-av-ph{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.75rem;color:var(--muted);flex-shrink:0;}
+.player-name{font-size:.85rem;font-weight:600;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pname-cell{display:flex;align-items:center;gap:.45rem;min-width:0;}
+.rating-val{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:var(--accent);letter-spacing:.05em;white-space:nowrap;}
+.rd-val{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);white-space:nowrap;}
+.record-badge{font-family:'DM Mono',monospace;font-size:.6rem;display:inline-flex;gap:.3rem;white-space:nowrap;}
+.record-badge .w{color:var(--win);}.record-badge .l{color:var(--loss);}
+/* hide less important columns on small screens */
+@media(max-width:480px){
+  .lb-col-rd,.lb-col-crown{display:none;}
+  .lb-table th{padding:.5rem .35rem;}
+  .lb-table td{padding:.55rem .35rem;}
+  .rating-val{font-size:1.2rem;}
+}
+@media(min-width:481px) and (max-width:640px){
+  .lb-col-crown{display:none;}
+}
+
+/* FORMS */
+.form-card{background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:1.25rem;width:100%;}
+.form-card h2{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.08em;margin-bottom:1rem;color:var(--text);}
+.field{margin-bottom:.9rem;}
+label{display:block;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:.88rem;padding:.6rem .85rem;outline:none;
+  transition:border-color .2s;appearance:none;border-radius:0;}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--accent);cursor:pointer;}
+input:not([type=checkbox]):not([type=radio]):focus,select:focus,textarea:focus{border-color:var(--accent);}
+input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{color:var(--muted);}
+
+.btn{background:var(--accent);color:#1e1018;border:none;font-family:'DM Mono',monospace;
+  font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:.7rem 1.4rem;
+  cursor:pointer;font-weight:500;transition:all .15s;display:inline-block;border-radius:0;}
+.btn:hover{background:#f5e6cc;}.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;
+  padding:.45rem .85rem;cursor:pointer;transition:all .15s;border-radius:0;}
+.btn-ghost:hover{border-color:var(--text);color:var(--text);}
+.btn-danger{background:var(--loss);color:#fff;border:none;font-family:'DM Mono',monospace;
+  font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;padding:.38rem .65rem;
+  cursor:pointer;transition:opacity .15s;border-radius:0;}
+.btn-danger:hover{opacity:.8;}
+.btn-admin{background:rgba(201,160,220,.12);color:var(--admin);border:1px solid var(--admin);
+  font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;
+  padding:.38rem .65rem;cursor:pointer;transition:all .15s;border-radius:0;}
+.btn-admin:hover{background:rgba(201,160,220,.22);}
+
+.msg{font-family:'DM Mono',monospace;font-size:.68rem;padding:.6rem .85rem;margin-top:.65rem;
+  border-left:3px solid var(--accent);background:rgba(229,178,93,.07);color:var(--accent);display:none;}
+.msg.err{border-color:var(--loss);background:rgba(255,71,87,.05);color:var(--loss);}
+
+/* HISTORY */
+.hist-filters{display:flex;gap:.65rem;margin-bottom:1rem;flex-wrap:wrap;}
+.hist-filters select{width:auto;min-width:150px;flex:1;}
+.match-row{background:var(--surface);border:1px solid var(--border);padding:.75rem .9rem;
+  margin-bottom:.35rem;display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto;align-items:center;gap:.4rem .4rem;}
+.match-row .match-meta-col{grid-column:1/-1;font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);text-align:left;white-space:normal;overflow-wrap:break-word;margin-top:.1rem;}
+.match-player{display:flex;flex-direction:column;gap:.15rem;}
+.match-player .name{font-weight:600;font-size:.82rem;}
+.match-player .delta{font-family:'DM Mono',monospace;font-size:.62rem;}
+.match-player .delta.pos{color:var(--win);}.match-player .delta.neg{color:var(--loss);}
+.match-player .rdi{font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted);}
+.match-mid{text-align:center;}
+.match-result{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);letter-spacing:.07em;
+  display:flex;align-items:center;gap:.3rem;justify-content:center;white-space:nowrap;}
+.match-result .ws{color:var(--win);font-size:.8rem;}.match-result .ls{color:var(--loss);font-size:.8rem;}
+.match-score-lbl{font-size:1.2rem;}
+.match-date-lbl{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);margin-top:.2rem;}
+
+.empty{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);text-align:center;padding:2.5rem 1rem;border:1px dashed var(--border);}
+.loading{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--muted);text-align:center;padding:2.5rem;letter-spacing:.1em;}
+.loading::after{content:'';display:inline-block;width:10px;height:10px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;margin-left:8px;vertical-align:middle;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* PLAYER CARDS */
+.cards-label{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:var(--muted);margin-bottom:.65rem;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:.65rem;width:100%;}
+.player-card{background:var(--surface);border:1px solid var(--border);padding:.9rem;cursor:pointer;
+  transition:border-color .2s,transform .15s;display:flex;flex-direction:column;gap:.65rem;
+  min-width:0;max-width:100%;box-sizing:border-box;}
+.player-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 18px rgba(229,178,93,.1);}
+.pc-header{display:flex;align-items:center;gap:.65rem;}
+.pc-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--border);background:var(--bg);flex-shrink:0;}
+.pc-av-ph{width:42px;height:42px;border-radius:50%;background:var(--bg);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted);flex-shrink:0;}
+.pc-name-block{min-width:0;}
+.pc-name{font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pc-tag{font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.07em;color:var(--loss);
+  border:1px solid var(--loss);padding:.08rem .28rem;display:inline-block;margin-top:.12rem;}
+.pc-stats{display:grid;grid-template-columns:1fr 1fr;gap:.45rem .65rem;}
+.pc-stat{display:flex;flex-direction:column;gap:.08rem;}
+.pc-stat-l{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+.pc-stat-v{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;line-height:1;}
+.pc-foot{display:flex;align-items:center;justify-content:space-between;padding-top:.6rem;border-top:1px solid var(--border);}
+.pc-hint{font-family:'DM Mono',monospace;font-size:.5rem;color:var(--muted);letter-spacing:.06em;}
+
+/* SEASON BADGES */
+.season-badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem;}
+.s-badge{font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.06em;padding:.18rem .45rem;border-radius:2px;display:inline-flex;align-items:center;gap:.25rem;line-height:1;}
+.s-badge.rank1{background:linear-gradient(135deg,#b8860b,#ffd700,#b8860b);color:#1a1000;box-shadow:0 1px 6px rgba(255,215,0,.35);}
+.s-badge.rank2{background:linear-gradient(135deg,#666,#c0c0c0,#666);color:#0a0a0a;}
+.s-badge.rank3{background:linear-gradient(135deg,#7a4a1e,#cd7f32,#7a4a1e);color:#1a0800;}
+.s-badge.rankN{background:var(--surface);color:var(--muted);border:1px solid var(--border);}
+.s-history-wrap{border-top:1px solid var(--border);padding-top:.6rem;margin-top:.1rem;}
+.s-history-select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--muted);
+  font-family:'DM Mono',monospace;font-size:.58rem;padding:.35rem .6rem;cursor:pointer;border-radius:0;appearance:none;}
+.s-history-select:focus{border-color:var(--accent);outline:none;}
+.s-history-data{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.7;margin-top:.4rem;padding:.5rem .65rem;background:rgba(0,0,0,.2);border:1px solid var(--border);}
+.s-history-data strong{color:var(--text);}
+
+/* SEASON COUNTDOWN in header */
+#season-countdown{font-size:.55rem;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:.07em;white-space:nowrap;border:1px solid rgba(229,178,93,.3);padding:.25rem .5rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;}
+@media(min-width:480px){#season-countdown{max-width:none;}}
+#season-countdown.urgent{color:var(--loss);border-color:rgba(217,83,79,.4);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+/* RULES */
+.rules-wrap{max-width:1100px;}
+.rules-columns{display:flex;flex-direction:column;gap:2rem;}
+@media(min-width:768px){
+  .rules-columns{flex-direction:row;gap:2.5rem;align-items:flex-start;}
+  .rules-col{flex:1;min-width:0;}
+}
+.rules-col-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);margin-bottom:1.1rem;}
+.rules-list{display:flex;flex-direction:column;}
+.rule-item{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 0;border-bottom:1px solid var(--border);}
+.rule-item:last-child{border-bottom:none;}
+.rule-icon{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--accent);min-width:1.8rem;text-align:center;padding-top:.1rem;flex-shrink:0;}
+.rule-title{font-weight:600;font-size:.88rem;color:var(--text);margin-bottom:.22rem;}
+.rule-desc{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);line-height:1.6;}
+
+/* PROFILE MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.88);
+  backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:.4rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);width:100%;max-width:800px;
+  max-height:96vh;overflow-y:auto;animation:mIn .2s ease;}
+@keyframes mIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.modal-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;}
+.mh-left{display:flex;gap:.75rem;align-items:flex-start;flex:1;min-width:0;}
+.m-av-wrap{position:relative;flex-shrink:0;}
+.m-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);display:block;}
+.m-av-ph{width:52px;height:52px;border-radius:50%;background:var(--bg);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--muted);}
+.m-av-upload{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--accent);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:.65rem;color:#1e1018;border:2px solid var(--surface);font-weight:700;line-height:1;}
+.m-av-upload:hover{background:#f5e6cc;}
+.m-av-input{display:none;}
+.m-player-info{flex:1;min-width:0;}
+.m-player-name{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.06em;color:var(--text);line-height:1;word-break:break-word;}
+.m-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:.5rem .6rem;margin-top:.5rem;}
+@media(max-width:400px){
+  .m-avatar,.m-av-ph{width:44px;height:44px;}
+  .m-player-name{font-size:1.3rem;}
+  .m-stats{grid-template-columns:repeat(auto-fill,minmax(75px,1fr));}
+  .modal-header{padding:.75rem;}
+  .mh-left{gap:.55rem;}
+  .m-close{font-size:.55rem;padding:.28rem .5rem;}
+}
+.m-stat{display:flex;flex-direction:column;gap:.12rem;}
+.m-stat-l{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.m-stat-v{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent);line-height:1;}
+.m-stat-v.neutral{color:var(--text);}.m-stat-v.green{color:var(--win);}.m-stat-v.red{color:var(--loss);}
+.m-close{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;
+  font-size:.62rem;letter-spacing:.07em;padding:.35rem .65rem;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.m-close:hover{border-color:var(--text);color:var(--text);}
+.modal-body{padding:1.25rem;}
+.m-quote{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);font-style:italic;margin-top:.4rem;line-height:1.6;}
+.m-quote .qa{color:var(--accent);font-style:normal;}
+.quote-row{display:flex;gap:.4rem;margin-top:.45rem;}
+.quote-row input{font-size:.72rem;padding:.38rem .6rem;}
+.quote-row .btn{padding:.38rem .65rem;font-size:.56rem;}
+.upload-prog{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);margin-top:.4rem;display:none;}
+
+/* CHART */
+.chart-section{margin-bottom:1.4rem;}
+.chart-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
+.chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:visible;position:relative;height:175px;cursor:crosshair;}
+.chart-outer::-webkit-scrollbar{height:3px;}.chart-outer::-webkit-scrollbar-track{background:var(--bg);}.chart-outer::-webkit-scrollbar-thumb{background:var(--border);}
+.chart-wrap{position:relative;display:inline-block;min-width:100%;}
+.chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
+  font-family:'DM Mono',monospace;font-size:.62rem;color:var(--text);pointer-events:none;
+  z-index:9999;display:none;line-height:1.6;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.5);}
+
+/* PROFILE MATCHES */
+.pm-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.65rem;
+  padding:.65rem 0;border-bottom:1px solid rgba(74,42,56,.6);}
+.pm-row:last-child{border-bottom:none;}
+.pm-badge{font-family:'Bebas Neue',sans-serif;font-size:.82rem;width:2.7rem;text-align:center;padding:.22rem 0;letter-spacing:.05em;}
+.pm-badge.win{color:var(--win);background:rgba(71,255,184,.08);}
+.pm-badge.loss{color:var(--loss);background:rgba(255,71,87,.08);}
+.pm-info{display:flex;flex-direction:column;gap:.12rem;min-width:0;}
+.pm-opp{font-weight:600;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pm-date{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);}
+.pm-delta{font-family:'DM Mono',monospace;font-size:.72rem;text-align:right;white-space:nowrap;min-width:0;}
+.pm-delta.pos{color:var(--win);}.pm-delta.neg{color:var(--loss);}
+
+/* ADMIN PANEL */
+.admin-section{margin-bottom:1.25rem;}
+.admin-stitle{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.08em;color:var(--admin);
+  padding:.55rem .75rem;border:1px solid rgba(201,160,220,.18);background:rgba(201,160,220,.04);
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .15s;}
+.admin-stitle:hover{background:rgba(201,160,220,.09);}
+.admin-stitle .collapse-arrow{font-size:.7rem;transition:transform .2s;display:inline-block;margin-left:.5rem;opacity:.6;}
+.admin-stitle.collapsed .collapse-arrow{transform:rotate(-90deg);}
+.admin-collapse-body{overflow:hidden;transition:max-height .25s ease,opacity .2s ease;max-height:4000px;opacity:1;padding-top:.75rem;}
+.admin-collapse-body.collapsed{max-height:0;opacity:0;padding-top:0;}
+.admin-prow{display:flex;align-items:center;gap:.65rem;padding:.65rem;background:var(--surface);
+  border:1px solid var(--border);margin-bottom:.35rem;flex-wrap:wrap;}
+.admin-prow:hover{border-color:var(--admin);}
+.admin-pname{flex:1;font-weight:600;font-size:.88rem;min-width:80px;}
+.admin-prating{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);}
+.admin-mrow{display:flex;align-items:center;gap:.65rem;padding:.6rem .7rem;background:var(--surface);
+  border:1px solid var(--border);margin-bottom:.35rem;flex-wrap:wrap;}
+.admin-mrow:hover{border-color:var(--loss);}
+.admin-minfo{flex:1;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);line-height:1.5;}
+.admin-minfo strong{color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;}
+
+/* ADMIN LOGIN / EDIT MODALS */
+.am-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:300;align-items:center;justify-content:center;padding:.75rem;}
+.am-overlay.open{display:flex;}
+.am-box{background:var(--surface);border:1px solid var(--admin);padding:1.75rem;width:100%;max-width:350px;animation:mIn .2s ease;}
+.am-box h2{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.08em;color:var(--admin);margin-bottom:1.1rem;}
+
+/* QUOTES */
+.lb-quote{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--muted);font-style:italic;
+  margin-bottom:1.1rem;text-align:center;letter-spacing:.02em;line-height:1.6;opacity:.7;}
+.lb-quote .qa{color:var(--muted);font-style:normal;opacity:.8;}
+
+
+/* BRACKETS */
+.br-pill{display:inline-block;font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.07em;
+  text-transform:uppercase;padding:.08rem .35rem;border-radius:20px;margin-left:.4rem;vertical-align:middle;}
+.br-pill.winners{background:rgba(229,178,93,.12);color:var(--accent);border:1px solid rgba(229,178,93,.25);}
+.br-pill.losers{background:rgba(217,83,79,.1);color:var(--loss);border:1px solid rgba(217,83,79,.2);}
+.br-pill.grand{background:rgba(201,160,220,.1);color:var(--admin);border:1px solid rgba(201,160,220,.25);}
+/* Bracket viewport */
+.br-viewport{position:relative;height:calc(100vh - 220px);min-height:420px;overflow:hidden;
+  background:var(--bg);border:1px solid var(--border);border-radius:3px;cursor:grab;width:100%;}
+.br-viewport.drag{cursor:grabbing;}
+.br-world{position:absolute;top:0;left:0;transform-origin:0 0;}
+/* SCROLLBARS */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+*{scrollbar-width:thin;scrollbar-color:var(--border) var(--bg);}
+
+/* MATCHES PANEL LAYOUT */
+.matches-layout{display:flex;flex-direction:column;gap:1.25rem;width:100%;}
+.matches-sidebar .form-card{margin-bottom:0;}
+.matches-main{width:100%;}
+@media(min-width:900px){
+  .matches-layout{display:grid;grid-template-columns:320px 1fr;gap:1.5rem;align-items:start;}
+}
+
+
+@media(min-width:480px){
+  header{padding:1.1rem 1.75rem;}
+  header h1{font-size:2.6rem;}
+  main{padding:1.5rem 1.75rem;}
+}
+@media(min-width:640px){
+  header{padding:1.2rem 2rem;}
+  header h1{font-size:3rem;}
+  nav{padding:0 2rem;}
+  main{padding:1.75rem 2rem;}
+  .match-row{grid-template-columns:1fr auto 1fr auto;}
+  .match-date-lbl{display:none;}
+}
+@media(min-width:900px){
+  .players-layout{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:start;}
+  .players-sidebar-mobile{display:none;}
+  #players-list-desktop{display:block;}
+}
+@media(max-width:899px){
+  #players-list-desktop{display:none;}
+  .players-sidebar-mobile{display:block;}
+  .players-layout{width:100%;}
+  .players-sidebar{width:100%;max-width:100%;}
+  .form-card{width:100%;max-width:100%;box-sizing:border-box;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 15 65 40" style="height:32px;width:auto;flex-shrink:0">
+      <g fill="#E5B25D" transform="matrix(0.67465,0,0,0.67465,0,17)">
+        <path d="M0,51.17l59.29.34L29.94,0,0,51.17ZM10.57,45.16L29.87,12.16l18.92,33.21-38.22-.22Z"/>
+        <path d="M56.43,49.84l-53.56-.31L29.92,3.31l26.52,46.54ZM4.61,48.54l50.09.29L29.91,5.31,4.61,48.54ZM53.38,48.06l-47.42-.27L29.9,6.85l23.48,41.2ZM7.69,46.79l43.96.25L29.89,8.85,7.69,46.79Z"/>
+      </g>
+      <g><g fill="#E5B25D" transform="matrix(0.5002,0,0,0.5002,5.244337,16.159662)">
+        <path d="M85.83,1.68h-.2c-13.75,0-24.95,11.17-24.99,24.92-.04,13.78,11.14,25.02,24.93,25.06h.2c13.75,0,24.95-11.17,24.99-24.92.04-13.78-11.14-25.02-24.93-25.06ZM82.49,8.06l-.09,15.41-15.3-.09c.66-3.79,2.46-7.29,5.23-10.07,2.8-2.8,6.33-4.6,10.16-5.25ZM82.36,29.54l-.09,15.71c-3.77-.7-7.3-2.53-10.01-5.29-2.86-2.89-4.65-6.56-5.24-10.51l15.34.09ZM88.35,45.37l.09-15.79,15.91.09c-1.32,8.12-7.83,14.54-16,15.7ZM88.48,23.5l.09-15.49c8.05,1.24,14.43,7.57,15.77,15.58l-15.86-.09Z"/>
+      </g>
+      <rect style="fill:rgb(229,178,93);transform-box:fill-box;transform-origin:50% 50%;" transform="matrix(0.866026,-0.5,0.5,0.866026,-10.207183,-11.867224)" x="64.404" y="49.512" width="5" height="14" rx="1" ry="1"/>
+      </g>
+      <path style="fill:rgb(229,178,93);" d="M48.584,41.937C51.595,42.003,52.489,42.72,54.089,45.157L58.396,42.534C57.247,40.011,57.233,38.736,58.841,35.979C55.729,37.282,48.569,41.95,48.584,41.937Z"/>
+    </svg>
+    <h1>TTTIW</h1>
+  </div>
+  <span class="header-sub" style="display:none" id="header-sub-text">Table Tennis · Texas Invention<span style="color:var(--accent)">Works</span></span>
+  <div class="header-right">
+    <span id="decay-status"></span>
+    <span id="season-countdown" style="display:none"></span>
+    <button id="admin-btn" onclick="openAdminLogin()">⚙<span class="admin-btn-label"> Admin</span></button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showPanel('leaderboard',this)">Leaderboard</button>
+  <button onclick="showPanel('players',this)">Players</button>
+  <button onclick="showPanel('matches',this)">Matches</button>
+  <button onclick="showPanel('rules',this)">Rules</button>
+  <button onclick="showPanel('brackets',this)">Tournaments</button>
+  <button id="admin-tab-btn" class="admin-tab" onclick="showPanel('admin',this)" style="display:none">★ Admin</button>
+</nav>
+
+<main>
+  <!-- LEADERBOARD -->
+  <div id="panel-leaderboard" class="panel active">
+    <div id="lb-loading" class="loading">Loading leaderboard</div>
+    <table class="lb-table" id="lb-table" style="display:none">
+      <thead><tr>
+        <th class="lb-col-rank">#</th>
+        <th>Player</th>
+        <th class="lb-col-rating">Rating</th>
+        <th class="lb-col-rd">RD</th>
+        <th class="lb-col-wl">W–L</th>
+        <th class="lb-col-crown"></th>
+      </tr></thead>
+      <tbody id="lb-body"></tbody>
+    </table>
+    <div id="lb-empty" class="empty" style="display:none">No players yet.</div>
+  </div>
+
+  <!-- PLAYERS -->
+  <div id="panel-players" class="panel">
+    <div class="players-layout">
+      <div class="players-sidebar">
+        <div class="form-card">
+          <h2>Add Player</h2>
+          <div class="field"><label>Player Name</label><input type="text" id="player-name" placeholder="Enter name…"></div>
+          <button class="btn" id="add-player-btn" onclick="addPlayer()">Add Player</button>
+          <div class="msg" id="player-msg"></div>
+          <p style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:.65rem;line-height:1.7">
+            New players start at <span style="color:var(--accent)">1500</span> · RD <span style="color:var(--accent)">120</span> · σ <span style="color:var(--accent)">0.06</span>.<br>
+            Tap any player card to add a profile photo &amp; quote.
+          </p>
+        </div>
+        <div class="players-sidebar-mobile" id="players-list-mobile"></div>
+      </div>
+      <div id="players-list-desktop"></div>
+    </div>
+  </div>
+
+  <!-- MATCHES (Submit + History combined) -->
+  <div id="panel-matches" class="panel">
+    <div class="matches-layout">
+      <div class="matches-sidebar">
+        <div class="form-card">
+          <h2>Submit Match</h2>
+          <div class="field"><label>Winner</label><select id="match-winner"></select></div>
+          <div class="field"><label>Loser</label><select id="match-loser"></select></div>
+          <div class="field"><label>Score (optional)</label><input type="text" id="match-score" placeholder="e.g. 11-7"></div>
+          <button class="btn" id="submit-match-btn" onclick="submitMatch()">Submit Match</button>
+          <div class="msg" id="match-msg"></div>
+        </div>
+      </div>
+      <div class="matches-main">
+        <div class="hist-filters">
+          <select id="history-filter" onchange="renderHistory()"><option value="all">All Players</option></select>
+          <select id="history-filter-2" onchange="renderHistory()" style="display:none"><option value="all">vs Everyone</option></select>
+        </div>
+        <div id="h2h-banner" style="display:none;background:var(--surface);border:1px solid var(--border);padding:.75rem 1rem;margin-bottom:1rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap"></div>
+        <div id="history-list"><div class="loading">Loading matches</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES -->
+  <div id="panel-rules" class="panel">
+    <div class="rules-wrap">
+      <div class="rules-columns">
+        <!-- House Rules Column -->
+        <div class="rules-col">
+          <div class="rules-col-title">House Rules</div>
+          <div class="rules-list">
+            <div class="rule-item"><div class="rule-icon">11</div><div><div class="rule-title">First to 11</div><div class="rule-desc">Win by reaching 11 points with a 2-point lead.</div></div></div>
+            <div class="rule-item"><div class="rule-icon">2&times;</div><div><div class="rule-title">2 Serves Each</div><div class="rule-desc">Players alternate with 2 serves per turn.</div></div></div>
+            <div class="rule-item"><div class="rule-icon">&infin;</div><div><div class="rule-title">Deuce Serving</div><div class="rule-desc">At 10&ndash;10 (deuce), alternate serves every point.</div></div></div>
+            <div class="rule-item"><div class="rule-icon">6&Prime;</div><div><div class="rule-title">Serve Height</div><div class="rule-desc">Ball must be struck 6 inches above the table surface.</div></div></div>
+            <div class="rule-item"><div class="rule-icon">&#9878;</div><div><div class="rule-title">Fairness Rule</div><div class="rule-desc">Beating stronger players gains more rating points.</div></div></div>
+          </div>
+        </div>
+        <!-- Rating System Column -->
+        <div class="rules-col">
+          <div class="rules-col-title">Rating System</div>
+          <div class="rules-list">
+            <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">RD</div><div><div class="rule-title">Rating Deviation</div><div class="rule-desc">RD measures how confident the system is in a player's rating. A low RD means the rating is reliable; a high RD means more uncertainty. New players start at RD 120. After enough games, RD can drop below 100 &mdash; only then does a player appear on the leaderboard.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&sigma;</div><div><div class="rule-title">Volatility (&sigma;)</div><div class="rule-desc">Volatility measures how erratic a player's performance is. A higher &sigma; means results are unpredictable &mdash; the system reacts more strongly to upsets. It's updated each match using the full Glicko-2 Illinois algorithm. Starting &sigma;: 0.06. Capped at 0.30.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">RD Decay (Inactivity)</div><div class="rule-desc">If you stop playing, your RD slowly increases using your personal volatility: &phi;* = &radic;(&phi;&sup2; + &sigma;&sup2;). This means volatile players decay faster than consistent ones. RD is capped at 200. If RD rises above 100 you'll be hidden from the leaderboard.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">G2</div><div><div class="rule-title">Glicko-2 Algorithm</div><div class="rule-desc">Full Glicko-2 implementation including per-player volatility updates via the Illinois root-finding method. Every match updates rating, RD, and volatility based on expected outcome &mdash; upsets gain more, expected wins gain less. Starting rating: 1500.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="panel-admin" class="panel">
+    <div style="max-width:820px">
+
+      <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">Season Settings</div>
+        <div class="form-card" style="border-color:rgba(201,160,220,.3)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Set a season end date. When the deadline passes, you can trigger a season reset — all ratings return to 1500, RD to 120, volatility to 0.06, wins/losses to 0, and a snapshot of final rankings is saved to each player's history.</p>
+          <div class="field">
+            <label>Season Name</label>
+            <input type="text" id="season-name-input" placeholder="e.g. Spring 2025">
+          </div>
+          <div class="field">
+            <label>Season End Date</label>
+            <input type="datetime-local" id="season-deadline-input">
+          </div>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+            <button class="btn" onclick="saveSeason()">Save Season Deadline</button>
+            <button class="btn-danger" id="reset-season-btn" onclick="triggerSeasonReset()" style="padding:.7rem 1.2rem;font-size:.65rem">⚡ Reset Season Now</button>
+          </div>
+          <div class="msg" id="season-msg"></div>
+          <div id="season-status-admin" style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:.75rem;line-height:1.7;display:none"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">Restore Previous Season</div>
+        <div class="form-card" style="border-color:rgba(217,83,79,.3)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Accidentally reset a season? Select a past season to restore — this will recreate all matches from that season's archived history, restore each player's final stats, and roll back the season number. <strong style="color:var(--loss)">Current live matches will be cleared.</strong></p>
+          <div class="field">
+            <label>Season to Restore</label>
+            <select id="restore-season-select" style="width:100%">
+              <option value="">— Loading seasons… —</option>
+            </select>
+          </div>
+          <div id="restore-season-preview" style="display:none;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.55rem .75rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem"></div>
+          <button class="btn-danger" id="restore-season-btn" onclick="restoreSeason()" style="padding:.65rem 1.2rem;font-size:.65rem">↩ Restore This Season</button>
+          <div class="msg" id="restore-msg" style="margin-top:.65rem"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">RD Decay Settings</div>
+        <div class="form-card" style="border-color:rgba(201,160,220,.15)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases each inactive period using each player's personal volatility: <strong style="color:var(--text)">φ* = √(φ² + σ²)</strong>. Volatile players decay faster. Default: 4 hours · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
+          <div id="decay-info" style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.6rem .8rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem">
+            Loading current settings…
+          </div>
+          <div class="field">
+            <label>Decay Period</label>
+            <div style="display:flex;gap:.6rem">
+              <input type="number" id="decay-amount" value="4" min="1" style="width:90px;flex-shrink:0;flex:none">
+              <select id="decay-unit">
+                <option value="minutes">Minutes</option>
+                <option value="hours" selected>Hours</option>
+                <option value="days">Days</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" onclick="saveDecay()">Save Decay Settings</button>
+          <div class="msg" id="decay-msg"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">Repair Ratings</div>
+        <div class="form-card" style="border-color:rgba(201,160,220,.15)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Recalculates every player's rating, RD, and volatility directly from their last stored match result, then applies any accumulated decay since that match. Use this to fix any players whose values were incorrectly reset.</p>
+          <button class="btn-admin" onclick="repairAllRatings()" style="font-size:.68rem;padding:.65rem 1.2rem">🔧 Repair All Ratings From Match History</button>
+          <div class="msg" id="repair-msg" style="margin-top:.65rem"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">Deduplicate Matches</div>
+        <div class="form-card" style="border-color:rgba(217,83,79,.3)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Scans the match log for duplicate entries (same two players, same winner, same minute). Keeps exactly one copy of each match and deletes the rest. Run <strong style="color:var(--text)">Repair All Ratings</strong> afterward to fix any rating drift.</p>
+          <div id="dedup-preview" style="display:none;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.55rem .75rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem"></div>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+            <button class="btn-admin" onclick="previewDedup()" style="font-size:.68rem;padding:.65rem 1.2rem">🔍 Preview Duplicates</button>
+            <button class="btn-danger" id="dedup-btn" onclick="runDedup()" style="padding:.65rem 1.2rem;font-size:.65rem;display:none">🗑 Delete Duplicates</button>
+          </div>
+          <div class="msg" id="dedup-msg" style="margin-top:.65rem"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">Fix Match Sides</div>
+        <div class="form-card" style="border-color:rgba(217,83,79,.3)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Fixes matches where p1/p2 sides got swapped during a restore — causing LOSSes to show positive rating changes. Ensures <strong style="color:var(--text)">p1 always = winner</strong> in every match record. Run <strong style="color:var(--text)">Repair All Ratings</strong> after.</p>
+          <button class="btn-admin" onclick="fixMatchSides()" id="fix-sides-btn" style="font-size:.68rem;padding:.65rem 1.2rem">🔀 Fix Match Sides</button>
+          <div class="msg" id="fix-sides-msg" style="margin-top:.65rem"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:600px">
+        <div class="admin-stitle">Match Result Simulator</div>
+        <div class="form-card" style="border-color:rgba(201,160,220,.3)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Simulate Glicko-2 outcomes without affecting real data. Load a real player or enter values manually.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.25rem">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--admin);margin-bottom:.5rem">Player A</div>
+              <div class="field" style="margin-bottom:.5rem">
+                <label>Load Player</label>
+                <select id="sim-a-player" onchange="simLoadPlayer('a')">
+                  <option value="">— manual —</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:.5rem"><label>Rating</label><input type="number" id="sim-a-rating" value="1500" step="1"></div>
+              <div class="field" style="margin-bottom:.5rem"><label>RD</label><input type="number" id="sim-a-rd" placeholder="120" step="0.1" min="30" max="200"></div>
+              <div class="field" style="margin-bottom:0"><label>Volatility σ</label><input type="number" id="sim-a-sigma" placeholder="0.06" step="0.001" min="0.01" max="0.30"></div>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--admin);margin-bottom:.5rem">Player B</div>
+              <div class="field" style="margin-bottom:.5rem">
+                <label>Load Player</label>
+                <select id="sim-b-player" onchange="simLoadPlayer('b')">
+                  <option value="">— manual —</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:.5rem"><label>Rating</label><input type="number" id="sim-b-rating" value="1500" step="1"></div>
+              <div class="field" style="margin-bottom:.5rem"><label>RD</label><input type="number" id="sim-b-rd" placeholder="120" step="0.1" min="30" max="200"></div>
+              <div class="field" style="margin-bottom:0"><label>Volatility σ</label><input type="number" id="sim-b-sigma" placeholder="0.06" step="0.001" min="0.01" max="0.30"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap">
+            <button class="btn-admin" onclick="simResult('A')" style="font-size:.68rem;padding:.65rem 1.2rem">▶ A Wins</button>
+            <button class="btn-admin" onclick="simResult('B')" style="font-size:.68rem;padding:.65rem 1.2rem">▶ B Wins</button>
+            <button class="btn-ghost" onclick="clearSim()" style="font-size:.62rem;padding:.55rem .9rem">Clear</button>
+          </div>
+          <div id="sim-result" style="display:none;margin-top:1rem;background:rgba(0,0,0,.25);border:1px solid var(--border);padding:.85rem 1rem;font-family:'DM Mono',monospace;font-size:.65rem;line-height:2;"></div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">Manage Players <span class="collapse-arrow">▼</span></div>
+        <div class="admin-collapse-body collapsed">
+          <div id="admin-players-list"><div class="loading">Loading</div></div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">Match Log (Delete &amp; Recalculate) <span class="collapse-arrow">▼</span></div>
+        <div class="admin-collapse-body collapsed">
+          <p style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5">Deleting a match will recalculate all ratings, RD, and volatility from that point forward, including time-based decay.</p>
+          <div id="admin-matches-list"><div class="loading">Loading</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BRACKETS / TOURNAMENTS -->
+  <div id="panel-brackets" class="panel">
+    <div style="width:100%">
+      <!-- Active brackets -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text)">Active Tournaments</div>
+        <button class="btn" onclick="openNewBracketModal()">+ New Tournament</button>
+      </div>
+      <div id="brackets-list"><div class="empty">No active tournaments. Create one to get started.</div></div>
+
+      <!-- Past tournaments -->
+      <div style="margin-top:2.5rem;border-top:1px solid var(--border);padding-top:1.75rem">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);margin-bottom:1.25rem">Past Tournaments</div>
+        <div id="past-tournaments-list"><div class="empty">No completed tournaments yet.</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profile-overlay" onclick="closeProfile(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="mh-left">
+        <div class="m-av-wrap" id="m-av-wrap">
+          <div class="m-av-ph" id="m-av-ph">?</div>
+          <label class="m-av-upload" title="Upload photo">+<input type="file" class="m-av-input" id="m-av-input" accept="image/*"></label>
+        </div>
+        <div class="m-player-info">
+          <div class="m-player-name" id="profile-name">—</div>
+          <div class="m-stats" id="profile-stats"></div>
+          <div class="m-quote" id="profile-quote" style="display:none"></div>
+          <div class="quote-row">
+            <input type="text" id="quote-input-modal" placeholder='"Leaderboard quote…"'>
+            <button class="btn" onclick="saveQuoteModal()">Save</button>
+          </div>
+          <div class="msg" id="quote-msg-modal" style="margin-top:.35rem;padding:.3rem .6rem;font-size:.58rem"></div>
+          <div class="upload-prog" id="upload-prog">Uploading…</div>
+        </div>
+      </div>
+      <button class="m-close" onclick="document.getElementById('profile-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="chart-section">
+        <div class="chart-lbl">Rating History</div>
+        <div class="chart-outer" id="chart-outer">
+          <div class="chart-wrap" id="chart-wrap">
+            <canvas id="rating-chart"></canvas>
+            <div class="chart-tip" id="chart-tip"></div>
+          </div>
+        </div>
+      </div>
+      <div id="profile-matches"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- BRACKET SCORE MODAL -->
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:300;align-items:center;justify-content:center;" id="br-score-ov">
+  <div style="background:#13131a;border:1px solid #2a2a3a;padding:20px;width:300px;border-radius:3px;animation:mIn .15s ease">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;margin-bottom:6px;color:#e0e0ee" id="br-m-title">Match</div>
+    <div style="text-align:center;font-size:.76rem;font-weight:600;margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e0e0ee" id="br-m-vs"></div>
+    <!-- Score inputs -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div id="br-sc1-lbl" style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:#52526a;margin-bottom:4px"></div>
+        <input id="br-sc1" type="number" min="0" placeholder="—" style="width:100%;background:#0d0d12;border:1px solid #2a2a3a;color:#e0e0ee;font-family:'DM Mono',monospace;font-size:1rem;padding:5px 8px;outline:none;border-radius:2px;text-align:center;appearance:none;-moz-appearance:textfield">
+      </div>
+      <div>
+        <div id="br-sc2-lbl" style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:#52526a;margin-bottom:4px"></div>
+        <input id="br-sc2" type="number" min="0" placeholder="—" style="width:100%;background:#0d0d12;border:1px solid #2a2a3a;color:#e0e0ee;font-family:'DM Mono',monospace;font-size:1rem;padding:5px 8px;outline:none;border-radius:2px;text-align:center;appearance:none;-moz-appearance:textfield">
+      </div>
+    </div>
+    <!-- Winner buttons -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:5px">
+      <button id="br-mw1" style="background:rgba(229,178,93,.08);border:1px solid rgba(229,178,93,.22);color:var(--accent);font-family:'DM Mono',monospace;font-size:.56rem;font-weight:600;padding:6px 3px;cursor:pointer;border-radius:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">▶ Wins</button>
+      <button id="br-mw2" style="background:rgba(229,178,93,.08);border:1px solid rgba(229,178,93,.22);color:var(--accent);font-family:'DM Mono',monospace;font-size:.56rem;font-weight:600;padding:6px 3px;cursor:pointer;border-radius:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">▶ Wins</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:5px">
+      <button id="br-mclr" style="display:none;flex:1;background:none;border:1px solid #2a2a3a;color:#52526a;font-family:'DM Mono',monospace;font-size:.52rem;padding:5px;cursor:pointer;border-radius:2px" onmouseover="this.style.borderColor='#ff6b35';this.style.color='#ff6b35'" onmouseout="this.style.borderColor='#2a2a3a';this.style.color='#52526a'">✕ Clear Result</button>
+      <button onclick="closeBrScore()" style="flex:1;background:none;border:1px solid #2a2a3a;color:#52526a;font-family:'DM Mono',monospace;font-size:.52rem;padding:5px;cursor:pointer;border-radius:2px" onmouseover="this.style.color='#e0e0ee';this.style.borderColor='#e0e0ee'" onmouseout="this.style.color='#52526a';this.style.borderColor='#2a2a3a'">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div class="am-overlay" id="crop-overlay" style="z-index:400">
+  <div style="background:var(--surface);border:1px solid var(--border);width:100%;max-width:380px;animation:mIn .2s ease">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.08em;color:var(--text)">Crop Photo</span>
+      <button class="m-close" onclick="closeCropModal()">✕</button>
+    </div>
+    <div style="padding:1.25rem">
+      <p style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:.85rem;line-height:1.6">Drag to reposition · Scroll or pinch to zoom</p>
+      <div style="display:flex;justify-content:center;margin-bottom:1rem">
+        <div id="crop-viewport" style="width:240px;height:240px;border-radius:50%;overflow:hidden;border:2px solid var(--accent);position:relative;cursor:grab;background:#111;touch-action:none;flex-shrink:0">
+          <img id="crop-img" style="position:absolute;transform-origin:top left;user-select:none;-webkit-user-drag:none;pointer-events:none" draggable="false">
+        </div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="display:block;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Zoom</label>
+        <input type="range" id="crop-zoom" min="1" max="4" step="0.01" value="1" style="width:100%;padding:0;height:3px;accent-color:var(--accent)">
+      </div>
+      <div style="display:flex;gap:.6rem">
+        <button class="btn" id="crop-confirm-btn" onclick="confirmCrop()">Use Photo</button>
+        <button class="btn-ghost" onclick="closeCropModal()">Cancel</button>
+      </div>
+      <div class="msg" id="crop-msg" style="margin-top:.65rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW BRACKET MODAL -->
+<div class="am-overlay" id="new-bracket-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="am-box" style="max-width:420px">
+    <h2>New Tournament Bracket</h2>
+    <div class="field"><label>Tournament Name</label><input type="text" id="bracket-name-input" placeholder="e.g. Office Slam 2025"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+      <div class="field" style="margin-bottom:0">
+        <label>Format</label>
+        <select id="bracket-format">
+          <option value="single">Single Elimination</option>
+          <option value="double">Double Elimination</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Seeding</label>
+        <select id="bracket-seeding">
+          <option value="rated">Rated (by rating)</option>
+          <option value="random">Random draw</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Select Players</label>
+      <div id="bracket-player-checkboxes" style="max-height:180px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);padding:.5rem .75rem;display:flex;flex-direction:column;gap:.35rem;"></div>
+    </div>
+    <div style="display:flex;gap:.65rem;margin-top:.5rem">
+      <button class="btn" onclick="createBracket()">Create Bracket</button>
+      <button class="btn-ghost" onclick="document.getElementById('new-bracket-overlay').classList.remove('open')">Cancel</button>
+    </div>
+    <div class="msg" id="bracket-create-msg" style="margin-top:.65rem"></div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="am-overlay" id="admin-login-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="am-box">
+    <h2>Admin Login</h2>
+    <div class="field"><label>Password</label>
+      <input type="password" id="admin-pw" placeholder="Enter password…" onkeydown="if(event.key==='Enter')submitAdminLogin()">
+    </div>
+    <div style="display:flex;gap:.65rem">
+      <button class="btn" onclick="submitAdminLogin()">Login</button>
+      <button class="btn-ghost" onclick="document.getElementById('admin-login-overlay').classList.remove('open')">Cancel</button>
+    </div>
+    <div class="msg" id="admin-login-msg" style="margin-top:.65rem"></div>
+  </div>
+</div>
+
+<!-- EDIT PLAYER MODAL -->
+<div class="am-overlay" id="admin-edit-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="am-box">
+    <h2>Edit Player Stats</h2>
+    <input type="hidden" id="edit-pid">
+    <div class="field"><label>Rating</label><input type="number" id="edit-rating" step="0.1"></div>
+    <div class="field"><label>RD</label><input type="number" id="edit-rd" step="0.1"></div>
+    <div class="field"><label>Volatility (σ)</label><input type="number" id="edit-sigma" step="0.001" min="0.01" max="0.30"></div>
+    <div class="field"><label>Wins</label><input type="number" id="edit-wins" step="1" min="0"></div>
+    <div class="field"><label>Losses</label><input type="number" id="edit-losses" step="1" min="0"></div>
+    <div style="display:flex;gap:.65rem">
+      <button class="btn" onclick="submitEditPlayer()">Save Changes</button>
+      <button class="btn-ghost" onclick="document.getElementById('admin-edit-overlay').classList.remove('open')">Cancel</button>
+    </div>
+    <div class="msg" id="edit-player-msg" style="margin-top:.65rem"></div>
+  </div>
+</div>
+
+<script type="module">
+// ── FIREBASE ─────────────────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:"AIzaSyCHRQOLzC0DcuZv4aCqsL4EM_IVthiZSIc",
+  authDomain:"tttiw-6d44e.firebaseapp.com",
+  projectId:"tttiw-6d44e",
+  storageBucket:"tttiw-6d44e.firebasestorage.app",
+  messagingSenderId:"902138155809",
+  appId:"1:902138155809:web:0860c66b77d07746952460"
+};
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app=initializeApp(FIREBASE_CONFIG);
+const db=getFirestore(app);
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let players=[],matches=[],isAdmin=false,curProfileId=null;
+const ADMIN_PW='pppaddle';
+const RD_MAX=200;
+const SIGMA_DEFAULT=0.06;
+const SIGMA_MAX=0.30;
+const TAU=1.2;
+const EPSILON=0.000001;
+
+// Show subtitle on wider screens
+const mq=window.matchMedia('(min-width:520px)');
+const toggleSub=()=>document.getElementById('header-sub-text').style.display=mq.matches?'block':'none';
+mq.addEventListener('change',toggleSub); toggleSub();
+
+// ── FULL GLICKO-2 WITH ILLINOIS VOLATILITY UPDATE ────────────────────────────
+const SCALE = 173.7178;
+
+function toG2(r, rd) {
+  return { mu: (r - 1500) / SCALE, phi: rd / SCALE };
+}
+function fromG2(mu, phi) {
+  return { r: mu * SCALE + 1500, rd: phi * SCALE };
+}
+function gPhi(phi) {
+  return 1 / Math.sqrt(1 + 3 * phi * phi / (Math.PI * Math.PI));
+}
+function E(mu, muj, phij) {
+  return 1 / (1 + Math.exp(-gPhi(phij) * (mu - muj)));
+}
+
+function g2Update(player, opps) {
+  const { mu, phi } = toG2(player.rating, player.rd);
+  const sigma = player.sigma || SIGMA_DEFAULT;
+
+  if (!opps.length) {
+    const phiStar = Math.sqrt(phi * phi + sigma * sigma);
+    const r = fromG2(mu, Math.min(phiStar, RD_MAX / SCALE));
+    return { rating: Math.round(r.r * 10) / 10, rd: Math.round(r.rd * 10) / 10, sigma };
+  }
+
+  let vInv = 0, deltaSum = 0;
+  for (const o of opps) {
+    const { mu: muj, phi: phij } = toG2(o.rating, o.rd);
+    const gj = gPhi(phij);
+    const ej = E(mu, muj, phij);
+    vInv += gj * gj * ej * (1 - ej);
+    deltaSum += gj * (o.s - ej);
+  }
+  const v = 1 / vInv;
+  const delta = v * deltaSum;
+
+  const newSigma = computeNewSigma(sigma, phi, v, delta);
+  const phiStar = Math.sqrt(phi * phi + newSigma * newSigma);
+  const phiNew = 1 / Math.sqrt(1 / (phiStar * phiStar) + 1 / v);
+  const muNew = mu + phiNew * phiNew * deltaSum;
+
+  const r = fromG2(muNew, phiNew);
+  return {
+    rating: Math.round(r.r * 10) / 10,
+    rd: Math.round(Math.min(r.rd, RD_MAX) * 10) / 10,
+    sigma: Math.round(Math.min(newSigma, SIGMA_MAX) * 100000) / 100000
+  };
+}
+
+function computeNewSigma(sigma, phi, v, delta) {
+  const a = Math.log(sigma * sigma);
+  const tau2 = TAU * TAU;
+  const phi2 = phi * phi;
+  const delta2 = delta * delta;
+
+  function f(x) {
+    const ex = Math.exp(x);
+    const d2 = phi2 + v + ex;
+    return (ex * (delta2 - phi2 - v - ex)) / (2 * d2 * d2) - (x - a) / tau2;
+  }
+
+  let A = a;
+  let B;
+  if (delta2 > phi2 + v) {
+    B = Math.log(delta2 - phi2 - v);
+  } else {
+    let k = 1;
+    while (f(a - k * TAU) < 0) k++;
+    B = a - k * TAU;
+  }
+
+  let fA = f(A);
+  let fB = f(B);
+
+  let iterations = 0;
+  while (Math.abs(B - A) > EPSILON && iterations < 500) {
+    const C = A + (A - B) * fA / (fB - fA);
+    const fC = f(C);
+    if (fC * fB <= 0) {
+      A = B; fA = fB;
+    } else {
+      fA = fA / 2;
+    }
+    B = C; fB = fC;
+    iterations++;
+  }
+
+  return Math.exp(A / 2);
+}
+
+// ── ADMIN ────────────────────────────────────────────────────────────────────
+window.openAdminLogin=function(){
+  if(isAdmin){
+    isAdmin=false;
+    const lbl=document.querySelector('#admin-btn .admin-btn-label');
+    if(lbl)lbl.textContent=' Admin';
+    document.getElementById('admin-btn').classList.remove('on');
+    document.getElementById('admin-tab-btn').style.display='none';
+    renderPastTournaments();
+    showPanel('leaderboard',document.querySelector('nav button'));return;
+  }
+  document.getElementById('admin-pw').value='';document.getElementById('admin-login-msg').style.display='none';
+  document.getElementById('admin-login-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('admin-pw').focus(),120);
+};
+window.submitAdminLogin=function(){
+  if(document.getElementById('admin-pw').value===ADMIN_PW){
+    isAdmin=true;document.getElementById('admin-login-overlay').classList.remove('open');
+    const lbl=document.querySelector('#admin-btn .admin-btn-label');
+    if(lbl)lbl.textContent=' Logout';
+    document.getElementById('admin-btn').classList.add('on');
+    document.getElementById('admin-tab-btn').style.display='';
+    renderAdminPanel();renderPastTournaments();populateRestoreSeasonDropdown();
+  }else{const m=document.getElementById('admin-login-msg');m.textContent='Incorrect password.';m.className='msg err';m.style.display='block';}
+};
+
+// ── LISTENERS ────────────────────────────────────────────────────────────────
+onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
+  players=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+  renderLeaderboard();renderPlayersList();renderMatchSelects();updateDecayStatus();
+  if(isAdmin){renderAdminPanel();simPopulateDropdowns();populateRestoreSeasonDropdown();}
+},err=>console.error(err));
+
+onSnapshot(query(collection(db,'matches'),orderBy('date','desc')),snap=>{
+  matches=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+  renderHistory();if(isAdmin)renderAdminPanel();
+},err=>console.error(err));
+
+onSnapshot(doc(db,'config','decay'),snap=>{
+  if(snap.exists()){
+    const d=snap.data();
+    const amt=d.amount||4, unt=d.unit||'hours';
+    document.getElementById('decay-amount').value=amt;
+    const sel=document.getElementById('decay-unit');
+    if(sel){for(let o of sel.options){if(o.value===unt){o.selected=true;break;}}}
+  }
+  updateDecayStatus();
+  updateDecayInfo();
+  // applyDecayLocally is handled solely by scheduleDecay loop, not here
+});
+setInterval(updateDecayStatus,1000);
+
+// ── Decay scheduler: fires once per decay period, self-reschedules ──
+const pendingDecayWrites = new Set();
+function scheduleDecay(){
+  applyDecayLocally();
+  setTimeout(scheduleDecay, decayMs());
+}
+scheduleDecay();
+
+function updateDecayInfo(){
+  const di=document.getElementById('decay-info');
+  if(!di)return;
+  const a=document.getElementById('decay-amount').value||'4';
+  const u=document.getElementById('decay-unit').value||'hours';
+  di.textContent=`Decay period: ${a} ${u} · Max RD: 200 · Players hidden if RD > 100 · Uses personal σ per player`;
+}
+
+// ── DECAY ────────────────────────────────────────────────────────────────────
+function decayMs(){
+  const a=parseFloat(document.getElementById('decay-amount').value)||4;
+  const u=document.getElementById('decay-unit').value||'hours';
+  if(u==='minutes')return a*6e4;
+  if(u==='hours')return a*36e5;
+  return a*864e5;
+}
+
+// Periods aligned to Unix epoch (midnight UTC for days, top-of-hour for hours)
+function currentDecayPeriod(ms){
+  return Math.floor(Date.now()/ms);
+}
+
+function computeDecay(p){
+  const ms=decayMs();
+  const sigma=p.sigma||SIGMA_DEFAULT;
+  const lastProcessed=p.lastDecayAt||0;
+  const basePeriod=Math.floor(lastProcessed/ms);
+  const nowPeriod=currentDecayPeriod(ms);
+  const per=nowPeriod-basePeriod;
+  if(per<=0)return null;
+
+  let phi=p.rd/SCALE, phiMax=RD_MAX/SCALE;
+  for(let i=0;i<per;i++){
+    phi=Math.sqrt(phi*phi+sigma*sigma);
+    if(phi>=phiMax){phi=phiMax;break;}
+  }
+
+  const newLast=nowPeriod*ms;
+  return{newRD:Math.round(Math.min(phi*SCALE,RD_MAX)*10)/10, newLast};
+}
+
+function applyDecayLocally(){
+  const ranked=players.filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
+  const topBefore=ranked[0]||null;
+  players.forEach(p=>{
+    // Skip if a write is already in-flight for this player
+    if(pendingDecayWrites.has(p.firestoreId))return;
+    const r=computeDecay(p);if(!r)return;
+    // Update in-memory state FIRST so the next tick sees the new value
+    p.rd=r.newRD;
+    p.lastDecayAt=r.newLast;
+    const upd={rd:r.newRD,lastDecayAt:r.newLast};
+    if(topBefore&&p.firestoreId===topBefore.firestoreId&&r.newRD>100&&p.no1Since){
+      const dur=Date.now()-(p.no1Since||Date.now());
+      const prev=p.longestNo1Ms||0;
+      upd.no1Since=null;
+      if(dur>prev)upd.longestNo1Ms=dur;
+      p.no1Since=null;if(dur>prev)p.longestNo1Ms=dur;
+    }
+    // Lock this player until Firestore confirms the write
+    pendingDecayWrites.add(p.firestoreId);
+    updateDoc(doc(db,'players',p.firestoreId),upd)
+      .catch(()=>{})
+      .finally(()=>pendingDecayWrites.delete(p.firestoreId));
+  });
+}
+
+function updateDecayStatus(){
+  const el=document.getElementById('decay-status');
+  if(!el)return;
+  const ms=decayMs(),now=Date.now();
+  const a=document.getElementById('decay-amount').value||'4';
+  const u=document.getElementById('decay-unit').value||'hours';
+  const lbl=a+u.charAt(0).toUpperCase();
+  const nowPeriod=Math.floor(now/ms);
+  const nextTick=(nowPeriod+1)*ms;
+  const diff=nextTick-now;
+  if(diff>0){const h=Math.floor(diff/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);el.textContent='DECAY·'+lbl+'·NEXT '+(h>0?h+'h'+m+'m':m+'m'+s+'s');}
+  else el.textContent='DECAY·'+lbl;
+}
+
+// ── DECAY SETTINGS ────────────────────────────────────────────────────────────
+window.saveDecay=async function(){
+  const amount=parseFloat(document.getElementById('decay-amount').value);
+  const unit=document.getElementById('decay-unit').value;
+  if(!amount||amount<=0){showMsg('decay-msg','Enter a valid period.',true);return;}
+  try{
+    await setDoc(doc(db,'config','decay'),{amount,unit});
+    showMsg('decay-msg',`Decay set to every ${amount} ${unit}.`);
+    updateDecayInfo();
+  }catch(e){showMsg('decay-msg','Error: '+e.message,true);}
+};
+
+// Helper: reconstruct a player's state from match history up to (not including) a given point
+function playerStateFromHistory(allMatchesBefore, pid) {
+  let rating=1500, rd=120, sigma=SIGMA_DEFAULT, wins=0, losses=0, lastMatchAt=null;
+  for(const m of allMatchesBefore){
+    if(m.p1id===pid){
+      rating=m.p1newRating;
+      rd=m.p1newRD;
+      sigma=m.p1newSigma||SIGMA_DEFAULT;
+      wins++;
+      lastMatchAt=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+    } else if(m.p2id===pid){
+      rating=m.p2newRating;
+      rd=m.p2newRD;
+      sigma=m.p2newSigma||SIGMA_DEFAULT;
+      losses++;
+      lastMatchAt=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+    }
+  }
+  return{rating,rd,sigma,wins,losses,lastMatchAt};
+}
+
+function applyDecayToPlayer(p, nowMs, periodMs){
+  if(!p.lastMatchAt||periodMs<=0)return;
+  const sigma=p.sigma||SIGMA_DEFAULT;
+  const periods=Math.floor((nowMs-p.lastMatchAt)/periodMs);
+  if(periods<=0)return;
+  let phi=p.rd/SCALE;
+  const phiMax=RD_MAX/SCALE;
+  for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+  p.rd=Math.round(Math.min(phi*SCALE,RD_MAX)*10)/10;
+}
+
+// ── LEADERBOARD ──────────────────────────────────────────────────────────────
+function renderLeaderboard(){
+  const sorted=[...players].sort((a,b)=>b.rating-a.rating);
+  document.getElementById('lb-loading').style.display='none';
+  if(!sorted.length){document.getElementById('lb-table').style.display='none';document.getElementById('lb-empty').style.display='block';return;}
+  document.getElementById('lb-empty').style.display='none';document.getElementById('lb-table').style.display='table';
+  const vis=sorted.filter(p=>p.rd<=100);
+  let lbQ=document.getElementById('lb-quote');
+  if(!lbQ){lbQ=document.createElement('div');lbQ.id='lb-quote';lbQ.className='lb-quote';document.getElementById('panel-leaderboard').insertBefore(lbQ,document.getElementById('lb-loading'));}
+  const top=vis[0];
+  if(top?.quote){lbQ.innerHTML=`"${esc(top.quote)}"`;lbQ.style.display='block';}else lbQ.style.display='none';
+  if(!vis.length){document.getElementById('lb-table').style.display='none';let hn=document.getElementById('lb-hidden-note');if(!hn){hn=document.createElement('div');hn.id='lb-hidden-note';hn.className='empty';document.getElementById('panel-leaderboard').appendChild(hn);}hn.style.display='block';hn.textContent=sorted.length+' player(s) exist but all have RD>100. Play more games!';return;}
+  const hn=document.getElementById('lb-hidden-note');if(hn)hn.style.display='none';
+  document.getElementById('lb-body').innerHTML=vis.map((p,i)=>{
+    const rc=i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const av=p.photoURL?`<img class="lb-avatar" src="${esc(p.photoURL)}" alt="">`:`<div class="lb-av-ph">${esc(p.name.charAt(0).toUpperCase())}</div>`;
+    const seasons=p.seasons||[];
+    const lastS=seasons.length?seasons[seasons.length-1]:null;
+    const sBadge=lastS?(()=>{const rk=lastS.rank,cls=rk===1?'rank1':rk===2?'rank2':rk===3?'rank3':'rankN',emoji=rk===1?'🥇':rk===2?'🥈':rk===3?'🥉':'';return`<span class="s-badge ${cls}" title="Last season: ${esc(lastS.seasonName||'Season '+lastS.seasonNum)}" style="font-size:.6rem;padding:.12rem .35rem">${emoji}${emoji?'':('#'+rk)}</span>`})():'';
+    const no1Since=p.no1Since||null;
+    const no1Tag=i===0?`<span class="no1-timer" data-since="${no1Since||Date.now()}" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;color:var(--accent3);letter-spacing:.04em;line-height:1;white-space:nowrap;">👑 0s</span>`:'';
+    return`<tr onclick="window.openProfile('${p.firestoreId}')"><td class="rank ${rc} lb-col-rank">${i+1}</td><td><div class="pname-cell">${av}<span class="player-name">${esc(p.name)}</span>${sBadge}</div></td><td class="lb-col-rating"><span class="rating-val">${r2(p.rating)}</span></td><td class="lb-col-rd"><span class="rd-val">±${r2(p.rd)}</span></td><td class="lb-col-wl"><span class="record-badge"><span class="w">${p.wins}W</span><span class="l">${p.losses}L</span></span></td><td class="lb-col-crown">${no1Tag}</td></tr>`;
+  }).join('')+(sorted.length>vis.length?`<tr><td colspan="6" style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);padding:.55rem .7rem;text-align:center">${sorted.length-vis.length} hidden (RD>100)</td></tr>`:'');
+}
+
+// ── PLAYERS ──────────────────────────────────────────────────────────────────
+window.addPlayer=async function(){
+  const name=document.getElementById('player-name').value.trim();
+  if(!name){showMsg('player-msg','Name required.',true);return;}
+  if(players.find(p=>p.name.toLowerCase()===name.toLowerCase())){showMsg('player-msg','Already exists.',true);return;}
+  const btn=document.getElementById('add-player-btn');btn.disabled=true;
+  try{
+    await addDoc(collection(db,'players'),{
+      name, rating:1500, rd:120, sigma:SIGMA_DEFAULT,
+      wins:0, losses:0, lastDecayAt:Date.now(), createdAt:serverTimestamp()
+    });
+    document.getElementById('player-name').value='';
+    showMsg('player-msg',name+' added!');
+  }
+  catch(e){showMsg('player-msg','Error: '+e.message,true);}finally{btn.disabled=false;}
+};
+
+function makeCard(p){
+  const wr=(p.wins+p.losses)>0?Math.round(p.wins/(p.wins+p.losses)*100):0;
+  const wc=wr>=60?'var(--win)':wr>=40?'var(--text)':'var(--loss)';
+  const rdH=p.rd>100,rdC=rdH?'var(--loss)':p.rd>80?'var(--accent)':'var(--win)';
+  const sigma=p.sigma||SIGMA_DEFAULT;
+  const sigmaC=sigma>0.15?'var(--loss)':sigma>0.09?'var(--accent)':'var(--win)';
+  const{ls,la}=pStats(p.firestoreId),sc=ls>=5?'var(--win)':ls>=3?'var(--accent)':'var(--text)';
+  const av=p.photoURL?`<img class="pc-avatar" src="${esc(p.photoURL)}" alt="">`:`<div class="pc-av-ph">${esc(p.name.charAt(0).toUpperCase())}</div>`;
+  const seasons=p.seasons||[];
+  let badgesHtml='',histHtml='';
+  if(seasons.length){
+    badgesHtml=`<div class="season-badges">`+seasons.slice().reverse().slice(0,4).map(s=>{
+      const rk=s.rank,cls=rk===1?'rank1':rk===2?'rank2':rk===3?'rank3':'rankN';
+      const emoji=rk===1?'🥇':rk===2?'🥈':rk===3?'🥉':'';
+      return`<span class="s-badge ${cls}" title="${esc(s.seasonName||'Season')}">${emoji}${emoji?'':('#'+rk)} ${esc(s.seasonName||('S'+s.seasonNum))}</span>`;
+    }).join('')+`</div>`;
+    const opts=seasons.slice().reverse().map((s,i)=>`<option value="${i}">${esc(s.seasonName||('Season '+s.seasonNum))} — #${s.rank}</option>`).join('');
+    histHtml=`<div class="s-history-wrap">
+      <select class="s-history-select" onchange="showSeasonData(this,'s-data-${p.firestoreId}')" onclick="event.stopPropagation()">
+        <option value="">📋 Previous seasons…</option>${opts}
+      </select>
+      <div class="s-history-data" id="s-data-${p.firestoreId}" style="display:none"></div>
+    </div>`;
+  }
+  return`<div class="player-card" onclick="window.openProfile('${p.firestoreId}')">
+    <div class="pc-header">${av}<div class="pc-name-block"><div class="pc-name">${esc(p.name)}</div>${rdH?'<span class="pc-tag">HIDDEN</span>':''}</div></div>
+    ${badgesHtml}
+    <div class="pc-stats">
+      <div class="pc-stat"><span class="pc-stat-l">Rating</span><span class="pc-stat-v" style="color:var(--accent)">${r2(p.rating)}</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">RD</span><span class="pc-stat-v" style="color:${rdC}">±${r2(p.rd)}</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">Record</span><span class="pc-stat-v">${p.wins}W–${p.losses}L</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">Win%</span><span class="pc-stat-v" style="color:${wc}">${wr}%</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">Streak</span><span class="pc-stat-v" style="color:${sc}">${ls>0?ls+'W':'—'}</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">Volatility σ</span><span class="pc-stat-v" style="color:${sigmaC};font-size:.9rem">${sigma.toFixed(4)}</span></div>
+    </div>
+    <div class="pc-foot"><span class="pc-hint">TAP TO VIEW PROFILE</span></div>
+    ${histHtml}
+  </div>`;
+}
+
+function renderPlayersList(){
+  const sorted=[...players].sort((a,b)=>b.rating-a.rating);
+  const html=sorted.length?`<div class="cards-label">ALL PLAYERS (${sorted.length})</div><div class="cards-grid">${sorted.map(makeCard).join('')}</div>`:'<div class="empty">No players yet.</div>';
+  const mob=document.getElementById('players-list-mobile'),des=document.getElementById('players-list-desktop');
+  if(mob)mob.innerHTML=html;if(des)des.innerHTML=html;
+}
+
+// ── SEASON HISTORY DROPDOWN ──────────────────────────────────────────────────
+window.showSeasonData=function(sel,dataId){
+  const el=document.getElementById(dataId);if(!el)return;
+  if(!sel.value){el.style.display='none';return;}
+  const idx=parseInt(sel.value);
+  const pid=dataId.replace('s-data-','');
+  const p=players.find(x=>x.firestoreId===pid);
+  if(!p||!p.seasons){el.style.display='none';return;}
+  const seasons=p.seasons.slice().reverse();
+  const s=seasons[idx];if(!s){el.style.display='none';return;}
+  const rk=s.rank,emoji=rk===1?'🥇 ':rk===2?'🥈 ':rk===3?'🥉 ':'';
+  const ended=s.endedAt?new Date(s.endedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+  el.style.display='block';
+  el.innerHTML=`<strong>${emoji}${esc(s.seasonName||('Season '+s.seasonNum))}</strong><br>
+    Final Rank: <strong style="color:${rk===1?'var(--accent)':rk===2?'#c0c0c0':rk===3?'#cd7f32':'var(--text)'}">#${rk}</strong><br>
+    Final Rating: <strong style="color:var(--accent)">${r2(s.rating)}</strong> ±${r2(s.rd)}<br>
+    Volatility σ: <strong>${(s.sigma||SIGMA_DEFAULT).toFixed(4)}</strong><br>
+    Record: <strong>${s.wins}W – ${s.losses}L</strong><br>
+    Season ended: ${ended}`;
+};
+
+function pStats(fid){
+  const ids=new Set(players.map(x=>x.firestoreId));
+  const pm=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)&&(m.p1id===fid||m.p2id===fid)).sort((a,b)=>toTs(a)-toTs(b));
+  let ls=0,cs=0;pm.forEach(m=>{const w=m.p1id===fid?m.score===1:m.score===0;w?(cs++,ls=Math.max(ls,cs)):cs=0;});
+  let la=0;
+  const all=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)).sort((a,b)=>toTs(a)-toTs(b));
+  if(all.length&&players.length>=2){
+    const rs={},rds={};
+    players.forEach(p=>{rs[p.firestoreId]=1500;rds[p.firestoreId]=350;});
+    const seen=new Set();
+    all.forEach(m=>{
+      if(!seen.has(m.p1id)){rs[m.p1id]=m.p1oldRating;seen.add(m.p1id);}
+      if(!seen.has(m.p2id)){rs[m.p2id]=m.p2oldRating;seen.add(m.p2id);}
+    });
+    const periodMs=decayMs();
+    const top=()=>{
+      let best=null,bestR=-Infinity;
+      for(const[id,r] of Object.entries(rs)){if(rds[id]<=100&&r>bestR){bestR=r;best=id;}}
+      return best;
+    };
+    let a1=null,lastTs=null;
+    all.forEach(m=>{
+      const ts=toTs(m);
+      if(lastTs!==null&&periodMs>0){
+        const periods=Math.floor((ts-lastTs)/periodMs);
+        if(periods>0){
+          const wasFidTop=top()===fid;
+          for(const id of Object.keys(rds)){
+            let phi=rds[id]/SCALE;
+            const phiMax=RD_MAX/SCALE;
+            const pSigma=(players.find(x=>x.firestoreId===id)?.sigma)||SIGMA_DEFAULT;
+            for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+pSigma*pSigma);if(phi>=phiMax){phi=phiMax;break;}}
+            rds[id]=Math.min(phi*SCALE,RD_MAX);
+          }
+          if(wasFidTop&&top()!==fid){
+            if(a1!==null){la=Math.max(la,lastTs+periods*periodMs-a1);a1=null;}
+          }
+        }
+      }
+      const pt=top();
+      rs[m.p1id]=m.p1newRating;rs[m.p2id]=m.p2newRating;
+      const p1LiveRd=players.find(x=>x.firestoreId===m.p1id)?.rd;
+      const p2LiveRd=players.find(x=>x.firestoreId===m.p2id)?.rd;
+      rds[m.p1id]=m.p1newRD??p1LiveRd??rds[m.p1id];
+      rds[m.p2id]=m.p2newRD??p2LiveRd??rds[m.p2id];
+      const nt=top();
+      if(pt===fid&&nt!==fid){if(a1!==null){la=Math.max(la,ts-a1);a1=null;}}
+      else if(pt!==fid&&nt===fid)a1=ts;
+      lastTs=ts;
+    });
+    const livePlayer=players.find(x=>x.firestoreId===fid);
+    const liveRd=livePlayer?.rd??rds[fid];
+    if(top()===fid&&liveRd<=100&&a1!==null)la=Math.max(la,Date.now()-a1);
+  }
+  return{ls,la};
+}
+function toTs(m){return m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();}
+const r2=v=>Number(v).toFixed(2);
+function fmtDur(ms){if(ms<=0)return'—';const d=Math.floor(ms/864e5),h=Math.floor((ms%864e5)/36e5);if(d>0)return d+'d '+h+'h';const m2=Math.floor((ms%36e5)/6e4);if(h>0)return h+'h '+m2+'m';return m2+'m';}
+function tickNo1Timers(){
+  const now=Date.now();
+  document.querySelectorAll('.no1-timer[data-since]').forEach(el=>{
+    const since=parseInt(el.dataset.since);
+    if(!since)return;
+    const ms=now-since;
+    const d=Math.floor(ms/864e5),h=Math.floor((ms%864e5)/36e5),m=Math.floor((ms%36e5)/6e4),s=Math.floor((ms%6e4)/1e3);
+    let label;
+    if(d>0)label=d+'d '+h+'h '+m+'m '+s+'s';
+    else if(h>0)label=h+'h '+m+'m '+s+'s';
+    else if(m>0)label=m+'m '+s+'s';
+    else label=s+'s';
+    el.textContent='👑 '+label;
+  });
+}
+setInterval(tickNo1Timers,1000);
+
+// ── SEASON LOGIC ─────────────────────────────────────────────────────────────
+let seasonConfig={name:'',deadline:null,seasonNum:1};
+
+onSnapshot(doc(db,'config','season'),snap=>{
+  if(snap.exists()){
+    const d=snap.data();
+    seasonConfig={name:d.name||'',deadline:d.deadline||null,seasonNum:d.seasonNum||1};
+  }
+  updateSeasonCountdown();
+  if(isAdmin)populateSeasonAdmin();
+});
+setInterval(updateSeasonCountdown,1000);
+
+function updateSeasonCountdown(){
+  const el=document.getElementById('season-countdown');
+  if(!el||!seasonConfig.deadline){lockMatchForm(false);return el&&(el.style.display='none');}
+  const now=Date.now(),dl=new Date(seasonConfig.deadline).getTime(),diff=dl-now;
+  if(diff<=0){
+    el.textContent='SEASON ENDED';el.style.display='';el.className='';
+    el.style.cssText='font-size:.55rem;color:var(--loss);font-family:\'DM Mono\',monospace;letter-spacing:.07em;white-space:nowrap;border:1px solid rgba(217,83,79,.4);padding:.25rem .5rem;';
+    lockMatchForm(true);
+    return;
+  }
+  lockMatchForm(false);
+  el.style.display='';
+  const days=Math.floor(diff/864e5),hrs=Math.floor((diff%864e5)/36e5),mins=Math.floor((diff%36e5)/6e4),secs=Math.floor((diff%6e4)/1e3);
+  const urgent=diff<86400000;
+  el.className=urgent?'urgent':'';
+  const label=seasonConfig.name?`${seasonConfig.name} · `:'';
+  if(days>0)el.textContent=label+'ENDS '+days+'d '+hrs+'h';
+  else el.textContent=label+'ENDS '+hrs+'h '+mins+'m '+secs+'s';
+}
+
+function populateSeasonAdmin(){
+  const nameEl=document.getElementById('season-name-input'),dlEl=document.getElementById('season-deadline-input');
+  if(nameEl&&seasonConfig.name)nameEl.value=seasonConfig.name;
+  if(dlEl&&seasonConfig.deadline){
+    try{const d=new Date(seasonConfig.deadline);const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);dlEl.value=local;}catch(e){}
+  }
+  const sa=document.getElementById('season-status-admin');
+  if(sa){
+    if(seasonConfig.deadline){
+      const dl=new Date(seasonConfig.deadline),now=Date.now(),diff=dl.getTime()-now;
+      sa.style.display='block';
+      sa.innerHTML=diff>0?`Current season: <strong style="color:var(--admin)">${esc(seasonConfig.name||'Unnamed')}</strong><br>Ends: <strong>${dl.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</strong>`:`Season <strong style="color:var(--loss)">${esc(seasonConfig.name||'Unnamed')}</strong> has ended. Ready to reset!`;
+    }else sa.style.display='none';
+  }
+}
+
+window.saveSeason=async function(){
+  const name=document.getElementById('season-name-input').value.trim();
+  const dlRaw=document.getElementById('season-deadline-input').value;
+  if(!dlRaw){showMsg('season-msg','Set a deadline date.',true);return;}
+  const deadline=new Date(dlRaw).toISOString();
+  try{
+    await setDoc(doc(db,'config','season'),{name:name||'Season',deadline,seasonNum:seasonConfig.seasonNum||1});
+    showMsg('season-msg','Season saved!');
+  }catch(e){showMsg('season-msg','Error: '+e.message,true);}
+};
+
+window.triggerSeasonReset=async function(){
+  if(!confirm(`This will:\n1. Save each player's rank, stats & full match history for this season\n2. Reset ALL ratings to 1500, RD to 120, volatility to 0.06, wins/losses to 0\n3. Clear all matches from the active log\n\nSeason: "${seasonConfig.name||'Current'}"\n\nThis cannot be undone. Continue?`))return;
+  const btn=document.getElementById('reset-season-btn');btn.disabled=true;btn.textContent='Archiving…';
+  try{
+    const sNum=seasonConfig.seasonNum||1;
+    const sName=seasonConfig.name||('Season '+sNum);
+    const endedAt=new Date().toISOString();
+
+    const ranked=[...players].filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
+    const rankMap={};ranked.forEach((p,i)=>rankMap[p.firestoreId]=i+1);
+    players.forEach(p=>{if(!rankMap[p.firestoreId])rankMap[p.firestoreId]=ranked.length+1;});
+
+    const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+    const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+
+    function computeSeasonStats(pid){
+      const pm=allMatches.filter(m=>m.p1id===pid||m.p2id===pid);
+      let ls=0,cs=0;
+      pm.forEach(m=>{const w=m.winnerId===pid;w?(cs++,ls=Math.max(ls,cs)):cs=0;});
+      const sorted=pm.slice().sort((a,b)=>(a.date?.toDate?a.date.toDate():new Date(a.date))-(b.date?.toDate?b.date.toDate():new Date(b.date)));
+      const chartPts=[];
+      if(sorted.length){
+        chartPts.push({rating:sorted[0].p1id===pid?sorted[0].p1oldRating:sorted[0].p2oldRating,label:'Start'});
+        sorted.forEach(m=>{
+          const i1=m.p1id===pid;
+          const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
+          chartPts.push({rating:i1?m.p1newRating:m.p2newRating,won:m.winnerId===pid,label:i1?m.p2name:m.p1name,date:ts.toISOString()});
+        });
+      }
+      return{ls,chartPts};
+    }
+
+    await Promise.all(players.map(async p=>{
+      const pid=p.firestoreId;
+      const{ls,chartPts}=computeSeasonStats(pid);
+      const myMatches=allMatches
+        .filter(m=>m.p1id===pid||m.p2id===pid)
+        .map(m=>({
+          opponent:m.p1id===pid?m.p2name:m.p1name,
+          won:m.winnerId===pid,
+          matchScore:m.matchScore||null,
+          delta:m.p1id===pid?m.p1delta:m.p2delta,
+          oldRating:m.p1id===pid?m.p1oldRating:m.p2oldRating,
+          newRating:m.p1id===pid?m.p1newRating:m.p2newRating,
+          date:m.date?.toDate?m.date.toDate().toISOString():new Date(m.date).toISOString(),
+        }));
+      await setDoc(doc(db,'players',pid,'seasonMatches',String(sNum)),{
+        seasonNum:sNum,seasonName:sName,endedAt,
+        matches:myMatches,
+        chartPts,
+        longestWinStreak:ls,
+      });
+      const existing=p.seasons||[];
+      const entry={
+        seasonNum:sNum,seasonName:sName,rank:rankMap[pid],
+        rating:p.rating,rd:p.rd,sigma:p.sigma||SIGMA_DEFAULT,
+        wins:p.wins,losses:p.losses,endedAt,longestWinStreak:ls
+      };
+      return updateDoc(doc(db,'players',pid),{
+        rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastDecayAt:Date.now(),
+        seasons:[...existing,entry]
+      });
+    }));
+
+    await Promise.all(matchesSnap.docs.map(d=>deleteDoc(doc(db,'matches',d.id))));
+    await setDoc(doc(db,'config','season'),{name:'',deadline:null,seasonNum:sNum+1});
+    showMsg('season-msg',`Season "${sName}" archived! All stats reset.`);
+  }catch(e){showMsg('season-msg','Error: '+e.message,true);}
+  finally{btn.disabled=false;btn.textContent='⚡ Reset Season Now';}
+};
+
+// ── RESTORE PREVIOUS SEASON ──────────────────────────────────────────────────
+async function populateRestoreSeasonDropdown(){
+  const sel=document.getElementById('restore-season-select');
+  if(!sel)return;
+  // Collect all unique past seasons across all players
+  const seasonMap={}; // seasonNum -> {seasonNum, seasonName, endedAt, playerCount}
+  players.forEach(p=>{
+    (p.seasons||[]).forEach(s=>{
+      const k=s.seasonNum;
+      if(!seasonMap[k]){seasonMap[k]={seasonNum:s.seasonNum,seasonName:s.seasonName||('Season '+s.seasonNum),endedAt:s.endedAt,players:0};}
+      seasonMap[k].players++;
+    });
+  });
+  const sorted=Object.values(seasonMap).sort((a,b)=>b.seasonNum-a.seasonNum);
+  if(!sorted.length){sel.innerHTML='<option value="">— No past seasons found —</option>';return;}
+  sel.innerHTML='<option value="">— Select a season to restore —</option>'+sorted.map(s=>{
+    const dt=s.endedAt?new Date(s.endedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    return`<option value="${s.seasonNum}">${esc(s.seasonName)} (${s.players} players${dt?' · ended '+dt:''})</option>`;
+  }).join('');
+  sel.onchange=function(){
+    const num=parseInt(this.value);
+    const prev=document.getElementById('restore-season-preview');
+    if(!num){prev.style.display='none';return;}
+    const s=seasonMap[num];
+    if(!s){prev.style.display='none';return;}
+    const plist=players.filter(p=>(p.seasons||[]).some(x=>x.seasonNum===num)).map(p=>{
+      const entry=(p.seasons||[]).find(x=>x.seasonNum===num);
+      return`<strong style="color:var(--text)">${esc(p.name)}</strong> — #${entry.rank} · ${r2(entry.rating)} (${entry.wins}W–${entry.losses}L)`;
+    }).join('<br>');
+    prev.style.display='block';
+    prev.innerHTML=`<strong style="color:var(--accent)">Season: ${esc(s.seasonName)}</strong><br>${plist||'<em>No players found</em>'}`;
+  };
+}
+
+window.restoreSeason=async function(){
+  const sel=document.getElementById('restore-season-select');
+  const sNum=parseInt(sel?.value);
+  if(!sNum){showMsg('restore-msg','Select a season first.',true);return;}
+
+  // Find season name from player data
+  let sName='Season '+sNum;
+  for(const p of players){
+    const e=(p.seasons||[]).find(x=>x.seasonNum===sNum);
+    if(e?.seasonName){sName=e.seasonName;break;}
+  }
+
+  const currentMatchCount=matches.length;
+  if(!confirm(`Restore "${sName}"?\n\nThis will:\n1. DELETE all ${currentMatchCount} current live match(es)\n2. Recreate ${sName}'s match history from archived data\n3. Restore each player's final ratings, wins & losses from that season\n4. Roll season number back to ${sNum}\n5. Remove the season-${sNum} entry from each player's history\n\nThis cannot be undone. Continue?`))return;
+
+  const btn=document.getElementById('restore-season-btn');
+  btn.disabled=true;btn.textContent='Restoring…';
+  try{
+    // 1. Fetch seasonMatches subcollection for each player
+    const playerSeasonData=[];
+    for(const p of players){
+      const entry=(p.seasons||[]).find(x=>x.seasonNum===sNum);
+      if(!entry)continue;
+      // Try to load the subcollection document
+      let smSnap=null;
+      try{smSnap=await getDocs(collection(db,'players',p.firestoreId,'seasonMatches'));}catch(e){}
+      let smDoc=null;
+      if(smSnap){smSnap.forEach(d=>{if(d.id===String(sNum))smDoc=d.data();});}
+      playerSeasonData.push({player:p,entry,smDoc});
+    }
+
+    // 2. Build match list — iterate ONLY won:true entries so each match is processed exactly once
+    //    from the winner's perspective. This guarantees:
+    //      - exactly n/2 matches written (n = total entries across all player profiles)
+    //      - p1 always = winner, matching how submitMatch writes records
+    //      - no side-swapping, no minute-truncation false-deduplication
+    const rawMatches=[];
+    const seenKeys=new Set();
+
+    for(const{player,smDoc}of playerSeasonData){
+      if(!smDoc?.matches)continue;
+      const winnerId=player.firestoreId;
+      for(const m of smDoc.matches){
+        if(!m.won)continue; // loser's copy — skip; the winner's copy covers this match
+
+        const opp=players.find(x=>x.name===m.opponent);
+        if(!opp)continue;
+        const loserId=opp.firestoreId;
+
+        // Exact date string as key — no truncation so same-minute different matches aren't merged
+        const dateStr=m.date||'';
+        const key=`${winnerId}|${loserId}|${dateStr}`;
+        if(seenKeys.has(key))continue; // true duplicate (same winner, loser, exact timestamp)
+        seenKeys.add(key);
+
+        // Pull loser's perspective to fill in p2 rating data
+        const loserData=playerSeasonData.find(x=>x.player.firestoreId===loserId);
+        const loserMatch=loserData?.smDoc?.matches?.find(lm=>
+          lm.opponent===player.name && lm.date===dateStr && !lm.won
+        );
+
+        rawMatches.push({
+          winnerId, loserId,
+          winnerName: player.name, loserName: opp.name,
+          p1id: winnerId, p2id: loserId,
+          p1name: player.name, p2name: opp.name,
+          score: 1,
+          matchScore: m.matchScore||loserMatch?.matchScore||null,
+          date: new Date(dateStr),
+          p1oldRating: m.oldRating,   p1newRating: m.newRating,   p1delta: m.delta,
+          p2oldRating: loserMatch?.oldRating??null, p2newRating: loserMatch?.newRating??null, p2delta: loserMatch?.delta??null,
+          p1newRD: null, p1newSigma: null, p2newRD: null, p2newSigma: null,
+        });
+      }
+    }
+
+    // Sort by date asc
+    rawMatches.sort((a,b)=>a.date-b.date);
+
+    // 3. Delete all current live matches
+    const liveSnap=await getDocs(collection(db,'matches'));
+    await Promise.all(liveSnap.docs.map(d=>deleteDoc(doc(db,'matches',d.id))));
+
+    // 4. Write reconstructed matches back to live matches collection
+    await Promise.all(rawMatches.map(m=>addDoc(collection(db,'matches'),{
+      winnerId:m.winnerId,loserId:m.loserId,winnerName:m.winnerName,loserName:m.loserName,
+      p1id:m.p1id,p2id:m.p2id,p1name:m.p1name,p2name:m.p2name,
+      score:m.score,matchScore:m.matchScore,
+      p1oldRating:m.p1oldRating,p1newRating:m.p1newRating,p1delta:m.p1delta,
+      p2oldRating:m.p2oldRating,p2newRating:m.p2newRating,p2delta:m.p2delta,
+      p1newRD:m.p1newRD,p1newSigma:m.p1newSigma,p2newRD:m.p2newRD,p2newSigma:m.p2newSigma,
+      date:m.date,
+    })));
+
+    // 5. Restore each player's stats from the season entry and remove that season from history
+    await Promise.all(playerSeasonData.map(({player,entry})=>{
+      const newSeasons=(player.seasons||[]).filter(x=>x.seasonNum!==sNum);
+      return updateDoc(doc(db,'players',player.firestoreId),{
+        rating:entry.rating,
+        rd:entry.rd,
+        sigma:entry.sigma||SIGMA_DEFAULT,
+        wins:entry.wins,
+        losses:entry.losses,
+        lastDecayAt:Date.now(),
+        seasons:newSeasons,
+      });
+    }));
+
+    // 6. Roll back season config to this season number (so admin can re-reset it properly)
+    await setDoc(doc(db,'config','season'),{
+      name:sName,
+      deadline:null,
+      seasonNum:sNum,
+    });
+
+    showMsg('restore-msg',`✅ "${sName}" restored! ${rawMatches.length} match(es) recreated for ${playerSeasonData.length} player(s). Season number rolled back to ${sNum}.`);
+    populateRestoreSeasonDropdown();
+  }catch(e){
+    showMsg('restore-msg','Error: '+e.message,true);
+    console.error(e);
+  }finally{
+    btn.disabled=false;btn.textContent='↩ Restore This Season';
+  }
+};
+
+// ── DEDUPLICATE MATCHES ───────────────────────────────────────────────────────
+function buildDedupGroups(allMatches){
+  const groups={};
+  for(const m of allMatches){
+    const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
+    const minute=Math.floor(ts.getTime()/60000);
+    const pair=[m.p1id,m.p2id].sort().join('|');
+    const key=`${pair}|${m.winnerId}|${minute}`;
+    if(!groups[key])groups[key]=[];
+    groups[key].push(m);
+  }
+  return Object.values(groups).filter(g=>g.length>1);
+}
+
+window.previewDedup=async function(){
+  const prev=document.getElementById('dedup-preview');
+  const btn=document.getElementById('dedup-btn');
+  prev.style.display='none';btn.style.display='none';
+  try{
+    const snap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+    const allMatches=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    const dupGroups=buildDedupGroups(allMatches);
+    const toDelete=dupGroups.flatMap(g=>{
+      // Keep the one with the most complete data (has p1newRD), delete the rest
+      const sorted=[...g].sort((a,b)=>(b.p1newRD!=null?1:0)-(a.p1newRD!=null?1:0));
+      return sorted.slice(1);
+    });
+    if(!toDelete.length){
+      prev.style.display='block';prev.innerHTML='✅ No duplicates found — match log looks clean.';
+      return;
+    }
+    const lines=dupGroups.map(g=>{
+      const ts=g[0].date?.toDate?g[0].date.toDate():new Date(g[0].date);
+      const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+      return`<strong style="color:var(--text)">${esc(g[0].winnerName)}</strong> beat <strong style="color:var(--text)">${esc(g[0].loserName)}</strong> · ${ds} ${ti} · <span style="color:var(--loss)">${g.length-1} duplicate(s)</span>`;
+    }).join('<br>');
+    prev.style.display='block';
+    prev.innerHTML=`Found <strong style="color:var(--loss)">${toDelete.length} duplicate doc(s)</strong> across ${dupGroups.length} match(es) out of ${allMatches.length} total.<br><br>${lines}`;
+    btn.style.display='';
+  }catch(e){showMsg('dedup-msg','Error: '+e.message,true);}
+};
+
+window.runDedup=async function(){
+  const btn=document.getElementById('dedup-btn');
+  if(!confirm('Delete all duplicate match entries? This cannot be undone. Run "Repair All Ratings" afterward.'))return;
+  btn.disabled=true;btn.textContent='Deleting…';
+  try{
+    const snap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+    const allMatches=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    const dupGroups=buildDedupGroups(allMatches);
+    const toDelete=dupGroups.flatMap(g=>{
+      const sorted=[...g].sort((a,b)=>(b.p1newRD!=null?1:0)-(a.p1newRD!=null?1:0));
+      return sorted.slice(1);
+    });
+    if(!toDelete.length){showMsg('dedup-msg','No duplicates found.',false);btn.style.display='none';return;}
+    await Promise.all(toDelete.map(m=>deleteDoc(doc(db,'matches',m.firestoreId))));
+    showMsg('dedup-msg',`✅ Deleted ${toDelete.length} duplicate(s). ${allMatches.length-toDelete.length} match(es) remain. Run Repair All Ratings now.`);
+    document.getElementById('dedup-preview').style.display='none';
+    btn.style.display='none';
+  }catch(e){showMsg('dedup-msg','Error: '+e.message,true);}
+  finally{btn.disabled=false;btn.textContent='🗑 Delete Duplicates';}
+};
+
+window.fixMatchSides=async function(){
+  const btn=document.getElementById('fix-sides-btn');
+  btn.disabled=true;btn.textContent='Scanning…';
+  try{
+    const snap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+    const allMatches=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+
+    const fixes=[];
+    for(const m of allMatches){
+      // In a correct match record: p1id === winnerId and score === 1
+      // If p1id !== winnerId, sides are swapped — fix by swapping all p1/p2 fields
+      if(m.p1id && m.winnerId && m.p1id !== m.winnerId){
+        fixes.push(updateDoc(doc(db,'matches',m.firestoreId),{
+          // Swap ids and names
+          p1id: m.p2id,       p2id: m.p1id,
+          p1name: m.p2name,   p2name: m.p1name,
+          // Swap rating data
+          p1oldRating: m.p2oldRating,   p2oldRating: m.p1oldRating,
+          p1newRating: m.p2newRating,   p2newRating: m.p1newRating,
+          p1delta: m.p2delta,           p2delta: m.p1delta,
+          p1newRD: m.p2newRD,           p2newRD: m.p1newRD,
+          p1newSigma: m.p2newSigma,     p2newSigma: m.p1newSigma,
+          // score is always 1 (p1 wins) in this system
+          score: 1,
+        }));
+      }
+    }
+
+    if(!fixes.length){
+      showMsg('fix-sides-msg',`✅ All ${allMatches.length} matches already have correct sides — nothing to fix.`);
+      return;
+    }
+
+    await Promise.all(fixes);
+    showMsg('fix-sides-msg',`✅ Fixed ${fixes.length} match(es). Now run Repair All Ratings to recalculate rating deltas.`);
+  }catch(e){
+    showMsg('fix-sides-msg','Error: '+e.message,true);
+    console.error(e);
+  }finally{
+    btn.disabled=false;btn.textContent='🔀 Fix Match Sides';
+  }
+};
+
+function lockMatchForm(locked){
+  const btn=document.getElementById('submit-match-btn');
+  const panel=document.getElementById('panel-matches');
+  if(!btn||!panel)return;
+  btn.disabled=locked;
+  let notice=document.getElementById('match-lock-notice');
+  if(locked){
+    if(!notice){
+      notice=document.createElement('div');
+      notice.id='match-lock-notice';
+      notice.style.cssText='font-family:\'DM Mono\',monospace;font-size:.68rem;color:var(--loss);border:1px solid rgba(217,83,79,.3);background:rgba(217,83,79,.07);padding:.75rem 1rem;margin-bottom:1rem;letter-spacing:.04em;';
+      notice.textContent='⚠ Season has ended. Match submission is locked until the admin resets the season.';
+      panel.querySelector('.form-card').prepend(notice);
+    }
+  } else {
+    if(notice)notice.remove();
+  }
+}
+
+// ── SUBMIT MATCH ─────────────────────────────────────────────────────────────
+window.submitMatch=async function(){
+  if(seasonConfig.deadline){
+    const diff=new Date(seasonConfig.deadline).getTime()-Date.now();
+    if(diff<=0){showMsg('match-msg','Season has ended. No matches can be submitted until the admin resets the season.',true);return;}
+  }
+  const wid=document.getElementById('match-winner').value,lid=document.getElementById('match-loser').value;
+  if(wid===lid){showMsg('match-msg','Select two different players.',true);return;}
+  const btn=document.getElementById('submit-match-btn');btn.disabled=true;showMsg('match-msg','Submitting…');
+  try{
+    await runTransaction(db,async tx=>{
+      const[ws,ls]=await Promise.all([tx.get(doc(db,'players',wid)),tx.get(doc(db,'players',lid))]);
+      if(!ws.exists()||!ls.exists())throw new Error('Player not found');
+      const w=ws.data(),l=ls.data();
+
+      const uw=g2Update(
+        {rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT},
+        [{rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT, s:1}]
+      );
+      const ul=g2Update(
+        {rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT},
+        [{rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT, s:0}]
+      );
+
+      const now=Date.now();
+      const allSnap=await getDocs(query(collection(db,'players')));
+      const allP=allSnap.docs.map(d=>({id:d.id,...d.data()}));
+      const ranked=p=>p.rd<=100;
+      const topBefore=allP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
+      const simP=allP.map(p=>{
+        if(p.id===wid)return{...p,rating:uw.rating,rd:uw.rd};
+        if(p.id===lid)return{...p,rating:ul.rating,rd:ul.rd};
+        return p;
+      });
+      const topAfter=simP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
+
+      const wUpdate={rating:uw.rating,rd:uw.rd,sigma:uw.sigma,wins:w.wins+1};
+      const lUpdate={rating:ul.rating,rd:ul.rd,sigma:ul.sigma,losses:l.losses+1};
+
+      if(topBefore?.id!==topAfter?.id){
+        if(topBefore){
+          const oldTop=allP.find(p=>p.id===topBefore.id);
+          if(oldTop?.no1Since){
+            const dur=now-(oldTop.no1Since||now);
+            const prev=oldTop.longestNo1Ms||0;
+            const upd={no1Since:null};
+            if(dur>prev)upd.longestNo1Ms=dur;
+            if(oldTop.id===wid)Object.assign(wUpdate,upd);
+            else if(oldTop.id===lid)Object.assign(lUpdate,upd);
+            else await tx.update(doc(db,'players',oldTop.id),upd);
+          }
+        }
+        if(topAfter){
+          const newTopData=allP.find(p=>p.id===topAfter.id);
+          const no1Since=newTopData?.no1Since||now;
+          if(topAfter.id===wid)wUpdate.no1Since=no1Since;
+          else if(topAfter.id===lid)lUpdate.no1Since=no1Since;
+          else await tx.update(doc(db,'players',topAfter.id),{no1Since});
+        }
+      }
+
+      tx.update(doc(db,'players',wid),wUpdate);
+      tx.update(doc(db,'players',lid),lUpdate);
+
+      const sc=document.getElementById('match-score').value.trim();
+      tx.set(doc(collection(db,'matches')),{
+        winnerId:wid,loserId:lid,winnerName:w.name,loserName:l.name,
+        p1id:wid,p2id:lid,p1name:w.name,p2name:l.name,score:1,
+        matchScore:sc||null,
+        p1delta:Math.round((uw.rating-w.rating)*10)/10,
+        p2delta:Math.round((ul.rating-l.rating)*10)/10,
+        p1newRD:uw.rd,p2newRD:ul.rd,
+        p1newSigma:uw.sigma,p2newSigma:ul.sigma,
+        p1oldRating:w.rating,p1newRating:uw.rating,
+        p2oldRating:l.rating,p2newRating:ul.rating,
+        date:serverTimestamp()
+      });
+    });
+    document.getElementById('match-score').value='';
+    const wn=players.find(p=>p.firestoreId===wid);
+    showMsg('match-msg',(wn?.name||'Winner')+' wins!');
+  }
+  catch(e){showMsg('match-msg','Error: '+e.message,true);}
+  finally{btn.disabled=false;}
+};
+
+function renderMatchSelects(){
+  const opts=players.map(p=>`<option value="${p.firestoreId}">${esc(p.name)} (${r2(p.rating)})</option>`).join('');
+  document.getElementById('match-winner').innerHTML=opts||'<option disabled>No players yet</option>';
+  document.getElementById('match-loser').innerHTML=opts||'<option disabled>No players yet</option>';
+}
+
+// ── HISTORY ──────────────────────────────────────────────────────────────────
+function renderHistoryFilter(){
+  const sel=document.getElementById('history-filter'),cur=sel.value;
+  sel.innerHTML='<option value="all">All Players</option>'+players.map(p=>`<option value="${p.firestoreId}">${esc(p.name)}</option>`).join('');
+  sel.value=players.find(p=>p.firestoreId===cur)?cur:'all';
+  // show/hide second dropdown
+  const flt=sel.value;
+  const sel2=document.getElementById('history-filter-2');
+  if(flt!=='all'){
+    const cur2=sel2.value;
+    sel2.innerHTML='<option value="all">vs Everyone</option>'+players.filter(p=>p.firestoreId!==flt).map(p=>`<option value="${p.firestoreId}">${esc(p.name)}</option>`).join('');
+    sel2.value=players.find(p=>p.firestoreId===cur2&&p.firestoreId!==flt)?cur2:'all';
+    sel2.style.display='';
+  } else {
+    sel2.style.display='none';
+    sel2.value='all';
+  }
+}
+window.renderHistory=function(){
+  renderHistoryFilter();
+  const flt=document.getElementById('history-filter').value;
+  const flt2=document.getElementById('history-filter-2').value;
+  const el=document.getElementById('history-list');
+  const banner=document.getElementById('h2h-banner');
+  const ids=new Set(players.map(p=>p.firestoreId));
+  let ms=matches.filter(m=>ids.has(m.p1id)&&ids.has(m.p2id));
+  if(flt!=='all')ms=ms.filter(m=>m.p1id===flt||m.p2id===flt);
+  if(flt!=='all'&&flt2!=='all')ms=ms.filter(m=>(m.p1id===flt&&m.p2id===flt2)||(m.p1id===flt2&&m.p2id===flt));
+
+  // H2H banner
+  if(flt!=='all'&&flt2!=='all'&&ms.length){
+    const p1=players.find(p=>p.firestoreId===flt);
+    const p2=players.find(p=>p.firestoreId===flt2);
+    const p1wins=ms.filter(m=>m.winnerId===flt).length;
+    const p2wins=ms.filter(m=>m.winnerId===flt2).length;
+    const total=ms.length;
+    const leader=p1wins>p2wins?p1:p2wins>p1wins?p2:null;
+    const leaderWins=Math.max(p1wins,p2wins);
+    const loserWins=Math.min(p1wins,p2wins);
+    const headlineCol=p1wins===p2wins?'var(--accent)':'var(--win)';
+    const headline=p1wins===p2wins
+      ?`<span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);letter-spacing:.05em">TIED ${p1wins}–${p2wins}</span>`
+      :`<span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--win);letter-spacing:.05em">${esc(leader.name)} leads ${leaderWins}–${loserWins}</span>`;
+    const sub=`<span style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted)">${total} match${total!==1?'es':''} played · ${esc(p1.name)} ${p1wins}W · ${esc(p2.name)} ${p2wins}W</span>`;
+    banner.style.display='flex';
+    banner.innerHTML=`<div style="display:flex;flex-direction:column;gap:.3rem">${headline}${sub}</div>`;
+  } else {
+    banner.style.display='none';
+  }
+
+  if(!ms.length){el.innerHTML='<div class="empty">No matches yet.</div>';return;}
+  el.innerHTML=ms.map(m=>{
+    const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
+    const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const d1=(m.p1delta>=0?'+':'')+m.p1delta,d2=(m.p2delta>=0?'+':'')+m.p2delta;
+    const s1=m.p1newSigma?` σ:${m.p1newSigma.toFixed(4)}`:'';
+    const s2=m.p2newSigma?` σ:${m.p2newSigma.toFixed(4)}`:'';
+    return`<div class="match-row">
+      <div class="match-player"><span class="name">${esc(m.p1name)}</span><span class="delta ${m.p1delta>=0?'pos':'neg'}">${d1} (${r2(m.p1oldRating)}→${r2(m.p1newRating)})</span><span class="rdi">RD:±${r2(m.p1newRD)}${s1}</span></div>
+      <div class="match-mid"><div class="match-result"><span class="ws">WIN</span>${m.matchScore?`<span class="match-score-lbl">${esc(m.matchScore)}</span>`:'<span style="font-size:.8rem;color:var(--muted)">vs</span>'}<span class="ls">LOSS</span></div></div>
+      <div class="match-player" style="text-align:right"><span class="name">${esc(m.p2name)}</span><span class="delta ${m.p2delta>=0?'pos':'neg'}">${d2} (${r2(m.p2oldRating)}→${r2(m.p2newRating)})</span><span class="rdi">RD:±${r2(m.p2newRD)}${s2}</span></div>
+      <div class="match-meta-col">${ds} · ${ti}</div>
+    </div>`;
+  }).join('');
+};
+
+// ── ADMIN PANEL ──────────────────────────────────────────────────────────────
+function renderAdminPanel(){
+  if(!isAdmin)return;
+  populateSeasonAdmin();
+  updateDecayInfo();
+  simPopulateDropdowns();
+  const sorted=[...players].sort((a,b)=>b.rating-a.rating);
+  const pl=document.getElementById('admin-players-list');
+  if(pl)pl.innerHTML=sorted.length?sorted.map(p=>`<div class="admin-prow"><span class="admin-pname">${esc(p.name)}</span><span class="admin-prating">${r2(p.rating)} ±${r2(p.rd)} σ:${(p.sigma||SIGMA_DEFAULT).toFixed(4)}</span><button class="btn-admin" onclick="openEditPlayer('${p.firestoreId}')">Edit Stats</button><button class="btn-danger" onclick="adminRemovePlayer('${p.firestoreId}','${esc(p.name)}')">Remove</button></div>`).join(''):'<div class="empty">No players.</div>';
+  const ml=document.getElementById('admin-matches-list');
+  if(ml)ml.innerHTML=matches.length?matches.slice(0,60).map(m=>{
+    const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
+    return`<div class="admin-mrow"><div class="admin-minfo"><strong>${esc(m.p1name)} beat ${esc(m.p2name)}</strong>${m.matchScore?' · '+esc(m.matchScore):''}<br>${ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div><button class="btn-danger" onclick="adminRemoveMatch('${m.firestoreId}')">Delete</button></div>`;
+  }).join(''):'<div class="empty">No matches.</div>';
+}
+
+window.adminRemovePlayer=async function(fid,name){
+  if(!confirm(`Remove "${name}"? Match history remains.`))return;
+  try{await deleteDoc(doc(db,'players',fid));}catch(e){alert('Error: '+e.message);}
+};
+
+window.adminRemoveMatch=async function(fid){
+  if(!confirm('Delete this match and recalculate all affected ratings?'))return;
+  try{
+    const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+    const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    const deletedIdx=allMatches.findIndex(m=>m.firestoreId===fid);
+    if(deletedIdx===-1){alert('Match not found.');return;}
+    const deletedMatch=allMatches[deletedIdx];
+    await deleteDoc(doc(db,'matches',fid));
+    const matchesBefore=allMatches.slice(0,deletedIdx);
+    const matchesAfter=allMatches.slice(deletedIdx+1);
+
+    const pid1=deletedMatch.p1id, pid2=deletedMatch.p2id;
+    const s1=playerStateFromHistory(matchesBefore,pid1);
+    const s2=playerStateFromHistory(matchesBefore,pid2);
+
+    if(matchesAfter.length===0){
+      await Promise.all([
+        updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}),
+        updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}),
+      ]);
+      alert('Match deleted. Ratings rewound to previous state.');
+      return;
+    }
+
+    const periodMs=decayMs();
+    const pmap={
+      [pid1]:{...s1,firestoreId:pid1},
+      [pid2]:{...s2,firestoreId:pid2},
+    };
+
+    const matchUpdates=[];
+    const playerUpdates={};
+
+    for(const m of matchesAfter){
+      const involvesP1=m.p1id===pid1||m.p2id===pid1;
+      const involvesP2=m.p1id===pid2||m.p2id===pid2;
+      if(!involvesP1&&!involvesP2)continue;
+
+      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+      const ourId=involvesP1?pid1:pid2;
+      const ourState=pmap[ourId];
+
+      applyDecayToPlayer(ourState,ts,periodMs);
+
+      const isWinner=(m.p1id===ourId);
+      const oppRating=isWinner?m.p2oldRating:m.p1oldRating;
+      const oppRD=isWinner?(m.p2newRD??120):(m.p1newRD??120);
+      const oppSigma=isWinner?(m.p2newSigma??SIGMA_DEFAULT):(m.p1newSigma??SIGMA_DEFAULT);
+
+      const newState=g2Update(
+        {rating:ourState.rating, rd:ourState.rd, sigma:ourState.sigma||SIGMA_DEFAULT},
+        [{rating:oppRating, rd:oppRD, sigma:oppSigma, s:isWinner?1:0}]
+      );
+      const oldRating=ourState.rating;
+      const delta=Math.round((newState.rating-oldRating)*10)/10;
+
+      pmap[ourId].rating=newState.rating;
+      pmap[ourId].rd=newState.rd;
+      pmap[ourId].sigma=newState.sigma;
+      if(isWinner)pmap[ourId].wins=(pmap[ourId].wins||0)+1;
+      else pmap[ourId].losses=(pmap[ourId].losses||0)+1;
+      pmap[ourId].lastMatchAt=ts;
+
+      if(m.p1id===ourId){
+        matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
+          p1delta:delta,p1oldRating:oldRating,p1newRating:newState.rating,p1newRD:newState.rd,p1newSigma:newState.sigma
+        }));
+      } else {
+        matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
+          p2delta:delta,p2oldRating:oldRating,p2newRating:newState.rating,p2newRD:newState.rd,p2newSigma:newState.sigma
+        }));
+      }
+      playerUpdates[ourId]=pmap[ourId];
+    }
+
+    const writes=Object.values(playerUpdates).map(p=>
+      updateDoc(doc(db,'players',p.firestoreId),{
+        rating:p.rating,rd:p.rd,sigma:p.sigma||SIGMA_DEFAULT,wins:p.wins||0,losses:p.losses||0,lastDecayAt:p.lastMatchAt||Date.now()
+      })
+    );
+    if(!playerUpdates[pid1])writes.push(updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}));
+    if(!playerUpdates[pid2])writes.push(updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}));
+
+    await Promise.all([...writes,...matchUpdates]);
+    alert('Match deleted and ratings recalculated from that point forward.');
+  }catch(e){alert('Error: '+e.message);console.error(e);}
+};
+
+// ── REPAIR RATINGS ─────────────────────────────────────────────────────────
+window.repairAllRatings=async function(){
+  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings, RD, and volatility?'))return;
+  const btn=document.querySelector('[onclick="repairAllRatings()"]');
+  if(btn){btn.disabled=true;btn.textContent='Repairing…';}
+  try{
+    const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+    const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    const now=Date.now();
+    const periodMs=decayMs();
+
+    // Build a fresh state map for every player, starting from scratch
+    const state={};
+    const initPlayer=pid=>{
+      if(!state[pid])state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastMatchAt:null};
+    };
+
+    const matchWrites=[];
+
+    for(const m of allMatches){
+      const pid1=m.p1id, pid2=m.p2id;
+      initPlayer(pid1); initPlayer(pid2);
+      const s1=state[pid1], s2=state[pid2];
+
+      // Recalculate both sides from current state
+      const u1=g2Update(
+        {rating:s1.rating,rd:s1.rd,sigma:s1.sigma},
+        [{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,s:1}]
+      );
+      const u2=g2Update(
+        {rating:s2.rating,rd:s2.rd,sigma:s2.sigma},
+        [{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,s:0}]
+      );
+
+      const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
+      const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
+
+      // Rewrite the match record with correct values
+      matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
+        p1oldRating:s1.rating, p1newRating:u1.rating, p1newRD:u1.rd, p1newSigma:u1.sigma, p1delta,
+        p2oldRating:s2.rating, p2newRating:u2.rating, p2newRD:u2.rd, p2newSigma:u2.sigma, p2delta,
+      }));
+
+      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+
+      // Advance state
+      state[pid1]={rating:u1.rating,rd:u1.rd,sigma:u1.sigma,wins:s1.wins+1,losses:s1.losses,lastMatchAt:ts};
+      state[pid2]={rating:u2.rating,rd:u2.rd,sigma:u2.sigma,wins:s2.wins,losses:s2.losses+1,lastMatchAt:ts};
+    }
+
+    // Write match records first
+    await Promise.all(matchWrites);
+
+    // Now apply decay from last match to now and write player docs
+    const playerWrites=[];
+    for(const p of players){
+      const s=state[p.firestoreId];
+      if(!s)continue;
+      let rd=s.rd;
+      const sigma=s.sigma||SIGMA_DEFAULT;
+      if(s.lastMatchAt&&periodMs>0){
+        const basePeriod=Math.floor(s.lastMatchAt/periodMs);
+        const nowPeriod=Math.floor(now/periodMs);
+        const periods=nowPeriod-basePeriod;
+        if(periods>0){
+          let phi=rd/SCALE;const phiMax=RD_MAX/SCALE;
+          for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+          rd=Math.round(Math.min(phi*SCALE,RD_MAX)*10)/10;
+        }
+      }
+      const nowPeriod=Math.floor(now/periodMs);
+      const lastDecayAt=nowPeriod*periodMs;
+      playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
+        rating:s.rating,rd,sigma,wins:s.wins,losses:s.losses,lastDecayAt
+      }));
+    }
+
+    await Promise.all(playerWrites);
+    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${playerWrites.length} player(s).`);
+  }catch(e){
+    showMsg('repair-msg','Error: '+e.message,true);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🔧 Repair All Ratings From Match History';}
+  }
+};
+
+window.openEditPlayer=function(fid){
+  const p=players.find(x=>x.firestoreId===fid);if(!p)return;
+  document.getElementById('edit-pid').value=fid;
+  document.getElementById('edit-rating').value=Math.round(p.rating);
+  document.getElementById('edit-rd').value=Math.round(p.rd);
+  document.getElementById('edit-sigma').value=(p.sigma||SIGMA_DEFAULT).toFixed(5);
+  document.getElementById('edit-wins').value=p.wins;
+  document.getElementById('edit-losses').value=p.losses;
+  document.getElementById('edit-player-msg').style.display='none';
+  document.getElementById('admin-edit-overlay').classList.add('open');
+};
+window.submitEditPlayer=async function(){
+  const fid=document.getElementById('edit-pid').value;
+  const rating=parseFloat(document.getElementById('edit-rating').value);
+  const rd=parseFloat(document.getElementById('edit-rd').value);
+  const sigma=parseFloat(document.getElementById('edit-sigma').value);
+  const wins=parseInt(document.getElementById('edit-wins').value);
+  const losses=parseInt(document.getElementById('edit-losses').value);
+  if([rating,rd,sigma,wins,losses].some(isNaN)){showMsg('edit-player-msg','Invalid values.',true);return;}
+  if(sigma<0.001||sigma>SIGMA_MAX){showMsg('edit-player-msg',`Volatility must be between 0.001 and ${SIGMA_MAX}.`,true);return;}
+  try{
+    await updateDoc(doc(db,'players',fid),{rating,rd,sigma,wins,losses});
+    showMsg('edit-player-msg','Saved!');
+    setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1200);
+  }
+  catch(e){showMsg('edit-player-msg','Error: '+e.message,true);}
+};
+
+// ── PROFILE PICTURE — CROP & RESIZE ──────────────────────────────────────────
+const MAX_FILE_MB=5;
+const OUT_SIZE=400;
+let cropState={file:null,imgW:0,imgH:0,scale:1,minScale:1,ox:0,oy:0};
+
+document.getElementById('m-av-input').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  this.value='';
+  if(!file)return;
+  if(!file.type.startsWith('image/')){showUploadErr('Only image files are supported.');return;}
+  if(file.size>MAX_FILE_MB*1024*1024){showUploadErr(`File too large (max ${MAX_FILE_MB}MB).`);return;}
+  openCropModal(file);
+});
+
+function showUploadErr(msg){
+  const prog=document.getElementById('upload-prog');
+  prog.style.display='block';prog.style.color='var(--loss)';prog.textContent='⚠ '+msg;
+  setTimeout(()=>{prog.style.display='none';prog.style.color='';},4000);
+}
+
+function openCropModal(file){
+  cropState.file=file;
+  const url=URL.createObjectURL(file);
+  const img=document.getElementById('crop-img');
+  img.onload=()=>{
+    cropState.imgW=img.naturalWidth;cropState.imgH=img.naturalHeight;
+    const vp=240;
+    const minS=Math.max(vp/cropState.imgW,vp/cropState.imgH);
+    cropState.minScale=minS;cropState.scale=minS;
+    cropState.ox=(vp-cropState.imgW*minS)/2;cropState.oy=(vp-cropState.imgH*minS)/2;
+    applyCropTransform();
+    document.getElementById('crop-zoom').min=minS;document.getElementById('crop-zoom').max=minS*4;
+    document.getElementById('crop-zoom').step=minS*0.005;document.getElementById('crop-zoom').value=minS;
+    document.getElementById('crop-msg').style.display='none';document.getElementById('crop-confirm-btn').disabled=false;
+  };
+  img.src=url;
+  document.getElementById('crop-overlay').classList.add('open');
+}
+
+window.closeCropModal=function(){
+  document.getElementById('crop-overlay').classList.remove('open');
+  const img=document.getElementById('crop-img');
+  if(img.src.startsWith('blob:'))URL.revokeObjectURL(img.src);
+};
+
+function applyCropTransform(){
+  const img=document.getElementById('crop-img');
+  img.style.width=cropState.imgW+'px';img.style.height=cropState.imgH+'px';
+  img.style.transform=`translate(${cropState.ox}px,${cropState.oy}px) scale(${cropState.scale})`;
+}
+
+function clampOffsets(){
+  const vp=240,s=cropState.scale,iw=cropState.imgW,ih=cropState.imgH;
+  const minX=vp-iw*s,minY=vp-ih*s;
+  cropState.ox=Math.min(0,Math.max(minX,cropState.ox));
+  cropState.oy=Math.min(0,Math.max(minY,cropState.oy));
+}
+
+document.getElementById('crop-zoom').addEventListener('input',function(){
+  const newS=parseFloat(this.value),vp=240;
+  const cx=vp/2,cy=vp/2;
+  const imgCx=(cx-cropState.ox)/cropState.scale,imgCy=(cy-cropState.oy)/cropState.scale;
+  cropState.scale=newS;cropState.ox=cx-imgCx*newS;cropState.oy=cy-imgCy*newS;
+  clampOffsets();applyCropTransform();
+});
+
+(function(){
+  const vp=document.getElementById('crop-viewport');
+  let dragging=false,startX,startY,startOx,startOy;
+  vp.addEventListener('mousedown',e=>{dragging=true;startX=e.clientX;startY=e.clientY;startOx=cropState.ox;startOy=cropState.oy;vp.style.cursor='grabbing';e.preventDefault();});
+  window.addEventListener('mousemove',e=>{if(!dragging)return;cropState.ox=startOx+(e.clientX-startX);cropState.oy=startOy+(e.clientY-startY);clampOffsets();applyCropTransform();});
+  window.addEventListener('mouseup',()=>{dragging=false;vp.style.cursor='grab';});
+  let lastTouches=null;
+  vp.addEventListener('touchstart',e=>{lastTouches=e.touches;if(e.touches.length===1){startX=e.touches[0].clientX;startY=e.touches[0].clientY;startOx=cropState.ox;startOy=cropState.oy;}e.preventDefault();},{passive:false});
+  vp.addEventListener('touchmove',e=>{
+    if(e.touches.length===1&&lastTouches?.length===1){cropState.ox=startOx+(e.touches[0].clientX-startX);cropState.oy=startOy+(e.touches[0].clientY-startY);clampOffsets();applyCropTransform();}
+    else if(e.touches.length===2&&lastTouches?.length===2){
+      const d0=Math.hypot(lastTouches[0].clientX-lastTouches[1].clientX,lastTouches[0].clientY-lastTouches[1].clientY);
+      const d1=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      const factor=d1/d0;
+      const newS=Math.min(Math.max(cropState.scale*factor,cropState.minScale),cropState.minScale*4);
+      const vp2=240,cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+      const rect=document.getElementById('crop-viewport').getBoundingClientRect();
+      const lcx=cx-rect.left,lcy=cy-rect.top;
+      const imgCx=(lcx-cropState.ox)/cropState.scale,imgCy=(lcy-cropState.oy)/cropState.scale;
+      cropState.scale=newS;cropState.ox=lcx-imgCx*newS;cropState.oy=lcy-imgCy*newS;clampOffsets();applyCropTransform();
+      document.getElementById('crop-zoom').value=newS;
+    }
+    lastTouches=e.touches;e.preventDefault();
+  },{passive:false});
+  vp.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const factor=e.deltaY<0?1.08:0.93;
+    const newS=Math.min(Math.max(cropState.scale*factor,cropState.minScale),cropState.minScale*4);
+    const rect=vp.getBoundingClientRect();
+    const lcx=e.clientX-rect.left,lcy=e.clientY-rect.top;
+    const imgCx=(lcx-cropState.ox)/cropState.scale,imgCy=(lcy-cropState.oy)/cropState.scale;
+    cropState.scale=newS;cropState.ox=lcx-imgCx*newS;cropState.oy=lcy-imgCy*newS;clampOffsets();applyCropTransform();
+    document.getElementById('crop-zoom').value=newS;
+  },{passive:false});
+})();
+
+window.confirmCrop=async function(){
+  const btn=document.getElementById('crop-confirm-btn');
+  btn.disabled=true;btn.textContent='Processing…';
+  try{
+    const img=document.getElementById('crop-img');
+    const vp=240;
+    const canvas=document.createElement('canvas');
+    canvas.width=OUT_SIZE;canvas.height=OUT_SIZE;
+    const ctx=canvas.getContext('2d');
+    const srcX=-cropState.ox/cropState.scale;
+    const srcY=-cropState.oy/cropState.scale;
+    const srcW=vp/cropState.scale;
+    const srcH=vp/cropState.scale;
+    ctx.drawImage(img,srcX,srcY,srcW,srcH,0,0,OUT_SIZE,OUT_SIZE);
+    const base64=canvas.toDataURL('image/jpeg',0.82);
+    closeCropModal();
+    if(!curProfileId)return;
+    const prog=document.getElementById('upload-prog');
+    prog.style.color='';prog.style.display='block';prog.textContent='Saving…';
+    await updateDoc(doc(db,'players',curProfileId),{photoURL:base64});
+    prog.textContent='Photo updated!';
+    const wrap=document.getElementById('m-av-wrap'),uploadBtn=wrap.querySelector('.m-av-upload');
+    let avImg=wrap.querySelector('.m-avatar');
+    if(!avImg){avImg=document.createElement('img');avImg.className='m-avatar';const ph=wrap.querySelector('.m-av-ph');if(ph)ph.replaceWith(avImg);else wrap.insertBefore(avImg,uploadBtn);}
+    avImg.src=base64;
+    setTimeout(()=>{prog.style.display='none';},2500);
+    btn.disabled=false;btn.textContent='Use Photo';
+  }catch(err){
+    console.error(err);
+    document.getElementById('crop-msg').textContent='Error: '+err.message;
+    document.getElementById('crop-msg').className='msg err';
+    document.getElementById('crop-msg').style.display='block';
+    btn.disabled=false;btn.textContent='Use Photo';
+  }
+};
+
+// ── PROFILE MODAL ────────────────────────────────────────────────────────────
+window.openProfile=async function(fid){
+  const p=players.find(x=>x.firestoreId===fid);if(!p)return;curProfileId=fid;
+  const wrap=document.getElementById('m-av-wrap'),uploadBtn=wrap.querySelector('.m-av-upload');
+  const old=wrap.querySelector('.m-avatar,.m-av-ph');if(old)old.remove();
+  if(p.photoURL){const img=document.createElement('img');img.className='m-avatar';img.src=p.photoURL;wrap.insertBefore(img,uploadBtn);}
+  else{const ph=document.createElement('div');ph.className='m-av-ph';ph.textContent=p.name.charAt(0).toUpperCase();wrap.insertBefore(ph,uploadBtn);}
+  document.getElementById('profile-name').textContent=p.name;
+  document.getElementById('quote-input-modal').value=p.quote||'';
+  document.getElementById('quote-msg-modal').style.display='none';
+  document.getElementById('upload-prog').style.display='none';
+  document.getElementById('m-av-input').value='';
+  const qEl=document.getElementById('profile-quote');
+  if(p.quote){qEl.innerHTML=`"${esc(p.quote)}"`;qEl.style.display='block';}else qEl.style.display='none';
+  const wr=(p.wins+p.losses)>0?Math.round(p.wins/(p.wins+p.losses)*100):0,wc=wr>=60?'green':wr>=40?'neutral':'red';
+  const{ls,la}=pStats(fid);
+  const sigma=p.sigma||SIGMA_DEFAULT;
+
+  function renderProfileStats(){
+    const liveP=players.find(x=>x.firestoreId===fid)||p;
+    const vis=[...players].filter(x=>x.rd<=100).sort((a,b)=>b.rating-a.rating);
+    const isTop=vis[0]?.firestoreId===fid;
+    const no1Html=isTop&&liveP.no1Since
+      ?`<span class="no1-timer counting" data-since="${liveP.no1Since}">👑 —</span>`
+      :isTop
+        ?`<span class="no1-timer counting" data-since="${Date.now()}">👑 —</span>`
+        :fmtDur(liveP.longestNo1Ms||la);
+    const liveSigma=(liveP.sigma||SIGMA_DEFAULT).toFixed(4);
+    const sigC=(liveP.sigma||SIGMA_DEFAULT)>0.15?'red':(liveP.sigma||SIGMA_DEFAULT)>0.09?'':'neutral';
+    document.getElementById('profile-stats').innerHTML=`
+    <div class="m-stat"><span class="m-stat-l">Rating</span><span class="m-stat-v">${r2(liveP.rating)}</span></div>
+    <div class="m-stat"><span class="m-stat-l">RD</span><span class="m-stat-v neutral">±${r2(liveP.rd)}</span></div>
+    <div class="m-stat"><span class="m-stat-l">Volatility σ</span><span class="m-stat-v ${sigC}" style="font-size:1rem">${liveSigma}</span></div>
+    <div class="m-stat"><span class="m-stat-l">Record</span><span class="m-stat-v neutral">${liveP.wins}W–${liveP.losses}L</span></div>
+    <div class="m-stat"><span class="m-stat-l">Win%</span><span class="m-stat-v ${wc}">${wr}%</span></div>
+    <div class="m-stat"><span class="m-stat-l">Streak</span><span class="m-stat-v ${ls>=5?'green':ls>=3?'':'neutral'}">${ls>0?ls+'W':'—'}</span></div>
+    <div class="m-stat"><span class="m-stat-l">Longest #1</span><span class="m-stat-v" style="color:var(--accent3);font-size:1rem">${no1Html}</span></div>`;
+  }
+  renderProfileStats();
+
+  const ids=new Set(players.map(x=>x.firestoreId));
+  const pm=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)&&(m.p1id===fid||m.p2id===fid)).sort((a,b)=>toTs(a)-toTs(b));
+  const start=pm.length>0?(pm[0].p1id===fid?pm[0].p1oldRating:pm[0].p2oldRating):p.rating;
+  const pts=[{rating:start,label:'Start'}];
+  pm.forEach(m=>{const i1=m.p1id===fid,ts=m.date?.toDate?m.date.toDate():new Date(m.date);pts.push({rating:i1?m.p1newRating:m.p2newRating,won:m.winnerId===fid,label:i1?m.p2name:m.p1name,date:ts.toISOString()});});
+  drawChart(pts);
+
+  function renderCurrentMatches(){
+    return pm.length?[...pm].reverse().map(m=>{
+      const i1=m.p1id===fid,won=i1?m.score===1:m.score===0,opp=i1?m.p2name:m.p1name,delta=i1?m.p1delta:m.p2delta,oldR=i1?m.p1oldRating:m.p2oldRating,newR=i1?m.p1newRating:m.p2newRating;
+      const ts=m.date?.toDate?m.date.toDate():new Date(m.date),ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),df=(delta>=0?'+':'')+delta;
+      const newSig=i1?(m.p1newSigma):(m.p2newSigma);
+      const sigStr=newSig?` <span style="color:var(--muted);font-size:.55rem">σ:${newSig.toFixed(4)}</span>`:'';
+      const newRD=i1?(m.p1newRD):(m.p2newRD);
+      const rdStr=newRD!=null?`<span style="color:var(--muted);font-size:.55rem"> ±${r2(newRD)} RD</span>`:'';
+      return`<div class="pm-row"><span class="pm-badge ${won?'win':'loss'}">${won?'WIN':'LOSS'}</span><div class="pm-info"><span class="pm-opp">vs ${esc(opp)}${m.matchScore?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;color:var(--muted)">'+esc(m.matchScore)+'</span>':''}</span><span class="pm-date">${ds} · ${ti}</span></div><span class="pm-delta ${delta>=0?'pos':'neg'}">${df}${sigStr}${rdStr}<br><span style="font-size:.6rem;color:var(--muted)">${r2(oldR)}→${r2(newR)}</span></span></div>`;
+    }).join(''):'<div class="empty">No matches this season yet.</div>';
+  }
+
+  const seasons=p.seasons||[];
+  let seasonSelectorHtml='';
+  if(seasons.length){
+    const opts=seasons.slice().reverse().map(s=>{
+      const emoji=s.rank===1?'🥇':s.rank===2?'🥈':s.rank===3?'🥉':'';
+      return`<option value="${s.seasonNum}">${emoji}${esc(s.seasonName||('Season '+s.seasonNum))} — #${s.rank}</option>`;
+    }).join('');
+    seasonSelectorHtml=`<div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem;flex-wrap:wrap">
+      <div class="chart-lbl" style="margin:0">Match History</div>
+      <select id="profile-season-sel" style="width:auto;flex:1;min-width:160px;font-size:.68rem;padding:.35rem .65rem" onchange="loadProfileSeason('${fid}',this.value)">
+        <option value="current">📅 Current Season</option>
+        ${opts}
+      </select>
+    </div>`;
+  } else {
+    seasonSelectorHtml=`<div class="chart-lbl" style="margin-bottom:.65rem">Match History</div>`;
+  }
+
+  document.getElementById('profile-matches').innerHTML=`${seasonSelectorHtml}<div id="profile-matches-list">${renderCurrentMatches()}</div>`;
+  document.getElementById('profile-overlay').classList.add('open');
+};
+
+window.loadProfileSeason=async function(fid,val){
+  const el=document.getElementById('profile-matches-list');
+  if(val==='current'){
+    const ids=new Set(players.map(x=>x.firestoreId));
+    const pm=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)&&(m.p1id===fid||m.p2id===fid)).sort((a,b)=>toTs(a)-toTs(b));
+    const p=players.find(x=>x.firestoreId===fid);
+    const start=pm.length>0?(pm[0].p1id===fid?pm[0].p1oldRating:pm[0].p2oldRating):(p?.rating||1500);
+    const pts=[{rating:start,label:'Start'}];
+    pm.forEach(m=>{const i1=m.p1id===fid,ts=m.date?.toDate?m.date.toDate():new Date(m.date);pts.push({rating:i1?m.p1newRating:m.p2newRating,won:m.winnerId===fid,label:i1?m.p2name:m.p1name,date:ts.toISOString()});});
+    drawChart(pts);
+    const sorted=[...pm].reverse();
+    el.innerHTML=sorted.length?sorted.map(m=>{
+      const i1=m.p1id===fid,won=i1?m.score===1:m.score===0,opp=i1?m.p2name:m.p1name,delta=i1?m.p1delta:m.p2delta,oldR=i1?m.p1oldRating:m.p2oldRating,newR=i1?m.p1newRating:m.p2newRating;
+      const ts=m.date?.toDate?m.date.toDate():new Date(m.date),ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),df=(delta>=0?'+':'')+delta;
+      const newRD2=i1?(m.p1newRD):(m.p2newRD);
+      const rdStr2=newRD2!=null?`<span style="color:var(--muted);font-size:.55rem"> ±${r2(newRD2)} RD</span>`:'';
+      return`<div class="pm-row"><span class="pm-badge ${won?'win':'loss'}">${won?'WIN':'LOSS'}</span><div class="pm-info"><span class="pm-opp">vs ${esc(opp)}${m.matchScore?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;color:var(--muted)">'+esc(m.matchScore)+'</span>':''}</span><span class="pm-date">${ds}</span></div><span class="pm-delta ${delta>=0?'pos':'neg'}">${df}${rdStr2}<br><span style="font-size:.6rem;color:var(--muted)">${r2(oldR)}→${r2(newR)}</span></span></div>`;
+    }).join(''):'<div class="empty">No matches this season yet.</div>';
+    return;
+  }
+  el.innerHTML='<div class="loading" style="padding:1.5rem">Loading</div>';
+  try{
+    const snap=await getDocs(collection(db,'players',fid,'seasonMatches'));
+    const archiveDoc=snap.docs.find(d=>d.id===String(val));
+    if(!archiveDoc){el.innerHTML='<div class="empty">No match data saved for this season.</div>';return;}
+    const data=archiveDoc.data();
+    const ms=data.matches||[];
+    if(data.chartPts&&data.chartPts.length){drawChart(data.chartPts);}else{drawChart([]);}
+    const p=players.find(x=>x.firestoreId===fid);
+    const sEntry=(p?.seasons||[]).find(s=>s.seasonNum===parseInt(val));
+    let headerHtml='';
+    if(sEntry){
+      const emoji=sEntry.rank===1?'🥇':sEntry.rank===2?'🥈':sEntry.rank===3?'🥉':'';
+      const ended=sEntry.endedAt?new Date(sEntry.endedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+      const streakHtml=sEntry.longestWinStreak>0?` · Best streak <strong style="color:var(--win)">${sEntry.longestWinStreak}W</strong>`:'';
+      const sigmaHtml=sEntry.sigma?` · σ: <strong>${sEntry.sigma.toFixed(4)}</strong>`:'';
+      headerHtml=`<div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);padding:.55rem .75rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.65rem;line-height:1.8">
+        ${emoji} <strong style="color:var(--text)">${esc(sEntry.seasonName||'Season '+sEntry.seasonNum)}</strong> · Final rank <strong style="color:var(--accent)">#${sEntry.rank}</strong> · ${sEntry.wins}W–${sEntry.losses}L · Rating <strong style="color:var(--accent)">${r2(sEntry.rating)}</strong>${sigmaHtml}${streakHtml}${ended?' · Ended '+ended:''}
+      </div>`;
+    }
+    if(!ms.length){el.innerHTML=headerHtml+'<div class="empty">No matches recorded for this season.</div>';return;}
+    const sorted=[...ms].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    el.innerHTML=headerHtml+sorted.map(m=>{
+      const ds=new Date(m.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const df=(m.delta>=0?'+':'')+m.delta;
+      const rdStr3=m.newRD!=null?`<span style="color:var(--muted);font-size:.55rem"> ±${r2(m.newRD)} RD</span>`:'';
+      return`<div class="pm-row"><span class="pm-badge ${m.won?'win':'loss'}">${m.won?'WIN':'LOSS'}</span><div class="pm-info"><span class="pm-opp">vs ${esc(m.opponent)}${m.matchScore?' <span style="font-family:\'DM Mono\',monospace;font-size:.58rem;color:var(--muted)">'+esc(m.matchScore)+'</span>':''}</span><span class="pm-date">${ds}</span></div><span class="pm-delta ${m.delta>=0?'pos':'neg'}">${df}${rdStr3}<br><span style="font-size:.6rem;color:var(--muted)">${r2(m.oldRating)}→${r2(m.newRating)}</span></span></div>`;
+    }).join('');
+  }catch(e){el.innerHTML=`<div class="empty">Error loading: ${esc(e.message)}</div>`;}
+};
+
+window.saveQuoteModal=async function(){
+  if(!curProfileId)return;const q=document.getElementById('quote-input-modal').value.trim();
+  try{await updateDoc(doc(db,'players',curProfileId),{quote:q||null});const p=players.find(x=>x.firestoreId===curProfileId);if(p)p.quote=q||null;
+    const qEl=document.getElementById('profile-quote');if(q){qEl.innerHTML=`"${esc(q)}"`;qEl.style.display='block';}else qEl.style.display='none';
+    showMsg('quote-msg-modal',q?'Quote saved!':'Quote cleared.');}
+  catch(e){showMsg('quote-msg-modal','Error: '+e.message,true);}
+};
+
+window.closeProfile=function(e){if(e.target===document.getElementById('profile-overlay'))document.getElementById('profile-overlay').classList.remove('open');};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay','admin-login-overlay','admin-edit-overlay','crop-overlay'].forEach(id=>document.getElementById(id).classList.remove('open'));}});
+
+// ── CHART ────────────────────────────────────────────────────────────────────
+function drawChart(points){
+  const PAD={top:16,right:22,bottom:26,left:46},H=175,MIN_PX=54;
+  const outer=document.getElementById('chart-outer'),newOuter=outer.cloneNode(false);
+  while(outer.firstChild)newOuter.appendChild(outer.firstChild);outer.parentNode.replaceChild(newOuter,outer);
+  const wrap=document.getElementById('chart-wrap'),canvas=document.getElementById('rating-chart'),tip=document.getElementById('chart-tip');
+  const W=Math.max(newOuter.clientWidth||580,PAD.left+PAD.right+(points.length>1?(points.length-1)*MIN_PX:200));
+  wrap.style.width=W+'px';wrap.style.height=H+'px';canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d'),cW=W-PAD.left-PAD.right,cH=H-PAD.top-PAD.bottom;
+  const ratings=points.map(p=>p.rating),minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
+  const xOf=i=>PAD.left+(points.length>1?(i/(points.length-1))*cW:cW/2);
+  const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
+  function redraw(hl){
+    ctx.clearRect(0,0,W,H);
+    for(let g=0;g<=4;g++){const y=PAD.top+(g/4)*cH;ctx.strokeStyle='rgba(74,42,56,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(W-PAD.right,y);ctx.stroke();ctx.fillStyle='#8a6a78';ctx.font='9px DM Mono,monospace';ctx.textAlign='right';ctx.fillText(Math.round(hi-(g/4)*(hi-lo)),PAD.left-4,y+3);}
+    if(points.length<2){ctx.fillStyle='#8a6a78';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('Play more matches to see history',W/2,H/2);return;}
+    for(let i=1;i<points.length;i++){const pv=points[i-1],cv=points[i],col=cv.won?'#7ec8a0':'#ff4757';ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));ctx.lineTo(xOf(i),H-PAD.bottom);ctx.lineTo(xOf(i-1),H-PAD.bottom);ctx.closePath();ctx.fillStyle=cv.won?'rgba(126,200,160,.1)':'rgba(217,83,79,.1)';ctx.fill();ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}
+    for(let i=0;i<points.length;i++){const pt=points[i],col=i===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757'),isHl=i===hl;if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),8,0,Math.PI*2);ctx.fillStyle=i===0?'rgba(138,106,120,.2)':(pt.won?'rgba(126,200,160,.2)':'rgba(217,83,79,.2)');ctx.fill();}ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),isHl?5:3.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();}}
+    if(hl>=0){ctx.beginPath();ctx.moveTo(xOf(hl),PAD.top);ctx.lineTo(xOf(hl),H-PAD.bottom);ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.stroke();ctx.setLineDash([]);}
+  }
+  function showTip(idx){const pt=points[idx],col=idx===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757');let html=`<span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${col}">${r2(pt.rating)}</span>`;if(idx===0)html+=`<br><span style="color:#8a6a78">Starting rating</span>`;else{const d=new Date(pt.date);const ds=pt.rating-points[idx-1].rating;const df=(ds>=0?'+':'')+r2(Math.abs(ds));const dt=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});html+=`<br><span style="color:${col}">${pt.won?'WIN':'LOSS'}</span> vs ${esc(pt.label)}<br><span style="color:${col}">${df} pts</span> · ${dt}`;}tip.innerHTML=html;tip.style.display='block';tip.style.left='-9999px';tip.style.top='-9999px';requestAnimationFrame(()=>{const canvasRect=canvas.getBoundingClientRect();const scaleX=canvasRect.width/canvas.width;const dx=canvasRect.left+xOf(idx)*scaleX;const dy=canvasRect.top+yOf(pt.rating)*(canvasRect.height/canvas.height);const tw=tip.offsetWidth,th=tip.offsetHeight;const vw=window.innerWidth,vh=window.innerHeight;let l=dx-tw/2;let t=dy-th-10;if(l<8)l=8;if(l+tw>vw-8)l=vw-tw-8;if(t<8)t=dy+14;if(t+th>vh-8)t=dy-th-10;tip.style.left=l+'px';tip.style.top=t+'px';});}
+  redraw(-1);let hl=-1;
+  function near(cx){let b=-1,bd=Infinity;for(let i=0;i<points.length;i++){const d=Math.abs(xOf(i)-cx);if(d<bd){bd=d;b=i;}}return bd<34?b:-1;}
+  function onMove(e){const r=canvas.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,idx=near(cx*(canvas.width/r.width));if(idx!==hl){hl=idx;redraw(idx);if(idx>=0)showTip(idx);else tip.style.display='none';}}
+  function onLeave(){hl=-1;redraw(-1);tip.style.display='none';}
+  newOuter.addEventListener('mousemove',onMove);newOuter.addEventListener('mouseleave',onLeave);newOuter.addEventListener('touchmove',onMove,{passive:true});newOuter.addEventListener('touchend',onLeave);
+}
+
+// ── BRACKETS ─────────────────────────────────────────────────────────────────
+let brackets=[];
+
+window.showPanel=function(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='players')renderPlayersList();
+  if(id==='matches')renderHistory();
+  if(id==='admin')renderAdminPanel();
+  if(id==='brackets'){renderBrackets();renderPastTournaments();}
+};
+
+function isBrComplete(b){
+  const allMatches=[...b.piRound,...(b.lPiRound||[])];
+  b.wRounds.forEach(r=>allMatches.push(...r.matches));
+  b.lRounds.forEach(r=>allMatches.push(...r.matches));
+  if(b.grand)allMatches.push(...b.grand.matches);
+  // grandReset only counts if it's needed (grand final p2 won)
+  if(b.grandReset&&b.grand?.matches[0]?.w===1)allMatches.push(...b.grandReset.matches);
+  // skip TBD-vs-TBD matches (unfilled slots), require all real matches decided
+  return allMatches.every(m=>(m.p1==='TBD'&&m.p2==='TBD')||m.p1==='BYE'||m.p2==='BYE'||m.w!=null);
+}
+
+function renderBrackets(){
+  const el=document.getElementById('brackets-list');
+  if(!el)return;
+  if(!brackets.length){el.innerHTML='<div class="empty">No brackets yet. Create one to get started.</div>';return;}
+  el.innerHTML=brackets.map((b,bi)=>{
+    const zPct=Math.round((brZoom[bi]||1)*100);
+    return`<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1rem 1rem .65rem;margin-bottom:1.1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem">
+        <div>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.06em;color:var(--text)">${esc(b.name)}</span>
+          <span class="br-pill ${b.format==='double'?'losers':'winners'}">${b.format==='double'?'Double Elim':'Single Elim'}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted);margin-left:.4rem">${b.players.length} players · ${b.seeding==='random'?'Random draw':'Rated seeds'}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:3px;overflow:hidden;">
+            <button onclick="brZoomBtn(${bi},-1)" style="background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;padding:.25rem .55rem;cursor:pointer;line-height:1">−</button>
+            <span id="br-zlbl-${bi}" style="font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);padding:0 .35rem;border-left:1px solid var(--border);border-right:1px solid var(--border);min-width:38px;text-align:center;line-height:1.8">${zPct}%</span>
+            <button onclick="brZoomBtn(${bi},1)" style="background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;padding:.25rem .55rem;cursor:pointer;line-height:1">+</button>
+          </div>
+          <button onclick="brFit(${bi})" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.06em;padding:.28rem .5rem;cursor:pointer;border-radius:3px;text-transform:uppercase">Fit</button>
+          <button class="btn-danger" style="font-size:.55rem" onclick="brDelete(${bi})">Delete</button>
+        </div>
+      </div>
+      <div id="br-save-banner-${bi}" style="display:none;align-items:center;justify-content:space-between;gap:.75rem;background:rgba(126,200,160,.07);border:1px solid rgba(126,200,160,.25);border-radius:3px;padding:.6rem .9rem;margin-bottom:.75rem;">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">🏆</span>
+          <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:#7ec8a0;letter-spacing:.04em">Tournament complete!</span>
+          <span id="br-winner-label-${bi}" style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--accent);letter-spacing:.06em"></span>
+        </div>
+        <button class="btn" style="font-size:.58rem;padding:.4rem .9rem;white-space:nowrap" onclick="brSaveTournament(${bi})">💾 Save Results</button>
+      </div>
+      <div id="br-vp-${bi}" class="br-viewport" data-bi="${bi}">
+        <div id="br-world-${bi}" class="br-world"></div>
+        <div style="position:absolute;bottom:7px;right:8px;font-family:'DM Mono',monospace;font-size:.48rem;color:#4a2a38;pointer-events:none;user-select:none;">drag · scroll to zoom</div>
+      </div>
+    </div>`;
+  }).join('');
+  // Init each bracket viewport and render its world
+  brackets.forEach((b,bi)=>{
+    initBrVp(bi);
+    renderBrWorld(bi);
+    setTimeout(()=>brFit(bi),60);
+  });
+}
+
+// ── BRACKET DATA MODEL (from bracket__2_) ─────────────────────────────────────
+const BR_CW=180, BR_SH=28, BR_CH=BR_SH*2+2, BR_HGAP=52, BR_COL=BR_CW+BR_HGAP, BR_VGAP=BR_CH+18;
+
+function brCY(ri,mi){const stride=Math.pow(2,ri);return BR_VGAP*(mi*stride+(stride-1)/2+0.5);}
+function brSecH(n0){return n0*BR_VGAP;}
+
+const brM=(p1,p2,s1,s2)=>({p1:p1||'TBD',p2:p2||'TBD',s1:s1??null,s2:s2??null,w:null});
+const brE=()=>brM('TBD','TBD',null,null);
+
+function brSeedOrder(n){if(n===1)return[1];const prev=brSeedOrder(n/2),out=[];for(const s of prev){out.push(s);out.push(n+1-s);}return out;}
+
+function buildBr(names,format){
+  const P=names.length;
+  let base=1; while(base*2<=P)base*=2;
+  const extras=P-base;
+  const piRound=[];
+  for(let i=0;i<extras;i++){const extra=base+1+i,bumped=base-i;piRound.push(brM(names[extra-1],names[bumped-1],extra,bumped));}
+  const piSlotSeeds=new Set();
+  for(let i=0;i<extras;i++)piSlotSeeds.add(base-i);
+  const order=brSeedOrder(base);
+  const r1=[];
+  for(let i=0;i<order.length;i+=2){
+    const a=order[i],b=order[i+1];
+    r1.push(brM(piSlotSeeds.has(a)?'TBD':names[a-1],piSlotSeeds.has(b)?'TBD':names[b-1],a,b));
+  }
+  const wRounds=[{label:format==='double'?'W Round 1':'Round 1',matches:r1}];
+  let sz=base/2,rn=2;
+  while(sz>1){
+    sz>>=1;
+    const lbl=format==='double'?(sz===1?'W Final':sz===2?'W Semis':`W Round ${rn}`):(sz===1?'Final':sz===2?'Semis':sz===4?'Quarters':`Round ${rn}`);
+    wRounds.push({label:lbl,matches:Array.from({length:sz},brE)});
+    rn++;
+  }
+  if(format==='single')return{format,P,base,extras,piRound,wRounds,lRounds:[],lPiRound:[],grand:null,grandReset:null};
+  const lPiRound=Array.from({length:extras},brE);
+  const lRounds=[];
+  const logBase=Math.log2(base);
+  const totalL=Math.max(0,2*(logBase-1)-1);
+  let lSz=base/4;
+  for(let lr=0;lr<totalL;lr++){
+    if(lr>0){if(lr%2===0)lSz=Math.max(1,lSz>>1);}
+    lRounds.push({label:lr===totalL-1?'L Final':`L Round ${lr+1}`,matches:Array.from({length:Math.max(1,lSz)},brE)});
+  }
+  const grand={label:'Grand Final',matches:[brE()]};
+  const grandReset={label:'Bracket Reset',matches:[brE()]};
+  return{format,P,base,extras,piRound,lPiRound,wRounds,lRounds,grand,grandReset};
+}
+
+function propagateBr(b){
+  const W=(m)=>m.w===0?{n:m.p1,s:m.s1}:{n:m.p2,s:m.s2};
+  const L=(m)=>m.w===0?{n:m.p2,s:m.s2}:{n:m.p1,s:m.s1};
+  function slot(m,side,n,s){if(side===0){m.p1=n;m.s1=s??null}else{m.p2=n;m.s2=s??null}}
+  function wipe(m){m.p1='TBD';m.p2='TBD';m.s1=null;m.s2=null;}
+  b.wRounds.forEach((r,ri)=>{if(ri>0)r.matches.forEach(wipe);});
+  if(b.lPiRound)b.lPiRound.forEach(wipe);
+  b.lRounds.forEach(r=>r.matches.forEach(wipe));
+  if(b.grand)wipe(b.grand.matches[0]);
+  if(b.grandReset)wipe(b.grandReset.matches[0]);
+  const r1=b.wRounds[0];
+  const extras=b.extras||0;
+  b.piRound.forEach((pm)=>{
+    if(pm.w==null)return;
+    const w=W(pm),bumpedSeed=pm.s2;
+    for(const rm of r1.matches){if(rm.s1===bumpedSeed){slot(rm,0,w.n,w.s);break}if(rm.s2===bumpedSeed){slot(rm,1,w.n,w.s);break}}
+  });
+  r1.matches.forEach((m,mi)=>{if(m.w==null)return;const next=b.wRounds[1]?.matches[mi>>1];if(next)slot(next,mi%2,W(m).n,W(m).s);});
+  for(let ri=1;ri<b.wRounds.length-1;ri++){b.wRounds[ri].matches.forEach((m,mi)=>{if(m.w==null)return;const next=b.wRounds[ri+1]?.matches[mi>>1];if(next)slot(next,mi%2,W(m).n,W(m).s);});}
+  if(b.format!=='double')return;
+  const r1len=r1.matches.length;
+  b.piRound.forEach((pm,pmi)=>{if(pm.w==null||!b.lPiRound[pmi])return;slot(b.lPiRound[pmi],0,L(pm).n,L(pm).s);});
+  r1.matches.forEach((m,mi)=>{if(m.w==null)return;const lpiIdx=r1len-1-mi;if(lpiIdx>=0&&lpiIdx<extras&&b.lPiRound[lpiIdx])slot(b.lPiRound[lpiIdx],1,L(m).n,L(m).s);});
+  const lr1=b.lRounds[0];
+  if(lr1){
+    const entrants=[];
+    for(let mi=0;mi<r1len-extras;mi++){const m=r1.matches[mi];if(m.w!=null)entrants.push(L(m));else entrants.push(null);}
+    for(let i=extras-1;i>=0;i--){const lpi=b.lPiRound?.[i];if(lpi&&lpi.w!=null)entrants.push(W(lpi));else entrants.push(null);}
+    lr1.matches.forEach((lm,lmi)=>{const e1=entrants[lmi*2],e2=entrants[lmi*2+1];if(e1)slot(lm,0,e1.n,e1.s);if(e2)slot(lm,1,e2.n,e2.s);});
+  }
+  if(b.lRounds[0]&&b.lRounds[1]){b.lRounds[0].matches.forEach((m,mi)=>{if(m.w==null)return;const nm=b.lRounds[1].matches[mi];if(nm)slot(nm,0,W(m).n,W(m).s);});}
+  for(let wi=1;wi<b.wRounds.length;wi++){
+    const lDropIdx=2*wi-1;
+    if(lDropIdx<0||lDropIdx>=b.lRounds.length)continue;
+    const lr=b.lRounds[lDropIdx];
+    const losers=b.wRounds[wi].matches.map((m,mi)=>m.w!=null?{lo:L(m),mi}:null).filter(Boolean);
+    const reversed=[...losers].reverse();
+    reversed.forEach((entry,i)=>{const nm=lr.matches[i];if(nm)slot(nm,1,entry.lo.n,entry.lo.s);});
+  }
+  for(let li=1;li<b.lRounds.length-1;li++){
+    const isDrop=li%2===1;
+    b.lRounds[li].matches.forEach((m,mi)=>{
+      if(m.w==null)return;
+      const w=W(m),next=b.lRounds[li+1];
+      if(!next)return;
+      if(isDrop){const nm=next.matches[mi>>1];if(nm)slot(nm,mi%2===0?0:1,w.n,w.s);}
+      else{const nm=next.matches[mi];if(nm)slot(nm,0,w.n,w.s);}
+    });
+  }
+  if(b.grand){
+    const gm=b.grand.matches[0];
+    const lastW=b.wRounds[b.wRounds.length-1].matches[0];
+    const lastL=b.lRounds[b.lRounds.length-1]?.matches[0];
+    if(lastW?.w!=null){const w=W(lastW);gm.p1=w.n;gm.s1=w.s;}
+    if(lastL?.w!=null){const w=W(lastL);gm.p2=w.n;gm.s2=w.s;}
+    if(b.grandReset){
+      const rm=b.grandReset.matches[0];
+      if(gm.w===1&&gm.p1!=='TBD'&&gm.p2!=='TBD'){rm.p1=gm.p1;rm.s1=gm.s1;rm.p2=gm.p2;rm.s2=gm.s2;}
+    }
+  }
+  const all=[...b.piRound,...(b.lPiRound||[])];
+  b.wRounds.forEach(r=>all.push(...r.matches));b.lRounds.forEach(r=>all.push(...r.matches));
+  if(b.grand)all.push(...b.grand.matches);
+  if(b.grandReset)all.push(...b.grandReset.matches);
+  all.forEach(m=>{if(m.w!=null&&(m.p1==='TBD'||m.p2==='TBD'))m.w=null;});
+}
+
+// ── BRACKET RENDER (canvas/world approach) ────────────────────────────────────
+const brZoom={}, brPan={};
+const BR_ZOOM_STEPS=[0.06,.1,.15,.2,.25,.3,.4,.5,.65,.8,1,1.2,1.5,1.8,2.2,2.8,3.5,4];
+
+function brApplyT(bi){
+  const w=document.getElementById('br-world-'+bi);
+  if(!w)return;
+  const z=brZoom[bi]||1,p=brPan[bi]||{x:30,y:30};
+  w.style.transform=`translate(${p.x}px,${p.y}px) scale(${z})`;
+  const lbl=document.getElementById('br-zlbl-'+bi);
+  if(lbl)lbl.textContent=Math.round(z*100)+'%';
+}
+
+window.brZoomBtn=function(bi,dir){
+  const cur=brZoom[bi]||1;
+  const idx=BR_ZOOM_STEPS.findIndex(s=>s>cur);
+  brZoom[bi]=dir>0?BR_ZOOM_STEPS[idx<0?BR_ZOOM_STEPS.length-1:idx]:BR_ZOOM_STEPS[[...BR_ZOOM_STEPS].reverse().findIndex(s=>s<cur)<0?0:BR_ZOOM_STEPS.length-1-[...BR_ZOOM_STEPS].reverse().findIndex(s=>s<cur)];
+  brApplyT(bi);
+};
+
+window.brFit=function(bi){
+  const w=document.getElementById('br-world-'+bi);
+  const vp=document.getElementById('br-vp-'+bi);
+  if(!w||!vp)return;
+  let minX=1e9,minY=1e9,maxX=0,maxY=0;
+  for(const c of w.children){
+    const l=parseFloat(c.style.left)||0,t=parseFloat(c.style.top)||0;
+    const cw=parseFloat(c.style.width)||0,ch=parseFloat(c.style.height)||0;
+    if(cw>0){minX=Math.min(minX,l);maxX=Math.max(maxX,l+cw);}
+    if(ch>0){minY=Math.min(minY,t);maxY=Math.max(maxY,t+ch);}
+  }
+  if(maxX===0)return;
+  const cw=maxX-minX,ch=maxY-minY;
+  const aw=vp.clientWidth,ah=vp.clientHeight;
+  const nz=Math.min(1,(aw-60)/cw,(ah-60)/ch);
+  brZoom[bi]=nz;
+  brPan[bi]={x:(aw-cw*nz)/2-minX*nz,y:(ah-ch*nz)/2-minY*nz};
+  brApplyT(bi);
+};
+
+window.brDelete=function(bi){
+  if(!confirm('Delete this bracket?'))return;
+  brackets.splice(bi,1);
+  saveBracketsToStorage();
+  renderBrackets();
+};
+
+function initBrVp(bi){
+  const vp=document.getElementById('br-vp-'+bi);
+  if(!vp||vp._brInit)return;
+  vp._brInit=true;
+  let dragging=false,dsx=0,dsy=0,dpx=0,dpy=0;
+  vp.addEventListener('mousedown',e=>{
+    if(e.target.tagName==='BUTTON')return;
+    dragging=true;dsx=e.clientX;dsy=e.clientY;
+    const p=brPan[bi]||{x:30,y:30};dpx=p.x;dpy=p.y;
+    vp.classList.add('drag');e.preventDefault();
+  });
+  window.addEventListener('mousemove',e=>{if(!dragging||document.getElementById('br-vp-'+bi)!==vp)return;brPan[bi]={x:dpx+(e.clientX-dsx),y:dpy+(e.clientY-dsy)};brApplyT(bi);});
+  window.addEventListener('mouseup',()=>{dragging=false;vp.classList.remove('drag');});
+  vp.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const r=vp.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    const f=e.deltaY<0?1.1:.9,cur=brZoom[bi]||1,nz=Math.max(.06,Math.min(4,cur*f));
+    const p=brPan[bi]||{x:30,y:30};
+    brPan[bi]={x:mx-(mx-p.x)*(nz/cur),y:my-(my-p.y)*(nz/cur)};
+    brZoom[bi]=nz;brApplyT(bi);
+  },{passive:false});
+}
+
+function brEl(tag,styles){const d=document.createElement(tag);Object.assign(d.style,styles);return d;}
+
+function brDrawCard(m,left,top,roundLabel,isL,wc,bi){
+  const world=document.getElementById('br-world-'+bi);
+  const hasW=m.w!=null;
+  const bc=hasW?(isL?'rgba(255,107,53,.55)':'rgba(229,178,93,.5)'):'#2a1a24';
+  const card=brEl('div',{position:'absolute',left:left+'px',top:top+'px',width:BR_CW+'px',height:BR_CH+'px',background:'#160d12',border:'1px solid '+bc,borderRadius:'3px',overflow:'hidden',transition:'border-color .12s'});
+  function mkSlot(name,seed,score,isWin,isLose){
+    const s=brEl('div',{height:BR_SH+'px',display:'flex',alignItems:'center',background:isWin?'rgba(229,178,93,.08)':'transparent'});
+    const sg=brEl('div',{width:'22px',minWidth:'22px',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.4rem',color:'#3a1a28',borderRight:'1px solid #2a1a24',background:'rgba(0,0,0,.3)'});
+    sg.textContent=seed??'';
+    const isTBD=name==='TBD',isBYE=name==='BYE';
+    const nc=isWin?wc:(isTBD||isBYE?'#2a1a24':'#b0a0a8');
+    const nm=brEl('div',{flex:'1',padding:'0 7px',fontSize:'.68rem',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',color:nc,fontStyle:isTBD||isBYE?'italic':'normal',opacity:isLose?'0.35':'1'});
+    nm.textContent=isTBD?'TBD':isBYE?'BYE':name;
+    s.append(sg,nm);
+    if(score!=null){
+      const sc=brEl('div',{padding:'0 6px',fontSize:'.72rem',fontWeight:'600',fontFamily:"'DM Mono',monospace",color:isWin?wc:(isLose?'#52526a':'#8a6a78'),flexShrink:'0'});
+      sc.textContent=score;
+      s.appendChild(sc);
+    }
+    return s;
+  }
+  card.appendChild(mkSlot(m.p1,m.s1,m.sc1??null,m.w===0,m.w===1));
+  card.appendChild(brEl('div',{height:'2px',background:'#2a1a24'}));
+  card.appendChild(mkSlot(m.p2,m.s2,m.sc2??null,m.w===1,m.w===0));
+  const clickable=m.p1!=='BYE'&&m.p2!=='BYE'&&!(m.p1==='TBD'&&m.p2==='TBD');
+  if(clickable){
+    card.style.cursor='pointer';
+    card.addEventListener('mouseenter',()=>!hasW&&(card.style.borderColor=isL?'rgba(255,107,53,.35)':'rgba(229,178,93,.3)'));
+    card.addEventListener('mouseleave',()=>!hasW&&(card.style.borderColor='#2a1a24'));
+    card.addEventListener('click',e=>{e.stopPropagation();openBrScore(m,roundLabel,bi);});
+  }
+  world.appendChild(card);
+}
+
+function brDrawPoly(pts,stroke,bi){
+  const world=document.getElementById('br-world-'+bi);
+  const u=[pts[0]];
+  for(let i=1;i<pts.length;i++){const p=pts[i],q=u[u.length-1];if(Math.abs(p[0]-q[0])>.5||Math.abs(p[1]-q[1])>.5)u.push(p);}
+  if(u.length<2)return;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText='position:absolute;top:0;left:0;width:1px;height:1px;overflow:visible;pointer-events:none;';
+  const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  poly.setAttribute('points',u.map(q=>q[0]+','+q[1]).join(' '));
+  poly.setAttribute('fill','none');poly.setAttribute('stroke',stroke);poly.setAttribute('stroke-width','1.5');
+  svg.appendChild(poly);world.appendChild(svg);
+}
+
+const brCelebrated=new Set();
+function renderBrWorld(bi){
+  const b=brackets[bi];
+  if(!b)return;
+  const world=document.getElementById('br-world-'+bi);
+  if(!world)return;
+  world.innerHTML='';
+
+  const TOP=44,PAD=28,LSEP=60;
+  const wn0=b.wRounds[0].matches.length;
+  const doL=b.format==='double'&&b.lRounds.length>0;
+  const doPI=b.piRound&&b.piRound.length>0;
+  const doLPI=doL&&b.lPiRound&&b.lPiRound.length>0;
+  const ln0=doL?b.lRounds[0].matches.length:0;
+  const wH=brSecH(wn0);
+  const lH=doL?brSecH(ln0):0;
+  const wTop=TOP,lTop=wTop+wH+LSEP+26;
+  const lBottom=lTop+lH;
+
+  const piX=PAD;
+  const wX=(doPI&&doPI)?piX+BR_COL:PAD;
+  const lpiX=wX;
+  const lX=doLPI?lpiX+BR_COL:wX;
+
+  function lCY(li,mi){
+    const strideRi=Math.floor(li/2);
+    const matchesInRound=Math.max(1,ln0/Math.pow(2,strideRi));
+    const mirrorMi=(matchesInRound-1)-mi;
+    return lBottom-brCY(strideRi,mirrorMi);
+  }
+
+  // Draw a Y-fork: two source lines meet at midY, then one line goes to dest
+  function drawFork(x1,cy1,cy2,midY,cy3,x2,mx,bc){
+    brDrawPoly([[x1,cy1],[mx,cy1],[mx,midY]],bc,bi);   // top card → midpoint
+    brDrawPoly([[x1,cy2],[mx,cy2],[mx,midY]],bc,bi);   // bottom card → midpoint
+    brDrawPoly([[mx,midY],[mx,cy3],[x2,cy3]],bc,bi);   // midpoint → next card
+  }
+
+  function drawWSection(rounds,startX){
+    const wc='#E5B25D',bc='rgba(229,178,93,.22)';
+    rounds.forEach((rnd,ri)=>{
+      const colX=startX+ri*BR_COL;
+      const lbl=brEl('div',{position:'absolute',left:colX+'px',top:(wTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:wc,userSelect:'none',pointerEvents:'none'});
+      lbl.textContent=rnd.label;world.appendChild(lbl);
+      rnd.matches.forEach((m,mi)=>brDrawCard(m,colX,wTop+brCY(ri,mi)-BR_CH/2,rnd.label,false,wc,bi));
+      if(ri<rounds.length-1){
+        const x1=colX+BR_CW,x2=colX+BR_COL,mx=(x1+x2)/2,nm=rnd.matches.length;
+        for(let mi=0;mi<nm;mi+=2){
+          const cy1=wTop+brCY(ri,mi);
+          const cy2=mi+1<nm?wTop+brCY(ri,mi+1):cy1;
+          const cy3=wTop+brCY(ri+1,mi>>1);
+          const midY=(cy1+cy2)/2;
+          drawFork(x1,cy1,cy2,midY,cy3,x2,mx,bc);
+        }
+      }
+    });
+    return startX+rounds.length*BR_COL;
+  }
+
+  function drawLSection(rounds,startX){
+    const wc='#ff6b35',bc='rgba(255,107,53,.22)';
+    rounds.forEach((rnd,li)=>{
+      const colX=startX+li*BR_COL;
+      const isSurvive=li%2===0;
+      const lbl=brEl('div',{position:'absolute',left:colX+'px',top:(lTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:wc,userSelect:'none',pointerEvents:'none'});
+      lbl.textContent=rnd.label;world.appendChild(lbl);
+      rnd.matches.forEach((m,mi)=>brDrawCard(m,colX,lCY(li,mi)-BR_CH/2,rnd.label,true,wc,bi));
+      if(li<rounds.length-1){
+        const x1=colX+BR_CW,x2=colX+BR_COL,mx=(x1+x2)/2,nm=rnd.matches.length;
+        if(isSurvive){
+          for(let mi=0;mi<nm;mi++){
+            const cy1=lCY(li,mi),cy2=lCY(li+1,mi);
+            brDrawPoly([[x1,cy1],[mx,cy1],[mx,cy2],[x2,cy2]],bc,bi);
+          }
+        } else {
+          for(let mi=0;mi<nm;mi+=2){
+            const cy1=lCY(li,mi);
+            const cy2=mi+1<nm?lCY(li,mi+1):cy1;
+            const cy3=lCY(li+1,mi>>1);
+            const midY=(cy1+cy2)/2;
+            drawFork(x1,cy1,cy2,midY,cy3,x2,mx,bc);
+          }
+        }
+      }
+    });
+    return startX+rounds.length*BR_COL;
+  }
+
+  // Play-in
+  if(doPI){
+    b.piRound.forEach((pm,pmi)=>{
+      const lbl=brEl('div',{position:'absolute',left:piX+'px',top:(wTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#E5B25D',userSelect:'none',pointerEvents:'none'});
+      lbl.textContent='Play-In';world.appendChild(lbl);
+      const r1=b.wRounds[0];
+      let r1mi=-1;
+      for(let i=0;i<r1.matches.length;i++){const rm=r1.matches[i];if(rm.s1===pm.s1||rm.s1===pm.s2||rm.s2===pm.s1||rm.s2===pm.s2){r1mi=i;break;}}
+      const piCY=wTop+brCY(0,r1mi>=0?r1mi:pmi);
+      brDrawCard(pm,piX,piCY-BR_CH/2,'W Play-In',false,'#E5B25D',bi);
+      if(r1mi>=0){
+        const x1=piX+BR_CW,x2=wX,mx=(x1+x2)/2;
+        const r1m=r1.matches[r1mi];
+        const side=(r1m.s1===pm.s1||r1m.s1===pm.s2)?0:1;
+        const slotCY=wTop+brCY(0,r1mi)-BR_CH/2+(side===0?BR_SH/2:BR_SH+2+BR_SH/2);
+        brDrawPoly([[x1,piCY],[mx,piCY],[mx,slotCY],[x2,slotCY]],'rgba(229,178,93,.18)',bi);
+      }
+    });
+  }
+
+  // Winners bracket tag
+  if(doL){
+    const tag=brEl('div',{position:'absolute',left:wX+'px',top:(wTop-36)+'px',fontSize:'.4rem',letterSpacing:'.16em',textTransform:'uppercase',color:'#E5B25D',background:'rgba(229,178,93,.07)',border:'1px solid rgba(229,178,93,.18)',padding:'2px 8px',borderRadius:'2px',userSelect:'none',pointerEvents:'none'});
+    tag.textContent='Winners Bracket';world.appendChild(tag);
+  }
+  const wEndX=drawWSection(b.wRounds,wX);
+
+  // Separator
+  if(doL){
+    world.appendChild(brEl('div',{position:'absolute',left:PAD+'px',top:(wTop+wH+LSEP/2)+'px',width:'3000px',height:'1px',background:'repeating-linear-gradient(90deg,rgba(255,107,53,.25) 0,rgba(255,107,53,.25) 6px,transparent 6px,transparent 12px)',pointerEvents:'none'}));
+  }
+
+  // L Play-in
+  if(doLPI){
+    const lr1len=b.lRounds[0].matches.length;
+    b.lPiRound.forEach((lpi,i)=>{
+      const lpiCY=lCY(0,lr1len-1-i);
+      const lbl=brEl('div',{position:'absolute',left:lpiX+'px',top:(lpiCY-BR_CH/2-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ff6b35',userSelect:'none',pointerEvents:'none'});
+      lbl.textContent='L Play-In';world.appendChild(lbl);
+      brDrawCard(lpi,lpiX,lpiCY-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
+      const x1=lpiX+BR_CW,x2=lX,mx=(x1+x2)/2,lr1CY=lCY(0,lr1len-1-i);
+      brDrawPoly([[x1,lpiCY],[mx,lpiCY],[mx,lr1CY],[x2,lr1CY]],'rgba(255,107,53,.18)',bi);
+    });
+  }
+
+  // Losers bracket
+  let lEndX=lX;
+  if(doL){
+    const tag=brEl('div',{position:'absolute',left:lX+'px',top:(lTop-22)+'px',fontSize:'.4rem',letterSpacing:'.16em',textTransform:'uppercase',color:'#ff6b35',background:'rgba(255,107,53,.07)',border:'1px solid rgba(255,107,53,.18)',padding:'2px 8px',borderRadius:'2px',userSelect:'none',pointerEvents:'none'});
+    tag.textContent='Losers Bracket';world.appendChild(tag);
+    lEndX=drawLSection(b.lRounds,lX);
+  }
+
+  // Grand Final
+  if(b.format==='double'&&b.grand){
+    const gX=Math.max(wEndX,lEndX)+4;
+    const gm=b.grand.matches[0];
+    const wFCY=wTop+brCY(b.wRounds.length-1,0);
+    const lFCY=doL?lCY(b.lRounds.length-1,0):null;
+    const gCY=wFCY;
+    const gTop=gCY-BR_CH/2;
+    const lbl=brEl('div',{position:'absolute',left:gX+'px',top:(gTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ffffff',userSelect:'none',pointerEvents:'none'});
+    lbl.textContent='Grand Final';world.appendChild(lbl);
+    brDrawCard(gm,gX,gTop,'Grand Final',false,'#E5B25D',bi);
+    const gCenter=gTop+BR_CH/2;
+    const x1w=wEndX,x2=gX,mxW=(x1w+x2)/2;
+    brDrawPoly([[x1w,wFCY],[mxW,wFCY],[mxW,gCenter],[x2,gCenter]],'rgba(229,178,93,.18)',bi);
+    if(doL&&lFCY!=null){const x1l=lEndX,mxL=(x1l+x2)/2;brDrawPoly([[x1l,lFCY],[mxL,lFCY],[mxL,gCenter],[x2,gCenter]],'rgba(255,107,53,.18)',bi);}
+    if(b.grandReset&&gm.w===1){
+      const rm=b.grandReset.matches[0];
+      const rX=gX+BR_COL;
+      const rlbl=brEl('div',{position:'absolute',left:rX+'px',top:(gTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ffffff',userSelect:'none',pointerEvents:'none'});
+      rlbl.textContent='Bracket Reset';world.appendChild(rlbl);
+      brDrawCard(rm,rX,gTop,'Bracket Reset',false,'#E5B25D',bi);
+      const xgr1=gX+BR_CW,xgr2=rX,mxgr=(xgr1+xgr2)/2;
+      brDrawPoly([[xgr1,gTop+BR_SH/2],[mxgr,gTop+BR_SH/2],[mxgr,gTop+BR_SH/2],[xgr2,gTop+BR_SH/2]],'rgba(255,255,255,.15)',bi);
+      brDrawPoly([[xgr1,gTop+BR_SH+2+BR_SH/2],[mxgr,gTop+BR_SH+2+BR_SH/2],[mxgr,gTop+BR_SH+2+BR_SH/2],[xgr2,gTop+BR_SH+2+BR_SH/2]],'rgba(255,255,255,.15)',bi);
+    }
+  }
+
+  // Show/hide completion banner
+  const banner=document.getElementById('br-save-banner-'+bi);
+  if(banner){
+    const complete=isBrComplete(b);
+    banner.style.display=complete?'flex':'none';
+    if(complete){
+      const winnerLabel=document.getElementById('br-winner-label-'+bi);
+      if(winnerLabel){
+        let champ='';
+        if(b.format==='double'){
+          const gr=b.grandReset?.matches[0];
+          const gf=b.grand?.matches[0];
+          if(gr&&gr.w!=null)champ=gr.w===0?gr.p1:gr.p2;
+          else if(gf&&gf.w!=null)champ=gf.w===0?gf.p1:gf.p2;
+        } else {
+          const lastR=b.wRounds[b.wRounds.length-1];
+          const fm=lastR?.matches[0];
+          if(fm&&fm.w!=null)champ=fm.w===0?fm.p1:fm.p2;
+        }
+        winnerLabel.textContent=champ?'🥇 '+champ:'';
+      }
+      // Only fire confetti once per bracket completion (tracked by bracket id)
+      const bid=b.id||bi;
+      if(!brCelebrated.has(bid)){brCelebrated.add(bid);brConfetti();}
+    } else {
+      // If bracket was un-completed, allow confetti again next time
+      brCelebrated.delete(b.id||bi);
+    }
+  }
+}
+
+function brConfetti(){
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  document.body.appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+  const COLORS=['#E5B25D','#7ec8a0','#c9a0dc','#ff6b35','#ffffff','#ffd700','#ff4757'];
+  const pieces=Array.from({length:160},()=>({
+    x:Math.random()*canvas.width,
+    y:-20-Math.random()*canvas.height*0.4,
+    r:Math.random()*6+3,
+    d:Math.random()*3+1.5,
+    color:COLORS[Math.floor(Math.random()*COLORS.length)],
+    tilt:Math.random()*10-5,
+    tiltSpeed:Math.random()*.15-.075,
+    angle:Math.random()*Math.PI*2,
+    spin:Math.random()*.08-.04,
+    shape:Math.random()>.5?'rect':'circle',
+    w:Math.random()*10+4,h:Math.random()*5+3,
+    vx:(Math.random()-.5)*2.5,
+  }));
+  let frame=0,running=true;
+  function draw(){
+    if(!running)return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p=>{
+      p.angle+=p.spin;p.tilt+=p.tiltSpeed;
+      p.x+=p.vx+Math.sin(p.angle)*.8;
+      p.y+=p.d;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.tilt);
+      ctx.globalAlpha=Math.min(1,Math.max(0,1-(frame-160)/80));
+      ctx.fillStyle=p.color;
+      if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();}
+      else{ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}
+      ctx.restore();
+    });
+    frame++;
+    if(frame<240)requestAnimationFrame(draw);
+    else{running=false;canvas.remove();}
+  }
+  requestAnimationFrame(draw);
+}
+
+window.brSaveTournament=function(bi){
+  const b=brackets[bi];
+  if(!b||!isBrComplete(b))return;
+  if(!confirm(`Save "${b.name}" to Past Tournaments? It will no longer be editable.`))return;
+
+  // Find champion (1st place)
+  let p1='',p2='',p3='';
+  if(b.format==='double'){
+    const gr=b.grandReset?.matches[0];const gf=b.grand?.matches[0];
+    const finalMatch=gr&&gr.w!=null?gr:gf;
+    if(finalMatch&&finalMatch.w!=null){
+      p1=finalMatch.w===0?finalMatch.p1:finalMatch.p2;
+      p2=finalMatch.w===0?finalMatch.p2:finalMatch.p1;
+    }
+    // 3rd = loser of last losers round final
+    const lastL=b.lRounds[b.lRounds.length-1];
+    const lFinal=lastL?.matches[0];
+    if(lFinal&&lFinal.w!=null)p3=lFinal.w===0?lFinal.p2:lFinal.p1;
+  } else {
+    const lastR=b.wRounds[b.wRounds.length-1];const fm=lastR?.matches[0];
+    if(fm&&fm.w!=null)p1=fm.w===0?fm.p1:fm.p2;
+  }
+
+  // Build match history for display
+  const matchLog=[];
+  const logRound=(rounds)=>rounds.forEach(r=>r.matches.forEach(m=>{
+    if(m.p1==='TBD'&&m.p2==='TBD')return;
+    if(m.p1==='BYE'||m.p2==='BYE')return;
+    if(m.w==null)return;
+    matchLog.push({round:r.label,p1:m.p1,p2:m.p2,w:m.w,sc1:m.sc1,sc2:m.sc2});
+  }));
+  logRound(b.piRound.length?[{label:'Play-In',matches:b.piRound}]:[]);
+  logRound(b.wRounds);
+  if(b.lPiRound?.length)logRound([{label:'L Play-In',matches:b.lPiRound}]);
+  logRound(b.lRounds);
+  if(b.grand)logRound([b.grand]);
+  if(b.grandReset&&b.grand?.matches[0]?.w===1)logRound([b.grandReset]);
+
+  const pastEntry={
+    id:b.id,name:b.name,format:b.format,seeding:b.seeding,
+    players:b.players,champion:p1,second:p2,third:p3,
+    savedAt:Date.now(),createdAt:b.createdAt,
+    matchLog
+  };
+  pastTournaments.unshift(pastEntry);
+  brackets.splice(bi,1);
+  saveBracketsToStorage();
+  savePastTournamentsToStorage();
+  renderBrackets();
+  renderPastTournaments();
+};
+
+// ── BRACKET SCORE MODAL ───────────────────────────────────────────────────────
+let brActiveM=null,brActiveBi=null;
+function openBrScore(m,label,bi){
+  brActiveM=m;brActiveBi=bi;
+  document.getElementById('br-m-title').textContent=label;
+  document.getElementById('br-m-vs').textContent=m.p1+' vs '+m.p2;
+  document.getElementById('br-mw1').textContent='▶ '+m.p1.slice(0,18)+' Wins';
+  document.getElementById('br-mw2').textContent='▶ '+m.p2.slice(0,18)+' Wins';
+  document.getElementById('br-sc1-lbl').textContent=m.p1.slice(0,16);
+  document.getElementById('br-sc2-lbl').textContent=m.p2.slice(0,16);
+  document.getElementById('br-sc1').value=m.sc1??'';
+  document.getElementById('br-sc2').value=m.sc2??'';
+  document.getElementById('br-mclr').style.display=m.w!=null?'':'none';
+  const ov=document.getElementById('br-score-ov');
+  ov.style.display='flex';
+  setTimeout(()=>document.getElementById('br-sc1').focus(),60);
+}
+window.closeBrScore=function(){document.getElementById('br-score-ov').style.display='none';brActiveM=null;brActiveBi=null;};
+function brSaveScore(w){
+  if(!brActiveM)return;
+  const s1=document.getElementById('br-sc1').value;
+  const s2=document.getElementById('br-sc2').value;
+  brActiveM.sc1=s1!==''?parseInt(s1):null;
+  brActiveM.sc2=s2!==''?parseInt(s2):null;
+  brActiveM.w=w;
+  propagateBr(brackets[brActiveBi]);
+  saveBracketsToStorage();
+  renderBrWorld(brActiveBi);
+  closeBrScore();
+}
+document.getElementById('br-mw1').onclick=()=>brSaveScore(0);
+document.getElementById('br-mw2').onclick=()=>brSaveScore(1);
+document.getElementById('br-mclr').onclick=()=>{if(!brActiveM)return;brActiveM.w=null;brActiveM.sc1=null;brActiveM.sc2=null;propagateBr(brackets[brActiveBi]);saveBracketsToStorage();renderBrWorld(brActiveBi);closeBrScore();};
+document.getElementById('br-score-ov').addEventListener('click',e=>{if(e.target.id==='br-score-ov')closeBrScore();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBrScore();});
+
+// ── BRACKET CREATE / STORAGE ──────────────────────────────────────────────────
+window.openNewBracketModal=function(){
+  if(!isAdmin){alert('Admin login required to create brackets.');return;}
+  const cb=document.getElementById('bracket-player-checkboxes');
+  const rated=players.filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
+  const unrated=players.filter(p=>p.rd>100).sort((a,b)=>a.name.localeCompare(b.name));
+  const sorted=[...rated,...unrated];
+  cb.innerHTML=sorted.map((p,i)=>{
+    const isRated=p.rd<=100;
+    const ratingStr=isRated?`<span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;margin-left:auto">${Math.round(p.rating)}</span>`:`<span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.58rem;margin-left:auto">unrated</span>`;
+    return`<label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.78rem;padding:.3rem .1rem;border-bottom:1px solid rgba(74,42,56,.3)">
+      <input type="checkbox" value="${esc(p.name)}" checked>
+      <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.55rem;min-width:14px">${i+1}</span>
+      <span style="flex:1">${esc(p.name)}</span>
+      ${ratingStr}
+    </label>`;
+  }).join('');
+  document.getElementById('bracket-name-input').value='';
+  document.getElementById('bracket-create-msg').style.display='none';
+  document.getElementById('new-bracket-overlay').classList.add('open');
+};
+
+window.createBracket=function(){
+  const name=document.getElementById('bracket-name-input').value.trim();
+  if(!name){showMsg('bracket-create-msg','Enter a tournament name.',true);return;}
+  const format=document.getElementById('bracket-format').value;
+  const seedingMode=document.getElementById('bracket-seeding').value;
+  const checkedNames=new Set(Array.from(document.querySelectorAll('#bracket-player-checkboxes input:checked')).map(el=>el.value));
+  if(checkedNames.size<2){showMsg('bracket-create-msg','Select at least 2 players.',true);return;}
+  let seeded;
+  if(seedingMode==='random'){
+    const arr=[...checkedNames];
+    for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+    seeded=arr;
+  } else {
+    const rated=players.filter(p=>p.rd<=100&&checkedNames.has(p.name)).sort((a,b)=>b.rating-a.rating);
+    const unrated=players.filter(p=>p.rd>100&&checkedNames.has(p.name)).sort((a,b)=>a.name.localeCompare(b.name));
+    const knownNames=new Set(players.map(p=>p.name));
+    const unknown=[...checkedNames].filter(n=>!knownNames.has(n)).map(n=>({name:n}));
+    seeded=[...rated,...unrated,...unknown].map(p=>p.name);
+  }
+  const b=buildBr(seeded,format);
+  b.id=Date.now();b.name=name;b.seeding=seedingMode;b.players=seeded;b.createdAt=Date.now();
+  propagateBr(b);
+  brackets.push(b);
+  saveBracketsToStorage();
+  document.getElementById('new-bracket-overlay').classList.remove('open');
+  showPanel('brackets',document.querySelector('nav button[onclick*="brackets"]'));
+};
+
+function saveBracketsToStorage(){try{localStorage.setItem('tttiw_brackets',JSON.stringify(brackets));}catch(e){}}
+function loadBracketsFromStorage(){try{const d=localStorage.getItem('tttiw_brackets');if(d)brackets=JSON.parse(d);}catch(e){}}
+loadBracketsFromStorage();
+
+// ── PAST TOURNAMENTS ──────────────────────────────────────────────────────────
+let pastTournaments=[];
+function savePastTournamentsToStorage(){try{localStorage.setItem('tttiw_past_tournaments',JSON.stringify(pastTournaments));}catch(e){}}
+function loadPastTournamentsFromStorage(){try{const d=localStorage.getItem('tttiw_past_tournaments');if(d)pastTournaments=JSON.parse(d);}catch(e){}}
+loadPastTournamentsFromStorage();
+
+function renderPastTournaments(){
+  const el=document.getElementById('past-tournaments-list');
+  if(!el)return;
+  if(!pastTournaments.length){el.innerHTML='<div class="empty">No completed tournaments yet.</div>';return;}
+  el.innerHTML=pastTournaments.map((t,ti)=>{
+    const date=new Date(t.savedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const fmt=t.format==='double'?'Double Elim':'Single Elim';
+    const isDouble=t.format==='double';
+
+    let resultsHtml='';
+    if(isDouble){
+      // Podium: 1st, 2nd, 3rd
+      const podium=[
+        {place:'1st',emoji:'🥇',name:t.champion||'—',color:'var(--accent)'},
+        {place:'2nd',emoji:'🥈',name:t.second||'—',color:'#c0c0c0'},
+        {place:'3rd',emoji:'🥉',name:t.third||'—',color:'#cd7f32'},
+      ];
+      resultsHtml=`<div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem">
+        ${podium.map(p=>`<div style="flex:1;min-width:120px;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:3px;padding:.6rem .8rem;">
+          <div style="font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem">${p.place}</div>
+          <div style="font-size:1.1rem;line-height:1">${p.emoji}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.05em;color:${p.color};margin-top:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div>
+        </div>`).join('')}
+      </div>`;
+    } else {
+      // Single elim: just the winner
+      resultsHtml=t.champion?`<div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0">
+        <span style="font-size:1.3rem">🏆</span>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Winner</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.05em;color:var(--accent)">${esc(t.champion)}</div>
+        </div>
+      </div>`:'';
+    }
+
+    return`<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;margin-bottom:1rem;overflow:hidden;">
+      <!-- Header -->
+      <div style="padding:.85rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;cursor:pointer" onclick="togglePastTournament(${ti})">
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;min-width:0">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.06em;color:var(--text)">${esc(t.name)}</span>
+          <span class="br-pill ${t.format==='double'?'losers':'winners'}">${fmt}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:.54rem;color:var(--muted)">${t.players.length} players · ${date}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0">
+          ${t.champion?`<span style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--accent);letter-spacing:.05em">🏆 ${esc(t.champion)}</span>`:''}
+          <span id="pt-arrow-${ti}" style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);transition:transform .2s">▼</span>
+        </div>
+      </div>
+      <!-- Collapsible body -->
+      <div id="pt-body-${ti}" style="display:none;padding:1rem;">
+        ${resultsHtml}
+        ${isAdmin?`<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);text-align:right"><button class="btn-danger" style="font-size:.54rem" onclick="deletePastTournament(${ti})">Delete from history</button></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.togglePastTournament=function(ti){
+  const body=document.getElementById('pt-body-'+ti);
+  const arrow=document.getElementById('pt-arrow-'+ti);
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(arrow)arrow.style.transform=open?'':'rotate(180deg)';
+};
+
+window.deletePastTournament=function(ti){
+  if(!isAdmin||!confirm('Delete this tournament from history?'))return;
+  pastTournaments.splice(ti,1);
+  savePastTournamentsToStorage();
+  renderPastTournaments();
+};
+
+// ── SIMULATOR ─────────────────────────────────────────────────────────────────
+function simPopulateDropdowns(){
+  const sorted=[...players].sort((a,b)=>b.rating-a.rating);
+  const opts='<option value="">— manual —</option>'+sorted.map(p=>`<option value="${esc(p.firestoreId)}">${esc(p.name)} (${Math.round(p.rating)} / RD ${p.rd})</option>`).join('');
+  const sa=document.getElementById('sim-a-player');
+  const sb=document.getElementById('sim-b-player');
+  if(sa){const va=sa.value;sa.innerHTML=opts;sa.value=va;}
+  if(sb){const vb=sb.value;sb.innerHTML=opts;sb.value=vb;}
+}
+
+window.simLoadPlayer=function(side){
+  const sel=document.getElementById(`sim-${side}-player`);
+  if(!sel||!sel.value)return;
+  const p=players.find(x=>x.firestoreId===sel.value);
+  if(!p)return;
+  document.getElementById(`sim-${side}-rating`).value=p.rating;
+  document.getElementById(`sim-${side}-rd`).value=p.rd;
+  document.getElementById(`sim-${side}-sigma`).value=p.sigma||SIGMA_DEFAULT;
+};
+
+window.simResult=function(winner){
+  const nameA=(()=>{const s=document.getElementById('sim-a-player');if(s&&s.value){const p=players.find(x=>x.firestoreId===s.value);if(p)return p.name;}return'Player A';})();
+  const nameB=(()=>{const s=document.getElementById('sim-b-player');if(s&&s.value){const p=players.find(x=>x.firestoreId===s.value);if(p)return p.name;}return'Player B';})();
+  const rA=parseFloat(document.getElementById('sim-a-rating').value)||1500;
+  const rB=parseFloat(document.getElementById('sim-b-rating').value)||1500;
+  const rdA=parseFloat(document.getElementById('sim-a-rd').value)||120;
+  const rdB=parseFloat(document.getElementById('sim-b-rd').value)||120;
+  const sA=parseFloat(document.getElementById('sim-a-sigma').value)||SIGMA_DEFAULT;
+  const sB=parseFloat(document.getElementById('sim-b-sigma').value)||SIGMA_DEFAULT;
+  const pA={rating:rA,rd:Math.max(30,Math.min(200,rdA)),sigma:Math.max(0.01,Math.min(SIGMA_MAX,sA))};
+  const pB={rating:rB,rd:Math.max(30,Math.min(200,rdB)),sigma:Math.max(0.01,Math.min(SIGMA_MAX,sB))};
+  const sWins=winner==='A'?1:0;
+  const sLoses=1-sWins;
+  const newA=g2Update(pA,[{rating:pB.rating,rd:pB.rd,sigma:pB.sigma,s:sWins}]);
+  const newB=g2Update(pB,[{rating:pA.rating,rd:pA.rd,sigma:pA.sigma,s:sLoses}]);
+  const dA=+(newA.rating-pA.rating).toFixed(1);
+  const dB=+(newB.rating-pB.rating).toFixed(1);
+  const{mu:muA}=toG2(pA.rating,pA.rd);
+  const{mu:muB,phi:phiB}=toG2(pB.rating,pB.rd);
+  const expA=(E(muA,muB,phiB)*100).toFixed(1);
+  const expB=(100-parseFloat(expA)).toFixed(1);
+  const winnerName=winner==='A'?nameA:nameB;
+  const loserName=winner==='A'?nameB:nameA;
+  const el=document.getElementById('sim-result');
+  const fmtD=(d)=>`<span style="color:${d>=0?'var(--win)':'var(--loss)'};font-weight:600">${d>=0?'+':''}${d}</span>`;
+  const fmtRD=(o,n)=>{const d=+(n-o).toFixed(1);return`${n} <span style="font-size:.58rem;color:${d<=0?'var(--win)':'var(--loss)'}">(${d>0?'+':''}${d})</span>`;};
+  el.style.display='block';
+  el.innerHTML=`
+    <div style="color:var(--accent);font-size:.72rem;margin-bottom:.65rem;letter-spacing:.05em;display:flex;align-items:center;gap:.5rem">
+      <span style="font-size:1rem">⚡</span>
+      <strong style="color:var(--win)">${esc(winnerName)}</strong>
+      <span style="color:var(--muted)">defeats</span>
+      <strong style="color:var(--loss)">${esc(loserName)}</strong>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1.5rem;border-top:1px solid var(--border);padding-top:.6rem">
+      <div style="color:var(--admin);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.15rem">${esc(nameA)}</div>
+      <div style="color:var(--admin);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.15rem">${esc(nameB)}</div>
+      <div><span style="color:var(--muted)">Win chance:</span> ${expA}%</div>
+      <div><span style="color:var(--muted)">Win chance:</span> ${expB}%</div>
+      <div><span style="color:var(--muted)">Rating:</span> ${pA.rating} → <strong>${newA.rating}</strong> ${fmtD(dA)}</div>
+      <div><span style="color:var(--muted)">Rating:</span> ${pB.rating} → <strong>${newB.rating}</strong> ${fmtD(dB)}</div>
+      <div><span style="color:var(--muted)">RD:</span> ${fmtRD(pA.rd,newA.rd)}</div>
+      <div><span style="color:var(--muted)">RD:</span> ${fmtRD(pB.rd,newB.rd)}</div>
+      <div><span style="color:var(--muted)">σ:</span> ${pA.sigma} → ${newA.sigma}</div>
+      <div><span style="color:var(--muted)">σ:</span> ${pB.sigma} → ${newB.sigma}</div>
+    </div>`;
+};
+
+window.clearSim=function(){
+  ['sim-a-player','sim-b-player'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sim-a-rating').value='1500';
+  document.getElementById('sim-b-rating').value='1500';
+  ['sim-a-rd','sim-b-rd','sim-a-sigma','sim-b-sigma'].forEach(id=>document.getElementById(id).value='');
+  const el=document.getElementById('sim-result');if(el)el.style.display='none';
+};
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+window.toggleAdminSection=function(titleEl){
+  titleEl.classList.toggle('collapsed');
+  const body=titleEl.nextElementSibling;
+  if(body)body.classList.toggle('collapsed');
+};
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showMsg(id,text,isErr=false){const el=document.getElementById(id);el.textContent=text;el.className='msg'+(isErr?' err':'');el.style.display='block';if(!isErr)setTimeout(()=>{el.style.display='none';},3000);}
+</script>
+</body>
+</html>
