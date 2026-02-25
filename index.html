@@ -74,20 +74,21 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
 .rd-val{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);white-space:nowrap;}
 .record-badge{font-family:'DM Mono',monospace;font-size:.6rem;display:inline-flex;gap:.3rem;white-space:nowrap;}
 .record-badge .w{color:var(--win);}.record-badge .l{color:var(--loss);}
-/* crown column: fixed width, clip overflow so timer text never shifts columns */
-.lb-col-crown{overflow:hidden;white-space:nowrap;text-overflow:clip;}
-.no1-timer{display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--accent3);
-  letter-spacing:.04em;line-height:1;white-space:nowrap;overflow:hidden;
-  min-width:7rem;text-align:left;}
+/* no1 timer: inline badge beside player name */
+.no1-timer{display:none;font-family:'DM Mono',monospace;font-size:.58rem;color:var(--accent3);
+  letter-spacing:.03em;line-height:1;white-space:nowrap;border:1px solid rgba(201,160,220,.3);
+  padding:.1rem .35rem;flex-shrink:0;}
+@media(min-width:641px){
+  .no1-timer{display:inline-flex;align-items:center;}
+}
+/* leaderboard: cap width so it doesn't stretch across huge screens */
+#panel-leaderboard{max-width:680px;}
 /* hide less important columns on small screens */
 @media(max-width:480px){
-  .lb-col-rd,.lb-col-crown{display:none;}
+  .lb-col-rd{display:none;}
   .lb-table th{padding:.5rem .35rem;}
   .lb-table td{padding:.55rem .35rem;}
   .rating-val{font-size:1.2rem;}
-}
-@media(min-width:481px) and (max-width:640px){
-  .lb-col-crown{display:none;}
 }
 
 /* FORMS */
@@ -312,7 +313,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .br-pill.grand{background:rgba(201,160,220,.1);color:var(--admin);border:1px solid rgba(201,160,220,.25);}
 /* Bracket viewport */
 .br-viewport{position:relative;height:calc(100vh - 220px);min-height:420px;overflow:hidden;
-  background:var(--bg);border:1px solid var(--border);border-radius:3px;cursor:grab;width:100%;}
+  background:#1a0d14;border:1px solid var(--border);border-radius:3px;cursor:grab;width:100%;}
 .br-viewport.drag{cursor:grabbing;}
 .br-world{position:absolute;top:0;left:0;transform-origin:0 0;}
 /* SCROLLBARS */
@@ -399,12 +400,11 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
     <div id="lb-loading" class="loading">Loading leaderboard</div>
     <table class="lb-table" id="lb-table" style="display:none;table-layout:fixed;width:100%">
       <colgroup>
-        <col class="lb-col-rank"  style="width:2.4rem">
-        <col><!-- player name: takes remaining space -->
+        <col class="lb-col-rank"   style="width:2.4rem">
+        <col><!-- player name + timer: takes remaining space -->
         <col class="lb-col-rating" style="width:5.5rem">
         <col class="lb-col-rd"     style="width:4.5rem">
         <col class="lb-col-wl"     style="width:5.5rem">
-        <col class="lb-col-crown"  style="width:8rem">
       </colgroup>
       <thead><tr>
         <th class="lb-col-rank">#</th>
@@ -412,7 +412,6 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
         <th class="lb-col-rating">Rating</th>
         <th class="lb-col-rd">RD</th>
         <th class="lb-col-wl">W–L</th>
-        <th class="lb-col-crown"></th>
       </tr></thead>
       <tbody id="lb-body"></tbody>
     </table>
@@ -704,18 +703,18 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 
 <!-- BRACKET SCORE MODAL -->
 <div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:300;align-items:center;justify-content:center;" id="br-score-ov">
-  <div style="background:#13131a;border:1px solid #2a2a3a;padding:20px;width:300px;border-radius:3px;animation:mIn .15s ease">
+  <div style="background:#2e1a24;border:1px solid #5a3a4a;padding:20px;width:300px;border-radius:3px;animation:mIn .15s ease">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;margin-bottom:6px;color:#e0e0ee" id="br-m-title">Match</div>
     <div style="text-align:center;font-size:.76rem;font-weight:600;margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e0e0ee" id="br-m-vs"></div>
     <!-- Score inputs -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div>
         <div id="br-sc1-lbl" style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:#52526a;margin-bottom:4px"></div>
-        <input id="br-sc1" type="number" min="0" placeholder="—" style="width:100%;background:#0d0d12;border:1px solid #2a2a3a;color:#e0e0ee;font-family:'DM Mono',monospace;font-size:1rem;padding:5px 8px;outline:none;border-radius:2px;text-align:center;appearance:none;-moz-appearance:textfield">
+        <input id="br-sc1" type="number" min="0" placeholder="—" style="width:100%;background:#1a0d14;border:1px solid #5a3a4a;color:#e1e2ef;font-family:'DM Mono',monospace;font-size:1rem;padding:5px 8px;outline:none;border-radius:2px;text-align:center;appearance:none;-moz-appearance:textfield">
       </div>
       <div>
         <div id="br-sc2-lbl" style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:#52526a;margin-bottom:4px"></div>
-        <input id="br-sc2" type="number" min="0" placeholder="—" style="width:100%;background:#0d0d12;border:1px solid #2a2a3a;color:#e0e0ee;font-family:'DM Mono',monospace;font-size:1rem;padding:5px 8px;outline:none;border-radius:2px;text-align:center;appearance:none;-moz-appearance:textfield">
+        <input id="br-sc2" type="number" min="0" placeholder="—" style="width:100%;background:#1a0d14;border:1px solid #5a3a4a;color:#e1e2ef;font-family:'DM Mono',monospace;font-size:1rem;padding:5px 8px;outline:none;border-radius:2px;text-align:center;appearance:none;-moz-appearance:textfield">
       </div>
     </div>
     <!-- Winner buttons -->
@@ -724,8 +723,8 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <button id="br-mw2" style="background:rgba(229,178,93,.08);border:1px solid rgba(229,178,93,.22);color:var(--accent);font-family:'DM Mono',monospace;font-size:.56rem;font-weight:600;padding:6px 3px;cursor:pointer;border-radius:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">▶ Wins</button>
     </div>
     <div style="display:flex;gap:6px;margin-top:5px">
-      <button id="br-mclr" style="display:none;flex:1;background:none;border:1px solid #2a2a3a;color:#52526a;font-family:'DM Mono',monospace;font-size:.52rem;padding:5px;cursor:pointer;border-radius:2px" onmouseover="this.style.borderColor='#ff6b35';this.style.color='#ff6b35'" onmouseout="this.style.borderColor='#2a2a3a';this.style.color='#52526a'">✕ Clear Result</button>
-      <button onclick="closeBrScore()" style="flex:1;background:none;border:1px solid #2a2a3a;color:#52526a;font-family:'DM Mono',monospace;font-size:.52rem;padding:5px;cursor:pointer;border-radius:2px" onmouseover="this.style.color='#e0e0ee';this.style.borderColor='#e0e0ee'" onmouseout="this.style.color='#52526a';this.style.borderColor='#2a2a3a'">Close</button>
+      <button id="br-mclr" style="display:none;flex:1;background:none;border:1px solid #5a3a4a;color:#a08090;font-family:'DM Mono',monospace;font-size:.52rem;padding:5px;cursor:pointer;border-radius:2px" onmouseover="this.style.borderColor='#ff6b35';this.style.color='#ff6b35'" onmouseout="this.style.borderColor='#5a3a4a';this.style.color='#a08090'">✕ Clear Result</button>
+      <button onclick="closeBrScore()" style="flex:1;background:none;border:1px solid #5a3a4a;color:#a08090;font-family:'DM Mono',monospace;font-size:.52rem;padding:5px;cursor:pointer;border-radius:2px" onmouseover="this.style.color='#e1e2ef';this.style.borderColor='#e1e2ef'" onmouseout="this.style.color='#a08090';this.style.borderColor='#5a3a4a'">Close</button>
     </div>
   </div>
 </div>
@@ -1149,8 +1148,8 @@ function renderLeaderboard(){
     const sBadge=lastS?(()=>{const rk=lastS.rank,cls=rk===1?'rank1':rk===2?'rank2':rk===3?'rank3':'rankN',emoji=rk===1?'🥇':rk===2?'🥈':rk===3?'🥉':'';return`<span class="s-badge ${cls}" title="Last season: ${esc(lastS.seasonName||'Season '+lastS.seasonNum)}" style="font-size:.6rem;padding:.12rem .35rem">${emoji}${emoji?'':('#'+rk)}</span>`})():'';
     const no1Since=p.no1Since||null;
     const no1Tag=i===0?`<span class="no1-timer" data-since="${no1Since||Date.now()}">👑 0s</span>`:'';
-    return`<tr onclick="window.openProfile('${p.firestoreId}')"><td class="rank ${rc} lb-col-rank">${i+1}</td><td><div class="pname-cell">${av}<span class="player-name">${esc(p.name)}</span>${sBadge}</div></td><td class="lb-col-rating"><span class="rating-val">${r2(p.rating)}</span></td><td class="lb-col-rd"><span class="rd-val">±${r2(p.rd)}</span></td><td class="lb-col-wl"><span class="record-badge"><span class="w">${p.wins}W</span><span class="l">${p.losses}L</span></span></td><td class="lb-col-crown">${no1Tag}</td></tr>`;
-  }).join('')+(sorted.length>vis.length?`<tr><td colspan="6" style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);padding:.55rem .7rem;text-align:center">${sorted.length-vis.length} hidden (RD>100)</td></tr>`:'');
+    return`<tr onclick="window.openProfile('${p.firestoreId}')"><td class="rank ${rc} lb-col-rank">${i+1}</td><td><div class="pname-cell">${av}<span class="player-name">${esc(p.name)}</span>${sBadge}${no1Tag}</div></td><td class="lb-col-rating"><span class="rating-val">${r2(p.rating)}</span></td><td class="lb-col-rd"><span class="rd-val">±${r2(p.rd)}</span></td><td class="lb-col-wl"><span class="record-badge"><span class="w">${p.wins}W</span><span class="l">${p.losses}L</span></span></td></tr>`;
+  }).join('')+(sorted.length>vis.length?`<tr><td colspan="5" style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);padding:.55rem .7rem;text-align:center">${sorted.length-vis.length} hidden (RD>100)</td></tr>`:'');
 }
 
 // ── PLAYERS ──────────────────────────────────────────────────────────────────
@@ -2681,32 +2680,33 @@ function brEl(tag,styles){const d=document.createElement(tag);Object.assign(d.st
 function brDrawCard(m,left,top,roundLabel,isL,wc,bi){
   const world=document.getElementById('br-world-'+bi);
   const hasW=m.w!=null;
-  const bc=hasW?(isL?'rgba(255,107,53,.55)':'rgba(229,178,93,.5)'):'#2a1a24';
-  const card=brEl('div',{position:'absolute',left:left+'px',top:top+'px',width:BR_CW+'px',height:BR_CH+'px',background:'#160d12',border:'1px solid '+bc,borderRadius:'3px',overflow:'hidden',transition:'border-color .12s'});
+  // idle border: visible against dark bg; won border: accent color
+  const bc=hasW?(isL?'rgba(255,107,53,.75)':'rgba(229,178,93,.75)'):'#5a3a4a';
+  const card=brEl('div',{position:'absolute',left:left+'px',top:top+'px',width:BR_CW+'px',height:BR_CH+'px',background:'#2e1a24',border:'1px solid '+bc,borderRadius:'3px',overflow:'hidden',transition:'border-color .12s'});
   function mkSlot(name,seed,score,isWin,isLose){
-    const s=brEl('div',{height:BR_SH+'px',display:'flex',alignItems:'center',background:isWin?'rgba(229,178,93,.08)':'transparent'});
-    const sg=brEl('div',{width:'22px',minWidth:'22px',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.4rem',color:'#3a1a28',borderRight:'1px solid #2a1a24',background:'rgba(0,0,0,.3)'});
+    const s=brEl('div',{height:BR_SH+'px',display:'flex',alignItems:'center',background:isWin?'rgba(229,178,93,.1)':'rgba(0,0,0,.15)'});
+    const sg=brEl('div',{width:'22px',minWidth:'22px',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.48rem',color:'#a08090',borderRight:'1px solid #5a3a4a',background:'rgba(0,0,0,.25)'});
     sg.textContent=seed??'';
     const isTBD=name==='TBD',isBYE=name==='BYE';
-    const nc=isWin?wc:(isTBD||isBYE?'#2a1a24':'#b0a0a8');
-    const nm=brEl('div',{flex:'1',padding:'0 7px',fontSize:'.68rem',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',color:nc,fontStyle:isTBD||isBYE?'italic':'normal',opacity:isLose?'0.35':'1'});
+    const nc=isWin?wc:(isTBD||isBYE?'#6a4a58':'#d4c4cc');
+    const nm=brEl('div',{flex:'1',padding:'0 7px',fontSize:'.68rem',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',color:nc,fontStyle:isTBD||isBYE?'italic':'normal',opacity:isLose?'0.4':'1'});
     nm.textContent=isTBD?'TBD':isBYE?'BYE':name;
     s.append(sg,nm);
     if(score!=null){
-      const sc=brEl('div',{padding:'0 6px',fontSize:'.72rem',fontWeight:'600',fontFamily:"'DM Mono',monospace",color:isWin?wc:(isLose?'#52526a':'#8a6a78'),flexShrink:'0'});
+      const sc=brEl('div',{padding:'0 6px',fontSize:'.72rem',fontWeight:'600',fontFamily:"'DM Mono',monospace",color:isWin?wc:(isLose?'#7a5a68':'#a08090'),flexShrink:'0'});
       sc.textContent=score;
       s.appendChild(sc);
     }
     return s;
   }
   card.appendChild(mkSlot(m.p1,m.s1,m.sc1??null,m.w===0,m.w===1));
-  card.appendChild(brEl('div',{height:'2px',background:'#2a1a24'}));
+  card.appendChild(brEl('div',{height:'2px',background:'#5a3a4a'}));
   card.appendChild(mkSlot(m.p2,m.s2,m.sc2??null,m.w===1,m.w===0));
   const clickable=m.p1!=='BYE'&&m.p2!=='BYE'&&!(m.p1==='TBD'&&m.p2==='TBD');
   if(clickable){
     card.style.cursor='pointer';
-    card.addEventListener('mouseenter',()=>!hasW&&(card.style.borderColor=isL?'rgba(255,107,53,.35)':'rgba(229,178,93,.3)'));
-    card.addEventListener('mouseleave',()=>!hasW&&(card.style.borderColor='#2a1a24'));
+    card.addEventListener('mouseenter',()=>!hasW&&(card.style.borderColor=isL?'rgba(255,107,53,.6)':'rgba(229,178,93,.55)'));
+    card.addEventListener('mouseleave',()=>!hasW&&(card.style.borderColor='#5a3a4a'));
     card.addEventListener('click',e=>{e.stopPropagation();openBrScore(m,roundLabel,bi);});
   }
   world.appendChild(card);
@@ -2888,8 +2888,8 @@ function renderBrWorld(bi){
       rlbl.textContent='Bracket Reset';world.appendChild(rlbl);
       brDrawCard(rm,rX,gTop,'Bracket Reset',false,'#E5B25D',bi);
       const xgr1=gX+BR_CW,xgr2=rX,mxgr=(xgr1+xgr2)/2;
-      brDrawPoly([[xgr1,gTop+BR_SH/2],[mxgr,gTop+BR_SH/2],[mxgr,gTop+BR_SH/2],[xgr2,gTop+BR_SH/2]],'rgba(255,255,255,.15)',bi);
-      brDrawPoly([[xgr1,gTop+BR_SH+2+BR_SH/2],[mxgr,gTop+BR_SH+2+BR_SH/2],[mxgr,gTop+BR_SH+2+BR_SH/2],[xgr2,gTop+BR_SH+2+BR_SH/2]],'rgba(255,255,255,.15)',bi);
+      brDrawPoly([[xgr1,gTop+BR_SH/2],[mxgr,gTop+BR_SH/2],[mxgr,gTop+BR_SH/2],[xgr2,gTop+BR_SH/2]],'rgba(255,255,255,.25)',bi);
+      brDrawPoly([[xgr1,gTop+BR_SH+2+BR_SH/2],[mxgr,gTop+BR_SH+2+BR_SH/2],[mxgr,gTop+BR_SH+2+BR_SH/2],[xgr2,gTop+BR_SH+2+BR_SH/2]],'rgba(255,255,255,.25)',bi);
     }
   }
 
