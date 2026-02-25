@@ -2486,7 +2486,7 @@ function renderBrackets(){
   brackets.forEach((b,bi)=>{
     initBrVp(bi);
     renderBrWorld(bi);
-    setTimeout(()=>brFit(bi),60);
+    setTimeout(()=>brDefaultView(bi),60);
   });
 }
 
@@ -2642,6 +2642,26 @@ window.brFit=function(bi){
   const nz=Math.min(1,(aw-60)/cw,(ah-60)/ch);
   brZoom[bi]=nz;
   brPan[bi]={x:(aw-cw*nz)/2-minX*nz,y:(ah-ch*nz)/2-minY*nz};
+  brApplyT(bi);
+};
+
+window.brDefaultView=function(bi){
+  const w=document.getElementById('br-world-'+bi);
+  const vp=document.getElementById('br-vp-'+bi);
+  if(!w||!vp)return;
+  let minX=1e9,minY=1e9,maxX=0,maxY=0;
+  for(const c of w.children){
+    const l=parseFloat(c.style.left)||0,t=parseFloat(c.style.top)||0;
+    const cw=parseFloat(c.style.width)||0,ch=parseFloat(c.style.height)||0;
+    if(cw>0){minX=Math.min(minX,l);maxX=Math.max(maxX,l+cw);}
+    if(ch>0){minY=Math.min(minY,t);maxY=Math.max(maxY,t+ch);}
+  }
+  if(maxX===0)return;
+  const z=1;
+  brZoom[bi]=z;
+  // Align bracket top-left to viewport top-left (with a small padding)
+  const PAD=12;
+  brPan[bi]={x:PAD-minX*z,y:PAD-minY*z};
   brApplyT(bi);
 };
 
@@ -2848,10 +2868,11 @@ function renderBrWorld(bi){
   // L Play-in
   if(doLPI){
     const lr1len=b.lRounds[0].matches.length;
+    const lpiTopCY=lCY(0,lr1len-1);
+    const lpiLbl=brEl('div',{position:'absolute',left:lpiX+'px',top:(lpiTopCY-BR_CH/2-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ff6b35',userSelect:'none',pointerEvents:'none'});
+    lpiLbl.textContent='L Play-In';world.appendChild(lpiLbl);
     b.lPiRound.forEach((lpi,i)=>{
       const lpiCY=lCY(0,lr1len-1-i);
-      const lbl=brEl('div',{position:'absolute',left:lpiX+'px',top:(lpiCY-BR_CH/2-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ff6b35',userSelect:'none',pointerEvents:'none'});
-      lbl.textContent='L Play-In';world.appendChild(lbl);
       brDrawCard(lpi,lpiX,lpiCY-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
       const x1=lpiX+BR_CW,x2=lX,mx=(x1+x2)/2,lr1CY=lCY(0,lr1len-1-i);
       brDrawPoly([[x1,lpiCY],[mx,lpiCY],[mx,lr1CY],[x2,lr1CY]],'rgba(255,107,53,.18)',bi);
