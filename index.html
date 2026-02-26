@@ -54,6 +54,7 @@ nav button:hover:not(.active){color:var(--text);}
 
 /* MAIN */
 main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
+@media(max-width:600px){main{padding:0;}#panel-leaderboard{padding:0;}#panel-leaderboard .lb-quote,#panel-leaderboard .empty,#panel-leaderboard #lb-loading,#panel-leaderboard #lb-hidden-note{padding-left:1rem;padding-right:1rem;}.panel:not(#panel-leaderboard){padding:1rem;}}
 .panel{display:none;}.panel.active{display:block;width:100%;overflow-x:hidden;}
 
 /* LEADERBOARD */
@@ -84,7 +85,6 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
 /* leaderboard: cap width and center on wide screens */
 #panel-leaderboard{max-width:860px;margin-left:auto;margin-right:auto;}
 @media(max-width:860px){#panel-leaderboard{margin-left:0;margin-right:0;width:100%;}}
-@media(max-width:600px){#panel-leaderboard{margin-right:-1.25rem;width:calc(100% + 1.25rem);}}
 /* hide less important columns on small screens */
 @media(max-width:480px){
   .lb-col-rd{display:none;}
@@ -2645,13 +2645,21 @@ window.brZoomBtn=function(bi,dir){
 window.brFullscreen=function(bi){
   const card=document.getElementById('br-card-'+bi);
   const btn=document.getElementById('br-fs-btn-'+bi);
-  const isExpanded=card.classList.contains('br-card-expanded');
+  const isExpanded=card.dataset.expanded==='1';
   if(!isExpanded){
+    card.dataset.expanded='1';
+    card._origParent=card.parentNode;
+    card._origNext=card.nextSibling;
+    document.body.appendChild(card);
     card.classList.add('br-card-expanded');
     btn.textContent='✕ Exit';
     document.body.style.overflow='hidden';
   } else {
     card.classList.remove('br-card-expanded');
+    card.dataset.expanded='';
+    if(card._origParent){
+      card._origParent.insertBefore(card,card._origNext||null);
+    }
     btn.textContent='⛶ Full';
     document.body.style.overflow='';
   }
@@ -2660,6 +2668,8 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     document.querySelectorAll('.br-card-expanded').forEach(card=>{
       card.classList.remove('br-card-expanded');
+      card.dataset.expanded='';
+      if(card._origParent)card._origParent.insertBefore(card,card._origNext||null);
       const bi=card.id.replace('br-card-','');
       const btn=document.getElementById('br-fs-btn-'+bi);
       if(btn)btn.textContent='⛶ Full';
