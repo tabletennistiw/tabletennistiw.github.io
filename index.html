@@ -708,7 +708,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 
 
 <!-- BRACKET SCORE MODAL -->
-<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:300;align-items:center;justify-content:center;" id="br-score-ov">
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:10000;align-items:center;justify-content:center;" id="br-score-ov">
   <div style="background:#2e1a24;border:1px solid #5a3a4a;padding:20px;width:300px;border-radius:3px;animation:mIn .15s ease">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;margin-bottom:6px;color:#e0e0ee" id="br-m-title">Match</div>
     <div style="text-align:center;font-size:.76rem;font-weight:600;margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e0e0ee" id="br-m-vs"></div>
@@ -2482,7 +2482,7 @@ function renderBrackets(){
           </div>
           <button onclick="brFit(${bi})" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.06em;padding:.28rem .5rem;cursor:pointer;border-radius:3px;text-transform:uppercase">Fit</button>
           <button onclick="brFullscreen(${bi})" id="br-fs-btn-${bi}" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.06em;padding:.28rem .5rem;cursor:pointer;border-radius:3px;text-transform:uppercase">⛶ Full</button>
-          <button class="btn-danger" style="font-size:.55rem" onclick="brDelete(${bi})">Delete</button>
+          ${isAdmin?`<button class="btn-danger" style="font-size:.55rem" onclick="brDelete(${bi})">Delete</button>`:''}
         </div>
       </div>
       <div id="br-save-banner-${bi}" style="display:none;align-items:center;justify-content:space-between;gap:.75rem;background:rgba(126,200,160,.07);border:1px solid rgba(126,200,160,.25);border-radius:3px;padding:.6rem .9rem;margin-bottom:.75rem;">
@@ -2491,7 +2491,7 @@ function renderBrackets(){
           <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:#7ec8a0;letter-spacing:.04em">Tournament complete!</span>
           <span id="br-winner-label-${bi}" style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--accent);letter-spacing:.06em"></span>
         </div>
-        <button class="btn" style="font-size:.58rem;padding:.4rem .9rem;white-space:nowrap" onclick="brSaveTournament(${bi})">💾 Save Results</button>
+        ${isAdmin?`<button class="btn" style="font-size:.58rem;padding:.4rem .9rem;white-space:nowrap" onclick="brSaveTournament(${bi})">💾 Save Results</button>`:''}
       </div>
       <div id="br-vp-${bi}" class="br-viewport" data-bi="${bi}">
         <div id="br-world-${bi}" class="br-world"></div>
