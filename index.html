@@ -809,6 +809,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   <div class="am-box">
     <h2>Edit Player Stats</h2>
     <input type="hidden" id="edit-pid">
+    <div class="field"><label>Name</label><input type="text" id="edit-name" autocomplete="off"></div>
     <div class="field"><label>Rating</label><input type="number" id="edit-rating" step="0.1"></div>
     <div class="field"><label>RD</label><input type="number" id="edit-rd" step="0.1"></div>
     <div class="field"><label>Volatility (σ)</label><input type="number" id="edit-sigma" step="0.001" min="0.01" max="0.30"></div>
@@ -2086,6 +2087,7 @@ window.repairAllRatings=async function(){
 window.openEditPlayer=function(fid){
   const p=players.find(x=>x.firestoreId===fid);if(!p)return;
   document.getElementById('edit-pid').value=fid;
+  document.getElementById('edit-name').value=p.name;
   document.getElementById('edit-rating').value=Math.round(p.rating);
   document.getElementById('edit-rd').value=Math.round(p.rd);
   document.getElementById('edit-sigma').value=(p.sigma||SIGMA_DEFAULT).toFixed(5);
@@ -2096,15 +2098,17 @@ window.openEditPlayer=function(fid){
 };
 window.submitEditPlayer=async function(){
   const fid=document.getElementById('edit-pid').value;
+  const name=document.getElementById('edit-name').value.trim();
   const rating=parseFloat(document.getElementById('edit-rating').value);
   const rd=parseFloat(document.getElementById('edit-rd').value);
   const sigma=parseFloat(document.getElementById('edit-sigma').value);
   const wins=parseInt(document.getElementById('edit-wins').value);
   const losses=parseInt(document.getElementById('edit-losses').value);
+  if(!name){showMsg('edit-player-msg','Name cannot be empty.',true);return;}
   if([rating,rd,sigma,wins,losses].some(isNaN)){showMsg('edit-player-msg','Invalid values.',true);return;}
   if(sigma<0.001||sigma>SIGMA_MAX){showMsg('edit-player-msg',`Volatility must be between 0.001 and ${SIGMA_MAX}.`,true);return;}
   try{
-    await updateDoc(doc(db,'players',fid),{rating,rd,sigma,wins,losses});
+    await updateDoc(doc(db,'players',fid),{name,rating,rd,sigma,wins,losses});
     showMsg('edit-player-msg','Saved!');
     setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1200);
   }
