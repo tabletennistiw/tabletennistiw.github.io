@@ -84,6 +84,7 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
 /* leaderboard: cap width and center on wide screens */
 #panel-leaderboard{max-width:860px;margin-left:auto;margin-right:auto;}
 @media(max-width:860px){#panel-leaderboard{margin-left:0;margin-right:0;width:100%;}}
+@media(max-width:600px){#panel-leaderboard{margin-right:-1.25rem;width:calc(100% + 1.25rem);}}
 /* hide less important columns on small screens */
 @media(max-width:480px){
   .lb-col-rd{display:none;}
@@ -251,7 +252,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .upload-prog{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);margin-top:.4rem;display:none;}
 
 /* CHART */
-.chart-section{margin-bottom:1.4rem;}
+.chart-section{margin-bottom:1.4rem;position:relative;}
 .chart-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
 .chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:visible;position:relative;height:175px;cursor:crosshair;}
 .chart-y-axis{position:absolute;top:0;left:0;width:42px;height:175px;pointer-events:none;z-index:2;}
@@ -317,6 +318,9 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .br-viewport{position:relative;height:calc(100vh - 220px);min-height:420px;overflow:hidden;
   background:#1a0d14;border:1px solid var(--border);border-radius:3px;cursor:grab;width:100%;}
 .br-viewport.drag{cursor:grabbing;}
+.br-card-expanded{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;padding:0;}
+.br-card-expanded .br-card-header{padding:.65rem 1rem;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.br-card-expanded .br-viewport{height:0;flex:1;min-height:unset;}
 .br-world{position:absolute;top:0;left:0;transform-origin:0 0;}
 /* SCROLLBARS */
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -2411,8 +2415,8 @@ function drawChart(points){
   const xOf=i=>PAD.left+(points.length>1?(i/(points.length-1))*cW:cW/2);
   const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
   // Floating Y-axis overlay (stays fixed while scrolling chart)
-  let yAxis=newOuter.parentElement.querySelector('.chart-y-axis');
-  if(!yAxis){yAxis=document.createElement('div');yAxis.className='chart-y-axis';newOuter.parentElement.appendChild(yAxis);}
+  let yAxis=newOuter.querySelector('.chart-y-axis');
+  if(!yAxis){yAxis=document.createElement('div');yAxis.className='chart-y-axis';newOuter.appendChild(yAxis);}
   yAxis.innerHTML='';
   for(let g=0;g<=4;g++){const val=Math.round(hi-(g/4)*(hi-lo));const pct=((PAD.top+(g/4)*cH)/H*100).toFixed(2);const lbl=document.createElement('span');lbl.textContent=val;lbl.style.cssText=`position:absolute;top:${pct}%;transform:translateY(-50%);left:4px;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;background:var(--bg);padding:0 2px;pointer-events:none;`;yAxis.appendChild(lbl);}
   function redraw(hl){
@@ -2463,8 +2467,8 @@ function renderBrackets(){
   if(!brackets.length){el.innerHTML='<div class="empty">No brackets yet. Create one to get started.</div>';return;}
   el.innerHTML=brackets.map((b,bi)=>{
     const zPct=Math.round((brZoom[bi]||1)*100);
-    return`<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1rem 1rem .65rem;margin-bottom:1.1rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem">
+    return`<div id="br-card-${bi}" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1rem 1rem .65rem;margin-bottom:1.1rem;">
+      <div class="br-card-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem">
         <div>
           <span style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.06em;color:var(--text)">${esc(b.name)}</span>
           <span class="br-pill ${b.format==='double'?'losers':'winners'}">${b.format==='double'?'Double Elim':'Single Elim'}</span>
@@ -2477,6 +2481,7 @@ function renderBrackets(){
             <button onclick="brZoomBtn(${bi},1)" style="background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;padding:.25rem .55rem;cursor:pointer;line-height:1">+</button>
           </div>
           <button onclick="brFit(${bi})" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.06em;padding:.28rem .5rem;cursor:pointer;border-radius:3px;text-transform:uppercase">Fit</button>
+          <button onclick="brFullscreen(${bi})" id="br-fs-btn-${bi}" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.06em;padding:.28rem .5rem;cursor:pointer;border-radius:3px;text-transform:uppercase">⛶ Full</button>
           <button class="btn-danger" style="font-size:.55rem" onclick="brDelete(${bi})">Delete</button>
         </div>
       </div>
@@ -2637,6 +2642,31 @@ window.brZoomBtn=function(bi,dir){
   brApplyT(bi);
 };
 
+window.brFullscreen=function(bi){
+  const card=document.getElementById('br-card-'+bi);
+  const btn=document.getElementById('br-fs-btn-'+bi);
+  const isExpanded=card.classList.contains('br-card-expanded');
+  if(!isExpanded){
+    card.classList.add('br-card-expanded');
+    btn.textContent='✕ Exit';
+    document.body.style.overflow='hidden';
+  } else {
+    card.classList.remove('br-card-expanded');
+    btn.textContent='⛶ Full';
+    document.body.style.overflow='';
+  }
+};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.br-card-expanded').forEach(card=>{
+      card.classList.remove('br-card-expanded');
+      const bi=card.id.replace('br-card-','');
+      const btn=document.getElementById('br-fs-btn-'+bi);
+      if(btn)btn.textContent='⛶ Full';
+    });
+    document.body.style.overflow='';
+  }
+});
 window.brFit=function(bi){
   const w=document.getElementById('br-world-'+bi);
   const vp=document.getElementById('br-vp-'+bi);
