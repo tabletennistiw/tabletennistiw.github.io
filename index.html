@@ -2901,11 +2901,10 @@ function renderBrWorld(bi){
     const lbl=brEl('div',{position:'absolute',left:gX+'px',top:(gTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ffffff',userSelect:'none',pointerEvents:'none'});
     lbl.textContent='Grand Final';world.appendChild(lbl);
     brDrawCard(gm,gX,gTop,'Grand Final',false,'#E5B25D',bi);
-    const gSlot0=gTop+BR_SH/2;
-    const gSlot1=gTop+BR_SH+2+BR_SH/2;
+    const gCenter=gTop+BR_CH/2;
     const x1w=wEndX-BR_HGAP,x2=gX,mxW=(x1w+x2)/2;
-    brDrawPoly([[x1w,wFCY],[mxW,wFCY],[mxW,gSlot0],[x2,gSlot0]],'rgba(229,178,93,.18)',bi);
-    if(doL&&lFCY!=null){const x1l=lEndX-BR_HGAP,mxL=(x1l+x2)/2;brDrawPoly([[x1l,lFCY],[mxL,lFCY],[mxL,gSlot1],[x2,gSlot1]],'rgba(255,107,53,.18)',bi);}
+    brDrawPoly([[x1w,wFCY],[mxW,wFCY],[mxW,gCenter],[x2,gCenter]],'rgba(229,178,93,.18)',bi);
+    if(doL&&lFCY!=null){const x1l=lEndX-BR_HGAP,mxL=(x1l+x2)/2;brDrawPoly([[x1l,lFCY],[mxL,lFCY],[mxL,gCenter],[x2,gCenter]],'rgba(255,107,53,.18)',bi);}
     if(b.grandReset&&gm.w===1){
       const rm=b.grandReset.matches[0];
       const rX=gX+BR_COL;
