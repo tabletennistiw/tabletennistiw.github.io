@@ -125,6 +125,14 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   border-left:3px solid var(--accent);background:rgba(229,178,93,.07);color:var(--accent);display:none;}
 .msg.err{border-color:var(--loss);background:rgba(255,71,87,.05);color:var(--loss);}
 
+/* ADMIN ACTION ROW */
+.admin-action-row{background:rgba(201,160,220,.07);border:1px solid rgba(201,160,220,.35);padding:.65rem .9rem;
+  margin-bottom:.35rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.admin-action-badge{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--admin);border:1px solid rgba(201,160,220,.4);padding:.12rem .4rem;white-space:nowrap;flex-shrink:0;}
+.admin-action-desc{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--admin);flex:1;line-height:1.5;}
+.admin-action-time{font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted);white-space:nowrap;}
+
 /* HISTORY */
 .hist-filters{display:flex;gap:.65rem;margin-bottom:1rem;flex-wrap:wrap;}
 .hist-filters select{width:auto;min-width:150px;flex:1;}
@@ -538,6 +546,23 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       </div>
 
       <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">GitHub Backup Settings <span class="collapse-arrow">▼</span></div>
+        <div class="admin-collapse-body collapsed">
+          <div class="form-card" style="border-color:rgba(201,160,220,.15)">
+            <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">When a season is saved, a JSON snapshot is written to your GitHub repo as a backup. Token needs <strong style="color:var(--text)">repo</strong> scope. Config is stored locally in your browser only — never sent to Firebase.</p>
+            <div class="field"><label>GitHub Personal Access Token</label><input type="password" id="gh-token" placeholder="ghp_…" autocomplete="off"></div>
+            <div class="field"><label>Repository (owner/repo)</label><input type="text" id="gh-repo" placeholder="yourname/tttiw-data" autocomplete="off"></div>
+            <div class="field"><label>Branch</label><input type="text" id="gh-branch" placeholder="main" autocomplete="off" value="main"></div>
+            <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+              <button class="btn" onclick="saveGitHubConfig()">Save Config</button>
+              <button class="btn-ghost" onclick="testGitHubBackup()" style="font-size:.62rem">Test Connection</button>
+            </div>
+            <div class="msg" id="gh-msg" style="margin-top:.65rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">RD Decay Settings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
           <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases each inactive period using each player's personal volatility: <strong style="color:var(--text)">φ* = √(φ² + σ²)</strong>. Volatile players decay faster. Default: 4 hours · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
@@ -642,6 +667,14 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
         <div class="admin-collapse-body collapsed">
           <p style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5">Deleting a match will recalculate all ratings, RD, and volatility from that point forward, including time-based decay.</p>
           <div id="admin-matches-list"><div class="loading">Loading</div></div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">Admin Action Log <span class="collapse-arrow">▼</span></div>
+        <div class="admin-collapse-body collapsed">
+          <p style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5">All manual stat edits and decay setting changes are logged here. Delete an action to remove it from the audit trail. When you run <strong style="color:var(--text)">Repair All Ratings</strong>, the repair replays these actions in chronological order — deleting one means the repair won't re-apply it.</p>
+          <div id="admin-actions-list"><div class="loading">Loading</div></div>
         </div>
       </div>
 
@@ -880,7 +913,8 @@ function g2Update(player, opps) {
   if (!opps.length) {
     const phiStar = Math.sqrt(phi * phi + sigma * sigma);
     const r = fromG2(mu, Math.min(phiStar, RD_MAX / SCALE));
-    return { rating: Math.round(r.r * 10) / 10, rd: Math.round(r.rd * 10) / 10, sigma };
+    // Return full float precision — only round for display (r2/toFixed)
+    return { rating: r.r, rd: r.rd, sigma };
   }
 
   let vInv = 0, deltaSum = 0;
@@ -900,10 +934,11 @@ function g2Update(player, opps) {
   const muNew = mu + phiNew * phiNew * deltaSum;
 
   const r = fromG2(muNew, phiNew);
+  // Return full float precision — only round for display (r2/toFixed)
   return {
-    rating: Math.round(r.r * 10) / 10,
-    rd: Math.round(Math.min(r.rd, RD_MAX) * 10) / 10,
-    sigma: Math.round(Math.min(newSigma, SIGMA_MAX) * 100000) / 100000
+    rating: r.r,
+    rd: Math.min(r.rd, RD_MAX),
+    sigma: Math.min(newSigma, SIGMA_MAX)
   };
 }
 
@@ -949,14 +984,47 @@ function computeNewSigma(sigma, phi, v, delta) {
 }
 
 // ── ADMIN ────────────────────────────────────────────────────────────────────
+
+// ── ADMIN ACTIONS (Firestore log of manual edits & decay changes) ─────────────
+let adminActions=[];
+let adminActionsUnsub=null;
+function listenAdminActions(){
+  if(adminActionsUnsub)return;
+  adminActionsUnsub=onSnapshot(query(collection(db,'adminActions'),orderBy('date','asc')),snap=>{
+    adminActions=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    renderHistory();
+    if(isAdmin)renderAdminActionsLog();
+  },err=>console.error(err));
+}
+async function logAdminAction(type,description,data){
+  await addDoc(collection(db,'adminActions'),{
+    type,description,data:data||{},date:serverTimestamp()
+  });
+}
+
+function applyAdminUI(){
+  const lbl=document.querySelector('#admin-btn .admin-btn-label');
+  if(lbl)lbl.textContent=' Logout';
+  document.getElementById('admin-btn').classList.add('on');
+  document.getElementById('admin-tab-btn').style.display='';
+  renderAdminPanel();renderPastTournaments();populateRestoreSeasonDropdown();
+  renderHistory();
+  listenAdminActions();
+}
+// Restore admin session from localStorage on page load
+(function(){
+  try{if(localStorage.getItem('tttiw_admin')==='1'){isAdmin=true;}}catch(e){}
+})();
+
 window.openAdminLogin=function(){
   if(isAdmin){
     isAdmin=false;
+    try{localStorage.removeItem('tttiw_admin');}catch(e){}
     const lbl=document.querySelector('#admin-btn .admin-btn-label');
     if(lbl)lbl.textContent=' Admin';
     document.getElementById('admin-btn').classList.remove('on');
     document.getElementById('admin-tab-btn').style.display='none';
-    renderPastTournaments();
+    renderPastTournaments();renderHistory();
     showPanel('leaderboard',document.querySelector('nav button'));return;
   }
   document.getElementById('admin-pw').value='';document.getElementById('admin-login-msg').style.display='none';
@@ -965,34 +1033,43 @@ window.openAdminLogin=function(){
 };
 window.submitAdminLogin=function(){
   if(document.getElementById('admin-pw').value===ADMIN_PW){
-    isAdmin=true;document.getElementById('admin-login-overlay').classList.remove('open');
-    const lbl=document.querySelector('#admin-btn .admin-btn-label');
-    if(lbl)lbl.textContent=' Logout';
-    document.getElementById('admin-btn').classList.add('on');
-    document.getElementById('admin-tab-btn').style.display='';
-    renderAdminPanel();renderPastTournaments();populateRestoreSeasonDropdown();
+    isAdmin=true;
+    try{localStorage.setItem('tttiw_admin','1');}catch(e){}
+    document.getElementById('admin-login-overlay').classList.remove('open');
+    applyAdminUI();
   }else{const m=document.getElementById('admin-login-msg');m.textContent='Incorrect password.';m.className='msg err';m.style.display='block';}
 };
 
 // ── LISTENERS ────────────────────────────────────────────────────────────────
+let _dataReady={players:false,matches:false};
+function _onDataReady(){
+  if(!_dataReady.players||!_dataReady.matches)return;
+  // If admin session was restored from localStorage, boot the admin UI now
+  if(isAdmin&&!adminActionsUnsub){applyAdminUI();}
+}
+
 onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
   players=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
   renderLeaderboard();renderPlayersList();renderMatchSelects();updateDecayStatus();
   if(isAdmin){renderAdminPanel();simPopulateDropdowns();populateRestoreSeasonDropdown();}
+  _dataReady.players=true;_onDataReady();
 },err=>console.error(err));
 
 onSnapshot(query(collection(db,'matches'),orderBy('date','desc')),snap=>{
   matches=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
   renderHistory();if(isAdmin)renderAdminPanel();
+  _dataReady.matches=true;_onDataReady();
 },err=>console.error(err));
 
 onSnapshot(doc(db,'config','decay'),snap=>{
   if(snap.exists()){
     const d=snap.data();
     const amt=d.amount||4, unt=d.unit||'hours';
-    document.getElementById('decay-amount').value=amt;
+    const amtEl=document.getElementById('decay-amount');
+    amtEl.value=amt;
+    amtEl.dataset.saved=amt;
     const sel=document.getElementById('decay-unit');
-    if(sel){for(let o of sel.options){if(o.value===unt){o.selected=true;break;}}}
+    if(sel){for(let o of sel.options){if(o.value===unt){o.selected=true;break;}}sel.dataset.saved=unt;}
   }
   updateDecayStatus();
   updateDecayInfo();
@@ -1046,7 +1123,7 @@ function computeDecay(p){
   }
 
   const newLast=nowPeriod*ms;
-  return{newRD:Math.round(Math.min(phi*SCALE,RD_MAX)*10)/10, newLast};
+  return{newRD:Math.min(phi*SCALE,RD_MAX), newLast};
 }
 
 function applyDecayLocally(){
@@ -1095,8 +1172,17 @@ window.saveDecay=async function(){
   const unit=document.getElementById('decay-unit').value;
   if(!amount||amount<=0){showMsg('decay-msg','Enter a valid period.',true);return;}
   try{
+    // Record old setting for audit log
+    const oldAmt=parseFloat(document.getElementById('decay-amount').dataset.saved||document.getElementById('decay-amount').value)||4;
+    const oldUnit=document.getElementById('decay-unit').dataset.saved||'hours';
     await setDoc(doc(db,'config','decay'),{amount,unit});
-    showMsg('decay-msg',`Decay set to every ${amount} ${unit}.`);
+    document.getElementById('decay-amount').dataset.saved=amount;
+    document.getElementById('decay-unit').dataset.saved=unit;
+    // Log this as an admin action so repair can account for it
+    await logAdminAction('decay_change',`RD decay changed to ${amount} ${unit}`,{
+      oldAmount:oldAmt,oldUnit,newAmount:amount,newUnit:unit
+    });
+    showMsg('decay-msg',`Decay set to every ${amount} ${unit}. Logged as admin action.`);
     updateDecayInfo();
   }catch(e){showMsg('decay-msg','Error: '+e.message,true);}
 };
@@ -1130,7 +1216,7 @@ function applyDecayToPlayer(p, nowMs, periodMs){
   let phi=p.rd/SCALE;
   const phiMax=RD_MAX/SCALE;
   for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
-  p.rd=Math.round(Math.min(phi*SCALE,RD_MAX)*10)/10;
+  p.rd=Math.min(phi*SCALE,RD_MAX);
 }
 
 // ── LEADERBOARD ──────────────────────────────────────────────────────────────
@@ -1445,10 +1531,128 @@ window.triggerSeasonReset=async function(){
 
     await Promise.all(matchesSnap.docs.map(d=>deleteDoc(doc(db,'matches',d.id))));
     await setDoc(doc(db,'config','season'),{name:'',deadline:null,seasonNum:sNum+1});
+
+    // GitHub backup — write season data to repo if configured
+    await backupSeasonToGitHub(sNum, sName, endedAt, ranked, rankMap, allMatches);
+
     showMsg('season-msg',`Season "${sName}" archived! All stats reset.`);
   }catch(e){showMsg('season-msg','Error: '+e.message,true);}
   finally{btn.disabled=false;btn.textContent='⚡ Reset Season Now';}
 };
+
+// ── GITHUB BACKUP ────────────────────────────────────────────────────────────
+function getGitHubConfig(){
+  try{
+    const cfg=JSON.parse(localStorage.getItem('tttiw_gh_config')||'{}');
+    return{token:cfg.token||'',repo:cfg.repo||'',branch:cfg.branch||'main'};
+  }catch(e){return{token:'',repo:'',branch:'main'};}
+}
+function saveGitHubConfig(){
+  const token=document.getElementById('gh-token')?.value?.trim()||'';
+  const repo=document.getElementById('gh-repo')?.value?.trim()||'';
+  const branch=document.getElementById('gh-branch')?.value?.trim()||'main';
+  try{localStorage.setItem('tttiw_gh_config',JSON.stringify({token,repo,branch}));}catch(e){}
+  showMsg('gh-msg','GitHub config saved (stored locally in browser only).');
+}
+function loadGitHubConfigUI(){
+  const cfg=getGitHubConfig();
+  const t=document.getElementById('gh-token'),r=document.getElementById('gh-repo'),b=document.getElementById('gh-branch');
+  if(t)t.value=cfg.token;if(r)r.value=cfg.repo;if(b)b.value=cfg.branch;
+}
+
+async function testGitHubBackup(){
+  const cfg=getGitHubConfig();
+  if(!cfg.token||!cfg.repo){showMsg('gh-msg','Enter a token and repo first.',true);return;}
+  showMsg('gh-msg','Testing connection…');
+  try{
+    const [owner,repo]=cfg.repo.split('/');
+    const res=await fetch(`https://api.github.com/repos/${owner}/${repo}`,{
+      headers:{Authorization:`Bearer ${cfg.token}`,Accept:'application/vnd.github+json'}
+    });
+    const d=await res.json();
+    if(res.ok){
+      showMsg('gh-msg',`✅ Connected to ${d.full_name} (${d.private?'private':'public'}) on branch "${cfg.branch}"`);
+    } else {
+      showMsg('gh-msg',`❌ ${d.message||'Access denied'}`,true);
+    }
+  }catch(e){showMsg('gh-msg','❌ Network error: '+e.message,true);}
+}
+window.saveGitHubConfig=function(){saveGitHubConfig();};
+window.testGitHubBackup=function(){testGitHubBackup();};
+
+async function backupSeasonToGitHub(sNum, sName, endedAt, ranked, rankMap, allMatches){
+  const slug=sName.replace(/[^a-zA-Z0-9]/g,'-');
+  const filename=`season-${sNum}-${slug}.json`;
+  const backupData={
+    seasonNum:sNum, seasonName:sName, endedAt,
+    finalRankings:ranked.map((p,i)=>({
+      rank:i+1, name:p.name, firestoreId:p.firestoreId,
+      rating:p.rating, rd:p.rd, sigma:p.sigma||SIGMA_DEFAULT,
+      wins:p.wins, losses:p.losses
+    })),
+    allPlayersRankMap:Object.entries(rankMap).map(([id,rank])=>{
+      const p=players.find(x=>x.firestoreId===id);
+      return{firestoreId:id,name:p?.name||id,rank};
+    }),
+    matches:allMatches.map(m=>({
+      p1name:m.p1name, p2name:m.p2name, p1id:m.p1id, p2id:m.p2id,
+      p1oldRating:m.p1oldRating, p1newRating:m.p1newRating, p1delta:m.p1delta,
+      p2oldRating:m.p2oldRating, p2newRating:m.p2newRating, p2delta:m.p2delta,
+      p1newRD:m.p1newRD, p2newRD:m.p2newRD,
+      p1newSigma:m.p1newSigma, p2newSigma:m.p2newSigma,
+      matchScore:m.matchScore||null,
+      date:m.date?.toDate?m.date.toDate().toISOString():new Date(m.date).toISOString(),
+      winnerId:m.winnerId
+    })),
+    exportedAt:new Date().toISOString()
+  };
+  const json=JSON.stringify(backupData,null,2);
+
+  // ── Always auto-download a local copy ────────────────────────────────────────
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+  }catch(e){console.warn('[backup] Download failed:',e);}
+
+  // ── Also push to GitHub repo if configured ───────────────────────────────────
+  const cfg=getGitHubConfig();
+  if(!cfg.token||!cfg.repo){
+    console.log('[GitHub backup] Not configured — skipping repo push.');
+    return;
+  }
+  try{
+    const repoPath=`seasons/${filename}`;
+    const encoded=btoa(unescape(encodeURIComponent(json)));
+    const [owner,repo]=cfg.repo.split('/');
+    const apiBase=`https://api.github.com/repos/${owner}/${repo}/contents/${repoPath}`;
+    let sha=null;
+    try{
+      const check=await fetch(apiBase,{headers:{Authorization:`Bearer ${cfg.token}`,Accept:'application/vnd.github+json'}});
+      if(check.ok){const d=await check.json();sha=d.sha;}
+    }catch(e){}
+    const body={message:`Archive season ${sNum}: ${sName}`,content:encoded,branch:cfg.branch};
+    if(sha)body.sha=sha;
+    const res=await fetch(apiBase,{
+      method:'PUT',
+      headers:{Authorization:`Bearer ${cfg.token}`,'Content-Type':'application/json',Accept:'application/vnd.github+json'},
+      body:JSON.stringify(body)
+    });
+    if(res.ok){
+      console.log(`[GitHub backup] Pushed to ${cfg.repo}/${repoPath}`);
+    }else{
+      const err=await res.json();
+      console.warn('[GitHub backup] Push failed:',err);
+      alert(`GitHub push failed: ${err.message||res.status}\nLocal download still saved.`);
+    }
+  }catch(e){
+    console.warn('[GitHub backup] Error:',e);
+    alert(`GitHub push error: ${e.message}\nLocal download still saved.`);
+  }
+}
 
 // ── RESTORE PREVIOUS SEASON ──────────────────────────────────────────────────
 async function populateRestoreSeasonDropdown(){
@@ -1877,8 +2081,7 @@ window.renderHistory=function(){
     banner.style.display='none';
   }
 
-  if(!ms.length){el.innerHTML='<div class="empty">No matches yet.</div>';return;}
-  el.innerHTML=ms.map(m=>{
+  function renderMatchRow(m){
     const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const d1=(m.p1delta>=0?'+':'')+m.p1delta,d2=(m.p2delta>=0?'+':'')+m.p2delta;
@@ -1890,6 +2093,35 @@ window.renderHistory=function(){
       <div class="match-player" style="text-align:right"><span class="name">${esc(m.p2name)}</span><span class="delta ${m.p2delta>=0?'pos':'neg'}">${d2} (${r2(m.p2oldRating)}→${r2(m.p2newRating)})</span><span class="rdi">RD:±${r2(m.p2newRD)}${s2}</span></div>
       <div class="match-meta-col">${ds} · ${ti}</div>
     </div>`;
+  }
+
+  if(!ms.length&&(!isAdmin||!adminActions.length)){el.innerHTML='<div class="empty">No matches yet.</div>';return;}
+
+  // Merge admin actions into the timeline (admin-only, shown most-recent-first)
+  const items=[];
+  ms.forEach(m=>items.push({_type:'match',_ts:toTs(m),data:m}));
+  if(isAdmin){
+    adminActions.forEach(a=>{
+      const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+      // Only show admin actions that match the player filter if one is active
+      if(flt!=='all'&&a.type==='stat_edit'&&a.data?.playerId!==flt)return;
+      if(flt!=='all'&&a.type!=='stat_edit')return;// decay changes only in all-players view
+      items.push({_type:'adminAction',_ts:ts,data:a});
+    });
+  }
+  items.sort((a,b)=>b._ts-a._ts);
+
+  el.innerHTML=items.map(item=>{
+    if(item._type==='match')return renderMatchRow(item.data);
+    const a=item.data;
+    const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
+    const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':'ADMIN ACTION';
+    return`<div class="admin-action-row">
+      <span class="admin-action-badge">${typeLabel}</span>
+      <span class="admin-action-desc">${esc(a.description||'')}</span>
+      <span class="admin-action-time">${ds} · ${ti}</span>
+    </div>`;
   }).join('');
 };
 
@@ -1899,6 +2131,7 @@ function renderAdminPanel(){
   populateSeasonAdmin();
   updateDecayInfo();
   simPopulateDropdowns();
+  loadGitHubConfigUI();
   const sorted=[...players].sort((a,b)=>b.rating-a.rating);
   const pl=document.getElementById('admin-players-list');
   if(pl)pl.innerHTML=sorted.length?sorted.map(p=>`<div class="admin-prow"><span class="admin-pname">${esc(p.name)}</span><span class="admin-prating">${r2(p.rating)} ±${r2(p.rd)} σ:${(p.sigma||SIGMA_DEFAULT).toFixed(4)}</span><button class="btn-admin" onclick="openEditPlayer('${p.firestoreId}')">Edit Stats</button><button class="btn-danger" onclick="adminRemovePlayer('${p.firestoreId}','${esc(p.name)}')">Remove</button></div>`).join(''):'<div class="empty">No players.</div>';
@@ -1907,7 +2140,38 @@ function renderAdminPanel(){
     const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
     return`<div class="admin-mrow"><div class="admin-minfo"><strong>${esc(m.p1name)} beat ${esc(m.p2name)}</strong>${m.matchScore?' · '+esc(m.matchScore):''}<br>${ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div><button class="btn-danger" onclick="adminRemoveMatch('${m.firestoreId}')">Delete</button></div>`;
   }).join(''):'<div class="empty">No matches.</div>';
+  renderAdminActionsLog();
 }
+
+function renderAdminActionsLog(){
+  const el=document.getElementById('admin-actions-list');
+  if(!el)return;
+  if(!adminActions.length){el.innerHTML='<div class="empty">No admin actions logged yet.</div>';return;}
+  const sorted=[...adminActions].sort((a,b)=>{
+    const ta=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+    const tb=b.date?.toDate?b.date.toDate().getTime():new Date(b.date).getTime();
+    return tb-ta;
+  });
+  el.innerHTML=sorted.map(a=>{
+    const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
+    const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':'★ ADMIN';
+    return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04)">
+      <div class="admin-minfo">
+        <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}<br>
+        <span style="font-size:.58rem">${ds}</span>
+      </div>
+      <button class="btn-danger" style="font-size:.54rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button>
+    </div>`;
+  }).join('');
+}
+
+window.deleteAdminAction=async function(fid){
+  if(!confirm('Delete this admin action from the log? It will no longer be replayed during Repair All Ratings.'))return;
+  try{
+    await deleteDoc(doc(db,'adminActions',fid));
+  }catch(e){alert('Error: '+e.message);}
+};
 
 window.adminRemovePlayer=async function(fid,name){
   if(!confirm(`Remove "${name}"? Match history remains.`))return;
@@ -2005,14 +2269,17 @@ window.adminRemoveMatch=async function(fid){
 
 // ── REPAIR RATINGS ─────────────────────────────────────────────────────────
 window.repairAllRatings=async function(){
-  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings, RD, and volatility?'))return;
+  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings, RD, and volatility? Admin stat edits and decay changes in the Action Log will be applied in chronological order.'))return;
   const btn=document.querySelector('[onclick="repairAllRatings()"]');
   if(btn){btn.disabled=true;btn.textContent='Repairing…';}
   try{
     const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
     const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    const actionsSnap=await getDocs(query(collection(db,'adminActions'),orderBy('date','asc')));
+    const allAdminActions=actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
     const now=Date.now();
-    const periodMs=decayMs();
+    // Starting decay period from config (may change mid-timeline via decay_change actions)
+    let periodMs=decayMs();
 
     // Build a fresh state map for every player, starting from scratch
     const state={};
@@ -2020,12 +2287,69 @@ window.repairAllRatings=async function(){
       if(!state[pid])state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastMatchAt:null};
     };
 
+    // Merge matches and admin actions into a single sorted event timeline
+    const events=[];
+    allMatches.forEach(m=>{
+      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+      events.push({_type:'match',_ts:ts,data:m});
+    });
+    allAdminActions.forEach(a=>{
+      const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+      events.push({_type:'admin',_ts:ts,data:a});
+    });
+    events.sort((a,b)=>a._ts-b._ts);
+
     const matchWrites=[];
 
-    for(const m of allMatches){
+    for(const evt of events){
+      if(evt._type==='admin'){
+        const a=evt.data;
+        if(a.type==='decay_change'){
+          // Update the period length going forward in the replay
+          const amt=a.data?.newAmount||4;
+          const unit=a.data?.newUnit||'hours';
+          if(unit==='minutes')periodMs=amt*6e4;
+          else if(unit==='hours')periodMs=amt*36e5;
+          else periodMs=amt*864e5;
+        } else if(a.type==='stat_edit'){
+          // Apply the stat override directly into the state map
+          const pid=a.data?.playerId;
+          if(!pid)continue;
+          initPlayer(pid);
+          const after=a.data?.after||{};
+          if(after.rating!=null)state[pid].rating=after.rating;
+          if(after.rd!=null){
+            state[pid].rd=after.rd;
+            // Reset decay baseline to the edit time so future decay uses the new RD
+            state[pid].lastMatchAt=evt._ts;
+          }
+          if(after.sigma!=null)state[pid].sigma=after.sigma;
+          if(after.wins!=null)state[pid].wins=after.wins;
+          if(after.losses!=null)state[pid].losses=after.losses;
+        }
+        continue;
+      }
+
+      // Normal match event
+      const m=evt.data;
       const pid1=m.p1id, pid2=m.p2id;
       initPlayer(pid1); initPlayer(pid2);
       const s1=state[pid1], s2=state[pid2];
+
+      // Apply inter-match decay before this game using current periodMs
+      if(periodMs>0){
+        const applyDecay=(s,ts)=>{
+          if(!s.lastMatchAt)return;
+          const periods=Math.floor((ts-s.lastMatchAt)/periodMs);
+          if(periods<=0)return;
+          const sigma=s.sigma||SIGMA_DEFAULT;
+          let phi=s.rd/SCALE;const phiMax=RD_MAX/SCALE;
+          for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+          s.rd=Math.min(phi*SCALE,RD_MAX);
+        };
+        applyDecay(s1,evt._ts);
+        applyDecay(s2,evt._ts);
+      }
 
       // Recalculate both sides from current state
       const u1=g2Update(
@@ -2046,11 +2370,9 @@ window.repairAllRatings=async function(){
         p2oldRating:s2.rating, p2newRating:u2.rating, p2newRD:u2.rd, p2newSigma:u2.sigma, p2delta,
       }));
 
-      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
-
       // Advance state
-      state[pid1]={rating:u1.rating,rd:u1.rd,sigma:u1.sigma,wins:s1.wins+1,losses:s1.losses,lastMatchAt:ts};
-      state[pid2]={rating:u2.rating,rd:u2.rd,sigma:u2.sigma,wins:s2.wins,losses:s2.losses+1,lastMatchAt:ts};
+      state[pid1]={rating:u1.rating,rd:u1.rd,sigma:u1.sigma,wins:s1.wins+1,losses:s1.losses,lastMatchAt:evt._ts};
+      state[pid2]={rating:u2.rating,rd:u2.rd,sigma:u2.sigma,wins:s2.wins,losses:s2.losses+1,lastMatchAt:evt._ts};
     }
 
     // Write match records first
@@ -2070,7 +2392,7 @@ window.repairAllRatings=async function(){
         if(periods>0){
           let phi=rd/SCALE;const phiMax=RD_MAX/SCALE;
           for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
-          rd=Math.round(Math.min(phi*SCALE,RD_MAX)*10)/10;
+          rd=Math.min(phi*SCALE,RD_MAX);
         }
       }
       const nowPeriod=Math.floor(now/periodMs);
@@ -2081,7 +2403,8 @@ window.repairAllRatings=async function(){
     }
 
     await Promise.all(playerWrites);
-    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${playerWrites.length} player(s).`);
+    const adminApplied=allAdminActions.length;
+    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${playerWrites.length} player(s)${adminApplied?` · applied ${adminApplied} admin action(s)`:''}.`);
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
@@ -2113,9 +2436,22 @@ window.submitEditPlayer=async function(){
   if([rating,rd,sigma,wins,losses].some(isNaN)){showMsg('edit-player-msg','Invalid values.',true);return;}
   if(sigma<0.001||sigma>SIGMA_MAX){showMsg('edit-player-msg',`Volatility must be between 0.001 and ${SIGMA_MAX}.`,true);return;}
   try{
+    const p=players.find(x=>x.firestoreId===fid);
+    const before={name:p?.name,rating:p?.rating,rd:p?.rd,sigma:p?.sigma,wins:p?.wins,losses:p?.losses};
+    const after={name,rating,rd,sigma,wins,losses};
+    // Build a human-readable description of what changed
+    const changes=[];
+    if(before.rating!==rating)changes.push(`rating ${r2(before.rating)}→${r2(rating)}`);
+    if(before.rd!==rd)changes.push(`RD ${r2(before.rd)}→${r2(rd)}`);
+    if(before.sigma!==sigma)changes.push(`σ ${(before.sigma||SIGMA_DEFAULT).toFixed(4)}→${sigma.toFixed(4)}`);
+    if(before.wins!==wins)changes.push(`wins ${before.wins}→${wins}`);
+    if(before.losses!==losses)changes.push(`losses ${before.losses}→${losses}`);
+    if(before.name!==name)changes.push(`name "${before.name}"→"${name}"`);
+    const desc=`Edited ${name}: ${changes.length?changes.join(', '):'no stat changes'}`;
     await updateDoc(doc(db,'players',fid),{name,rating,rd,sigma,wins,losses});
-    showMsg('edit-player-msg','Saved!');
-    setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1200);
+    await logAdminAction('stat_edit',desc,{playerId:fid,playerName:name,before,after});
+    showMsg('edit-player-msg','Saved! Logged as admin action.');
+    setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1400);
   }
   catch(e){showMsg('edit-player-msg','Error: '+e.message,true);}
 };
