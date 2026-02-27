@@ -2753,51 +2753,55 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay',
 
 // ── CHART ────────────────────────────────────────────────────────────────────
 function drawChart(points){
-  const STEP=54,Y_W=38,PAD={top:14,right:16,bottom:24,left:Y_W},H=175;
+  const STEP=54,PAD={top:14,right:8,bottom:24,left:8},H=175;
   const outer=document.getElementById('chart-outer'),newOuter=outer.cloneNode(false);
   while(outer.firstChild)newOuter.appendChild(outer.firstChild);outer.parentNode.replaceChild(newOuter,outer);
   const wrap=document.getElementById('chart-wrap'),canvas=document.getElementById('rating-chart'),tip=document.getElementById('chart-tip');
 
-  // Fixed spacing per point — always scroll if needed
   const n=points.length;
-  const W=Math.max(newOuter.clientWidth||300, PAD.left+PAD.right+(n>1?(n-1)*STEP:STEP));
+  // Fixed STEP px per point; always at least fill container width
+  const W=Math.max(newOuter.clientWidth||300, PAD.left+PAD.right+(n>1?(n-1)*STEP:0)+PAD.left);
   wrap.style.width=W+'px';wrap.style.height=H+'px';canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d'),cW=W-PAD.left-PAD.right,cH=H-PAD.top-PAD.bottom;
 
   const ratings=n?points.map(p=>p.rating):[1500];
   const minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
 
-  // xOf: evenly spaced by STEP, starting at PAD.left
+  // Points start at PAD.left, each STEP apart
   const xOf=i=>PAD.left+(n>1?i*STEP:cW/2);
   const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
 
-  // Sticky y-axis overlay (position:sticky left:0 inside the scrolling container)
-  let yAxis=newOuter.querySelector('.chart-y-axis');
-  if(!yAxis){yAxis=document.createElement('div');yAxis.className='chart-y-axis';newOuter.appendChild(yAxis);}
-  yAxis.style.cssText=`position:sticky;left:0;top:0;width:${Y_W}px;height:${H}px;pointer-events:none;z-index:2;flex-shrink:0;`;
-  yAxis.innerHTML='';
-  for(let g=0;g<=4;g++){
-    const val=Math.round(hi-(g/4)*(hi-lo));
-    const y=PAD.top+(g/4)*cH;
-    const lbl=document.createElement('span');
-    lbl.textContent=val;
-    lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:3px;right:3px;text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;background:var(--bg);padding:0 2px;pointer-events:none;`;
-    yAxis.appendChild(lbl);
+  function drawLabels(){
+    ctx.font='9px DM Mono,monospace';
+    ctx.textAlign='left';
+    ctx.textBaseline='middle';
+    for(let g=0;g<=4;g++){
+      const val=Math.round(hi-(g/4)*(hi-lo));
+      const y=PAD.top+(g/4)*cH;
+      // small bg rect to punch through grid line
+      const txt=String(val);
+      const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='#1a0d14';
+      ctx.fillRect(2,y-6,tw+4,12);
+      ctx.fillStyle='#8a6a78';
+      ctx.fillText(txt,4,y);
+    }
   }
 
   function redraw(hl){
     ctx.clearRect(0,0,W,H);
-    // grid lines
+    // grid lines — full width edge to edge
     for(let g=0;g<=4;g++){
       const y=PAD.top+(g/4)*cH;
       ctx.strokeStyle='rgba(74,42,56,.9)';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(W-PAD.right,y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
     }
     if(n<2){
-      ctx.fillStyle='#8a6a78';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';
-      ctx.fillText('Play more matches to see history',W/2,H/2);return;
+      ctx.fillStyle='#8a6a78';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('Play more matches to see history',W/2,H/2);
+      drawLabels();return;
     }
-    // area + line segments
+    // area fill + line segments
     for(let i=1;i<n;i++){
       const pv=points[i-1],cv=points[i],col=cv.won?'#7ec8a0':'#ff4757';
       ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
@@ -2818,6 +2822,8 @@ function drawChart(points){
       ctx.beginPath();ctx.moveTo(xOf(hl),PAD.top);ctx.lineTo(xOf(hl),H-PAD.bottom);
       ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.stroke();ctx.setLineDash([]);
     }
+    // labels drawn last so they sit on top of everything
+    drawLabels();
   }
 
   function showTip(idx){
