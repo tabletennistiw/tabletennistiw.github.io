@@ -2428,8 +2428,8 @@ window.openEditPlayer=function(fid){
   const p=players.find(x=>x.firestoreId===fid);if(!p)return;
   document.getElementById('edit-pid').value=fid;
   document.getElementById('edit-name').value=p.name;
-  document.getElementById('edit-rating').value=Math.round(p.rating);
-  document.getElementById('edit-rd').value=Math.round(p.rd);
+  document.getElementById('edit-rating').value=p.rating;
+  document.getElementById('edit-rd').value=p.rd;
   document.getElementById('edit-sigma').value=(p.sigma||SIGMA_DEFAULT).toFixed(5);
   document.getElementById('edit-wins').value=p.wins;
   document.getElementById('edit-losses').value=p.losses;
