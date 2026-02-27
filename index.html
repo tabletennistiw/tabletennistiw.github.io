@@ -260,7 +260,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .chart-section{margin-bottom:1.4rem;position:relative;}
 .chart-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
 .chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:hidden;position:relative;height:175px;cursor:crosshair;}
-.chart-y-axis{position:absolute;top:0;left:0;width:40px;height:175px;pointer-events:none;z-index:3;background:var(--bg);}
+.chart-y-axis{position:absolute;bottom:0;left:0;width:44px;height:175px;pointer-events:none;z-index:3;background:var(--bg);border-right:1px solid var(--border);}
 .chart-outer::-webkit-scrollbar{height:3px;}.chart-outer::-webkit-scrollbar-track{background:var(--bg);}.chart-outer::-webkit-scrollbar-thumb{background:var(--border);}
 .chart-wrap{position:relative;display:inline-block;min-width:100%;}
 .chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
@@ -703,8 +703,8 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
     <div class="modal-body">
       <div class="chart-section">
         <div class="chart-lbl">Rating History</div>
+        <div class="chart-y-axis" id="chart-y-axis"></div>
         <div class="chart-outer" id="chart-outer">
-          <div class="chart-y-axis" id="chart-y-axis"></div>
           <div class="chart-wrap" id="chart-wrap">
             <canvas id="rating-chart"></canvas>
             <div class="chart-tip" id="chart-tip"></div>
@@ -2752,7 +2752,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay',
 
 // ── CHART ────────────────────────────────────────────────────────────────────
 function drawChart(points){
-  const STEP=54,Y_W=40,PAD={top:14,right:8,bottom:24,left:Y_W},H=175;
+  const STEP=54,Y_W=44,PAD={top:14,right:8,bottom:24,left:Y_W+14},H=175;
   const outer=document.getElementById('chart-outer'),newOuter=outer.cloneNode(false);
   while(outer.firstChild)newOuter.appendChild(outer.firstChild);outer.parentNode.replaceChild(newOuter,outer);
   const wrap=document.getElementById('chart-wrap'),canvas=document.getElementById('rating-chart'),tip=document.getElementById('chart-tip');
@@ -2768,20 +2768,20 @@ function drawChart(points){
   const xOf=i=>PAD.left+(n>1?i*STEP:W/2-PAD.left);
   const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
 
-  // Y-axis overlay — sits on chart-outer (position:absolute), never scrolls
-  const yAxis=document.createElement('div');
-  yAxis.className='chart-y-axis';
-  newOuter.appendChild(yAxis);
-  for(let g=0;g<=4;g++){
-    const val=Math.round(hi-(g/4)*(hi-lo));
-    const y=PAD.top+(g/4)*cH;
-    const lbl=document.createElement('span');
-    lbl.textContent=val;
-    lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:3px;right:3px;text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;`;
-    yAxis.appendChild(lbl);
+  // Y-axis is a sibling of chart-outer in chart-section — never inside the scroll container
+  const yAxis=document.getElementById('chart-y-axis');
+  if(yAxis){
+    yAxis.innerHTML='';
+    for(let g=0;g<=4;g++){
+      const val=Math.round(hi-(g/4)*(hi-lo));
+      const y=PAD.top+(g/4)*cH;
+      const lbl=document.createElement('span');
+      lbl.textContent=val;
+      lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:3px;right:5px;text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;`;
+      yAxis.appendChild(lbl);
+    }
   }
 
-  // Re-add wrap (was moved out during clone swap)
   newOuter.appendChild(wrap);
 
   function redraw(hl){
