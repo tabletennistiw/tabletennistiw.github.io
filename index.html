@@ -85,10 +85,7 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
 /* leaderboard: cap width and center on wide screens */
 #panel-leaderboard{max-width:860px;margin-left:auto;margin-right:auto;}
 /* hide RD column on small screens */
-@media(max-width:500px){
-  .lb-col-rd{display:none;}
-  col.lb-col-rd{width:0!important;}
-}
+
 
 /* FORMS */
 .form-card{background:var(--surface);border:1px solid var(--border);padding:1.25rem;margin-bottom:1.25rem;width:100%;}
@@ -214,10 +211,11 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 
 /* PROFILE MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.88);
-  backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding:.4rem;overflow-y:auto;}
+  backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding:.75rem;overflow-y:auto;}
 .modal-overlay.open{display:flex;}
+@media(min-width:600px){.modal-overlay.open{align-items:center;}}
 .modal{background:var(--surface);border:1px solid var(--border);width:100%;max-width:800px;
-  max-height:96vh;overflow-y:auto;animation:mIn .2s ease;}
+  max-height:calc(100vh - 1.5rem);overflow-y:auto;animation:mIn .2s ease;margin:auto;}
 @keyframes mIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 .modal-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;}
 .mh-left{display:flex;gap:.75rem;align-items:flex-start;flex:1;min-width:0;}
@@ -257,10 +255,11 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .upload-prog{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);margin-top:.4rem;display:none;}
 
 /* CHART */
-.chart-section{margin-bottom:1.4rem;position:relative;}
+.chart-section{margin-bottom:1.4rem;}
 .chart-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
-.chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:hidden;position:relative;height:175px;cursor:crosshair;}
-.chart-y-axis{position:absolute;bottom:0;left:0;width:44px;height:175px;pointer-events:none;z-index:3;background:var(--bg);border-right:1px solid var(--border);}
+.chart-row{display:flex;gap:0;height:175px;}
+.chart-y-axis{width:40px;flex-shrink:0;position:relative;border:1px solid var(--border);background:var(--bg);}
+.chart-outer{flex:1;border:1px solid var(--border);border-left:none;background:var(--bg);overflow-x:auto;overflow-y:hidden;position:relative;height:175px;cursor:crosshair;}
 .chart-outer::-webkit-scrollbar{height:3px;}.chart-outer::-webkit-scrollbar-track{background:var(--bg);}.chart-outer::-webkit-scrollbar-thumb{background:var(--border);}
 .chart-wrap{position:relative;display:inline-block;min-width:100%;}
 .chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
@@ -703,11 +702,13 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
     <div class="modal-body">
       <div class="chart-section">
         <div class="chart-lbl">Rating History</div>
-        <div class="chart-y-axis" id="chart-y-axis"></div>
-        <div class="chart-outer" id="chart-outer">
-          <div class="chart-wrap" id="chart-wrap">
-            <canvas id="rating-chart"></canvas>
-            <div class="chart-tip" id="chart-tip"></div>
+        <div class="chart-row">
+          <div class="chart-y-axis" id="chart-y-axis"></div>
+          <div class="chart-outer" id="chart-outer">
+            <div class="chart-wrap" id="chart-wrap">
+              <canvas id="rating-chart"></canvas>
+              <div class="chart-tip" id="chart-tip"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2652,8 +2653,6 @@ window.openProfile=async function(fid){
   const start=pm.length>0?(pm[0].p1id===fid?pm[0].p1oldRating:pm[0].p2oldRating):p.rating;
   const pts=[{rating:start,label:'Start'}];
   pm.forEach(m=>{const i1=m.p1id===fid,ts=m.date?.toDate?m.date.toDate():new Date(m.date);pts.push({rating:i1?m.p1newRating:m.p2newRating,won:m.winnerId===fid,label:i1?m.p2name:m.p1name,date:ts.toISOString()});});
-  drawChart(pts);
-
   function renderCurrentMatches(){
     return pm.length?[...pm].reverse().map(m=>{
       const i1=m.p1id===fid,won=i1?m.score===1:m.score===0,opp=i1?m.p2name:m.p1name,delta=i1?m.p1delta:m.p2delta,oldR=i1?m.p1oldRating:m.p2oldRating,newR=i1?m.p1newRating:m.p2newRating;
@@ -2686,6 +2685,7 @@ window.openProfile=async function(fid){
 
   document.getElementById('profile-matches').innerHTML=`${seasonSelectorHtml}<div id="profile-matches-list">${renderCurrentMatches()}</div>`;
   document.getElementById('profile-overlay').classList.add('open');
+  requestAnimationFrame(()=>drawChart(pts));
 };
 
 window.loadProfileSeason=async function(fid,val){
@@ -2752,23 +2752,27 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay',
 
 // ── CHART ────────────────────────────────────────────────────────────────────
 function drawChart(points){
-  const STEP=54,Y_W=44,PAD={top:14,right:8,bottom:24,left:Y_W+14},H=175;
-  const outer=document.getElementById('chart-outer'),newOuter=outer.cloneNode(false);
+  const STEP=54,PAD={top:14,right:8,bottom:24,left:8},H=175;
+  const outer=document.getElementById('chart-outer');
+  const containerW=outer.clientWidth||300;
+  const newOuter=outer.cloneNode(false);
   while(outer.firstChild)newOuter.appendChild(outer.firstChild);outer.parentNode.replaceChild(newOuter,outer);
   const wrap=document.getElementById('chart-wrap'),canvas=document.getElementById('rating-chart'),tip=document.getElementById('chart-tip');
 
   const n=points.length;
-  const W=Math.max(newOuter.clientWidth||300, PAD.left+PAD.right+(n>1?(n-1)*STEP:STEP));
+  const scrollW=PAD.left+PAD.right+(n>1?(n-1)*STEP:STEP);
+  const W=Math.max(containerW, scrollW);
+  const step=n>1?(W-PAD.left-PAD.right)/(n-1):0;
   wrap.style.width=W+'px';wrap.style.height=H+'px';canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d'),cH=H-PAD.top-PAD.bottom;
 
   const ratings=n?points.map(p=>p.rating):[1500];
   const minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
 
-  const xOf=i=>PAD.left+(n>1?i*STEP:W/2-PAD.left);
+  const xOf=i=>PAD.left+(n>1?i*step:W/2);
   const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
 
-  // Y-axis is a sibling of chart-outer in chart-section — never inside the scroll container
+  // Y-axis: separate column, labels centered on each grid line
   const yAxis=document.getElementById('chart-y-axis');
   if(yAxis){
     yAxis.innerHTML='';
@@ -2777,7 +2781,7 @@ function drawChart(points){
       const y=PAD.top+(g/4)*cH;
       const lbl=document.createElement('span');
       lbl.textContent=val;
-      lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:3px;right:5px;text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;`;
+      lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:0;right:0;text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;`;
       yAxis.appendChild(lbl);
     }
   }
@@ -2786,7 +2790,6 @@ function drawChart(points){
 
   function redraw(hl){
     ctx.clearRect(0,0,W,H);
-    // grid lines — full width, edge to edge
     for(let g=0;g<=4;g++){
       const y=PAD.top+(g/4)*cH;
       ctx.strokeStyle='rgba(74,42,56,.9)';ctx.lineWidth=1;
@@ -2799,7 +2802,7 @@ function drawChart(points){
     for(let i=1;i<n;i++){
       const pv=points[i-1],cv=points[i],col=cv.won?'#7ec8a0':'#ff4757';
       ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
-      ctx.lineTo(xOf(i),H-PAD.bottom);ctx.lineTo(xOf(i-1),H-PAD.bottom);ctx.closePath();
+      ctx.lineTo(xOf(i),H);ctx.lineTo(xOf(i-1),H);ctx.closePath();
       ctx.fillStyle=cv.won?'rgba(126,200,160,.1)':'rgba(217,83,79,.1)';ctx.fill();
       ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
       ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
