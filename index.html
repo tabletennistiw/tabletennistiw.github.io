@@ -262,9 +262,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 /* CHART */
 .chart-section{margin-bottom:1.4rem;position:relative;}
 .chart-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
-.chart-y-bar{display:flex;justify-content:space-between;padding:0 0 3px 0;pointer-events:none;height:18px;position:relative;}
-.chart-y-bar span{font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;white-space:nowrap;}
-.chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:visible;position:relative;height:175px;cursor:crosshair;}
+.chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:hidden;position:relative;height:175px;cursor:crosshair;}
 .chart-outer::-webkit-scrollbar{height:3px;}.chart-outer::-webkit-scrollbar-track{background:var(--bg);}.chart-outer::-webkit-scrollbar-thumb{background:var(--border);}
 .chart-wrap{position:relative;display:inline-block;min-width:100%;}
 .chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
@@ -707,7 +705,6 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
     <div class="modal-body">
       <div class="chart-section">
         <div class="chart-lbl">Rating History</div>
-        <div class="chart-y-bar" id="chart-y-bar"></div>
         <div class="chart-outer" id="chart-outer">
           <div class="chart-wrap" id="chart-wrap">
             <canvas id="rating-chart"></canvas>
@@ -2756,41 +2753,96 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay',
 
 // ── CHART ────────────────────────────────────────────────────────────────────
 function drawChart(points){
-  const PAD={top:16,right:22,bottom:26,left:8},H=175,MIN_PX=54;
+  const STEP=54,Y_W=38,PAD={top:14,right:16,bottom:24,left:Y_W},H=175;
   const outer=document.getElementById('chart-outer'),newOuter=outer.cloneNode(false);
   while(outer.firstChild)newOuter.appendChild(outer.firstChild);outer.parentNode.replaceChild(newOuter,outer);
   const wrap=document.getElementById('chart-wrap'),canvas=document.getElementById('rating-chart'),tip=document.getElementById('chart-tip');
-  // Always fill container width; only expand beyond it if there are many points
-  const containerW=newOuter.clientWidth||580;
-  const minNeeded=PAD.left+PAD.right+(points.length>1?(points.length-1)*MIN_PX:0);
-  const W=Math.max(containerW,minNeeded);
+
+  // Fixed spacing per point — always scroll if needed
+  const n=points.length;
+  const W=Math.max(newOuter.clientWidth||300, PAD.left+PAD.right+(n>1?(n-1)*STEP:STEP));
   wrap.style.width=W+'px';wrap.style.height=H+'px';canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d'),cW=W-PAD.left-PAD.right,cH=H-PAD.top-PAD.bottom;
-  const ratings=points.map(p=>p.rating),minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
-  const xOf=i=>PAD.left+(points.length>1?(i/(points.length-1))*cW:cW/2);
+
+  const ratings=n?points.map(p=>p.rating):[1500];
+  const minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
+
+  // xOf: evenly spaced by STEP, starting at PAD.left
+  const xOf=i=>PAD.left+(n>1?i*STEP:cW/2);
   const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
-  // Static Y-axis bar above chart (doesn't scroll)
-  const yBar=document.getElementById('chart-y-bar');
-  if(yBar){
-    yBar.innerHTML='';
-    const vals=[Math.round(hi),Math.round(hi-(hi-lo)*.25),Math.round(hi-(hi-lo)*.5),Math.round(hi-(hi-lo)*.75),Math.round(lo)];
-    vals.forEach(v=>{const s=document.createElement('span');s.textContent=v;yBar.appendChild(s);});
+
+  // Sticky y-axis overlay (position:sticky left:0 inside the scrolling container)
+  let yAxis=newOuter.querySelector('.chart-y-axis');
+  if(!yAxis){yAxis=document.createElement('div');yAxis.className='chart-y-axis';newOuter.appendChild(yAxis);}
+  yAxis.style.cssText=`position:sticky;left:0;top:0;width:${Y_W}px;height:${H}px;pointer-events:none;z-index:2;flex-shrink:0;`;
+  yAxis.innerHTML='';
+  for(let g=0;g<=4;g++){
+    const val=Math.round(hi-(g/4)*(hi-lo));
+    const y=PAD.top+(g/4)*cH;
+    const lbl=document.createElement('span');
+    lbl.textContent=val;
+    lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:3px;right:3px;text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;background:var(--bg);padding:0 2px;pointer-events:none;`;
+    yAxis.appendChild(lbl);
   }
+
   function redraw(hl){
     ctx.clearRect(0,0,W,H);
-    for(let g=0;g<=4;g++){const y=PAD.top+(g/4)*cH;ctx.strokeStyle='rgba(74,42,56,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(W-PAD.right,y);ctx.stroke();}
-    if(points.length<2){ctx.fillStyle='#8a6a78';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';ctx.fillText('Play more matches to see history',W/2,H/2);return;}
-    for(let i=1;i<points.length;i++){const pv=points[i-1],cv=points[i],col=cv.won?'#7ec8a0':'#ff4757';ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));ctx.lineTo(xOf(i),H-PAD.bottom);ctx.lineTo(xOf(i-1),H-PAD.bottom);ctx.closePath();ctx.fillStyle=cv.won?'rgba(126,200,160,.1)':'rgba(217,83,79,.1)';ctx.fill();ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}
-    for(let i=0;i<points.length;i++){const pt=points[i],col=i===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757'),isHl=i===hl;if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),8,0,Math.PI*2);ctx.fillStyle=i===0?'rgba(138,106,120,.2)':(pt.won?'rgba(126,200,160,.2)':'rgba(217,83,79,.2)');ctx.fill();}ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),isHl?5:3.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();}}
-    if(hl>=0){ctx.beginPath();ctx.moveTo(xOf(hl),PAD.top);ctx.lineTo(xOf(hl),H-PAD.bottom);ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.stroke();ctx.setLineDash([]);}
+    // grid lines
+    for(let g=0;g<=4;g++){
+      const y=PAD.top+(g/4)*cH;
+      ctx.strokeStyle='rgba(74,42,56,.9)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(W-PAD.right,y);ctx.stroke();
+    }
+    if(n<2){
+      ctx.fillStyle='#8a6a78';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';
+      ctx.fillText('Play more matches to see history',W/2,H/2);return;
+    }
+    // area + line segments
+    for(let i=1;i<n;i++){
+      const pv=points[i-1],cv=points[i],col=cv.won?'#7ec8a0':'#ff4757';
+      ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
+      ctx.lineTo(xOf(i),H-PAD.bottom);ctx.lineTo(xOf(i-1),H-PAD.bottom);ctx.closePath();
+      ctx.fillStyle=cv.won?'rgba(126,200,160,.1)':'rgba(217,83,79,.1)';ctx.fill();
+      ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
+      ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+    }
+    // dots
+    for(let i=0;i<n;i++){
+      const pt=points[i],col=i===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757'),isHl=i===hl;
+      if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),8,0,Math.PI*2);ctx.fillStyle=i===0?'rgba(138,106,120,.2)':(pt.won?'rgba(126,200,160,.2)':'rgba(217,83,79,.2)');ctx.fill();}
+      ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),isHl?5:3.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+      if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();}
+    }
+    // hover crosshair
+    if(hl>=0){
+      ctx.beginPath();ctx.moveTo(xOf(hl),PAD.top);ctx.lineTo(xOf(hl),H-PAD.bottom);
+      ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.stroke();ctx.setLineDash([]);
+    }
   }
-  function showTip(idx){const pt=points[idx],col=idx===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757');let html=`<span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${col}">${r2(pt.rating)}</span>`;if(idx===0)html+=`<br><span style="color:#8a6a78">Starting rating</span>`;else{const d=new Date(pt.date);const ds=pt.rating-points[idx-1].rating;const df=(ds>=0?'+':'')+r2(Math.abs(ds));const dt=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});html+=`<br><span style="color:${col}">${pt.won?'WIN':'LOSS'}</span> vs ${esc(pt.label)}<br><span style="color:${col}">${df} pts</span> · ${dt}`;}tip.innerHTML=html;tip.style.display='block';tip.style.left='-9999px';tip.style.top='-9999px';requestAnimationFrame(()=>{const canvasRect=canvas.getBoundingClientRect();const scaleX=canvasRect.width/canvas.width;const dx=canvasRect.left+xOf(idx)*scaleX;const dy=canvasRect.top+yOf(pt.rating)*(canvasRect.height/canvas.height);const tw=tip.offsetWidth,th=tip.offsetHeight;const vw=window.innerWidth,vh=window.innerHeight;let l=dx-tw/2;let t=dy-th-10;if(l<8)l=8;if(l+tw>vw-8)l=vw-tw-8;if(t<8)t=dy+14;if(t+th>vh-8)t=dy-th-10;tip.style.left=l+'px';tip.style.top=t+'px';});}
+
+  function showTip(idx){
+    const pt=points[idx],col=idx===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757');
+    let html=`<span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${col}">${r2(pt.rating)}</span>`;
+    if(idx===0)html+=`<br><span style="color:#8a6a78">Starting rating</span>`;
+    else{const d=new Date(pt.date);const ds=pt.rating-points[idx-1].rating;const df=(ds>=0?'+':'')+r2(Math.abs(ds));const dt=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});html+=`<br><span style="color:${col}">${pt.won?'WIN':'LOSS'}</span> vs ${esc(pt.label)}<br><span style="color:${col}">${df} pts</span> · ${dt}`;}
+    tip.innerHTML=html;tip.style.display='block';tip.style.left='-9999px';tip.style.top='-9999px';
+    requestAnimationFrame(()=>{
+      const cr=canvas.getBoundingClientRect(),sx=cr.width/canvas.width;
+      const dx=cr.left+xOf(idx)*sx,dy=cr.top+yOf(pt.rating)*(cr.height/canvas.height);
+      const tw=tip.offsetWidth,th=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+      let l=dx-tw/2,t=dy-th-10;
+      if(l<8)l=8;if(l+tw>vw-8)l=vw-tw-8;if(t<8)t=dy+14;if(t+th>vh-8)t=dy-th-10;
+      tip.style.left=l+'px';tip.style.top=t+'px';
+    });
+  }
+
   redraw(-1);let hl=-1;
   requestAnimationFrame(()=>{newOuter.scrollLeft=newOuter.scrollWidth;});
-  function near(cx){let b=-1,bd=Infinity;for(let i=0;i<points.length;i++){const d=Math.abs(xOf(i)-cx);if(d<bd){bd=d;b=i;}}return bd<34?b:-1;}
+  function near(cx){let b=-1,bd=Infinity;for(let i=0;i<n;i++){const d=Math.abs(xOf(i)-cx);if(d<bd){bd=d;b=i;}}return bd<34?b:-1;}
   function onMove(e){const r=canvas.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,idx=near(cx*(canvas.width/r.width));if(idx!==hl){hl=idx;redraw(idx);if(idx>=0)showTip(idx);else tip.style.display='none';}}
   function onLeave(){hl=-1;redraw(-1);tip.style.display='none';}
-  newOuter.addEventListener('mousemove',onMove);newOuter.addEventListener('mouseleave',onLeave);newOuter.addEventListener('touchmove',onMove,{passive:true});newOuter.addEventListener('touchend',onLeave);
+  newOuter.addEventListener('mousemove',onMove);newOuter.addEventListener('mouseleave',onLeave);
+  newOuter.addEventListener('touchmove',onMove,{passive:true});newOuter.addEventListener('touchend',onLeave);
 }
 
 // ── BRACKETS ─────────────────────────────────────────────────────────────────
