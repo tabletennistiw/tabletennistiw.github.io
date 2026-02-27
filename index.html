@@ -1377,7 +1377,7 @@ function pStats(fid){
 }
 function toTs(m){return m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();}
 const r2=v=>Number(v).toFixed(2);
-function fmtDur(ms){if(ms<=0)return'—';const d=Math.floor(ms/864e5),h=Math.floor((ms%864e5)/36e5);if(d>0)return d+'d '+h+'h';const m2=Math.floor((ms%36e5)/6e4);if(h>0)return h+'h '+m2+'m';return m2+'m';}
+function fmtDur(ms){if(ms<=0)return'—';const d=Math.floor(ms/864e5),h=Math.floor((ms%864e5)/36e5);if(d>0)return d+'d '+h+'h';const m2=Math.floor((ms%36e5)/6e4),s=Math.floor((ms%6e4)/1e3);if(h>0)return h+'h '+m2+'m '+s+'s';return m2+'m '+s+'s';}
 function tickNo1Timers(){
   const now=Date.now();
   document.querySelectorAll('.no1-timer[data-since]').forEach(el=>{
@@ -3155,7 +3155,7 @@ function initBrVp(bi){
   },{passive:false});
 
   // ── Touch: pan (1 finger) + pinch zoom (2 fingers) ──
-  let t1x=0,t1y=0,tpx=0,tpy=0,tPinchDist=0,tPinchZoom=0,tPinchMx=0,tPinchMy=0;
+  let t1x=0,t1y=0,tpx=0,tpy=0,tPinchDist=0,tPinchZoom=0,tPinchMx=0,tPinchMy=0,tTapX=0,tTapY=0,tMoved=false;
   function tDist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
   function tMid(a,b,r){return{x:(a.clientX+b.clientX)/2-r.left,y:(a.clientY+b.clientY)/2-r.top};}
   vp.addEventListener('touchstart',e=>{
@@ -3164,7 +3164,9 @@ function initBrVp(bi){
     const p=brPan[bi]||{x:30,y:30};
     if(e.touches.length===1){
       t1x=e.touches[0].clientX;t1y=e.touches[0].clientY;tpx=p.x;tpy=p.y;
+      tTapX=e.touches[0].clientX;tTapY=e.touches[0].clientY;tMoved=false;
     } else if(e.touches.length>=2){
+      tMoved=true;
       const [a,b]=[e.touches[0],e.touches[1]];
       tPinchDist=tDist(a,b);
       tPinchZoom=brZoom[bi]||1;
@@ -3175,6 +3177,7 @@ function initBrVp(bi){
   },{passive:false});
   vp.addEventListener('touchmove',e=>{
     e.preventDefault();
+    tMoved=true;
     const r=vp.getBoundingClientRect();
     const p=brPan[bi]||{x:30,y:30};
     if(e.touches.length===1){
@@ -3199,6 +3202,15 @@ function initBrVp(bi){
       // Dropped to 1 finger after pinch — reset pan base to avoid jump
       const p=brPan[bi]||{x:30,y:30};
       t1x=e.touches[0].clientX;t1y=e.touches[0].clientY;tpx=p.x;tpy=p.y;
+    }
+    // Tap detection: if finger didn't move, find the card element and click it
+    if(!tMoved&&e.changedTouches.length===1){
+      const t=e.changedTouches[0];
+      if(Math.hypot(t.clientX-tTapX,t.clientY-tTapY)<8){
+        const el=document.elementFromPoint(t.clientX,t.clientY);
+        const card=el&&el.closest('[data-br-tap]');
+        if(card)card.click();
+      }
     }
   },{passive:false});
 }
@@ -3233,6 +3245,7 @@ function brDrawCard(m,left,top,roundLabel,isL,wc,bi){
   const clickable=m.p1!=='BYE'&&m.p2!=='BYE'&&!(m.p1==='TBD'&&m.p2==='TBD');
   if(clickable){
     card.style.cursor='pointer';
+    card.dataset.brTap='1';
     card.addEventListener('mouseenter',()=>!hasW&&(card.style.borderColor=isL?'rgba(255,107,53,.6)':'rgba(229,178,93,.55)'));
     card.addEventListener('mouseleave',()=>!hasW&&(card.style.borderColor='#5a3a4a'));
     card.addEventListener('click',e=>{e.stopPropagation();openBrScore(m,roundLabel,bi);});
