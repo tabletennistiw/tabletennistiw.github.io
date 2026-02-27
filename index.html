@@ -1265,7 +1265,7 @@ function applyDecayToPlayer(p, nowMs, periodMs){
 }
 
 // ── LEADERBOARD QUOTE ZONE ───────────────────────────────────────────────────
-let _lbQuoteTimer=null, _lbFloatTimers=[], _lbNo1Typed=false, _lbLastVis=null;
+let _lbQuoteTimer=null, _lbFloatTimers=[], _lbNo1Typed=false, _lbLastVis=null, _lbTypeTick=null;
 
 window.addEventListener('resize',()=>{
   if(window.innerWidth<640){
@@ -1303,11 +1303,11 @@ function initLbQuoteZone(vis){
     el.innerHTML='';
     let i=0;
     const full='"'+text+'"';
-    const tick=setInterval(()=>{
+    _lbTypeTick=setInterval(()=>{
       el.innerHTML=esc(full.slice(0,i))+'<span style="opacity:.4">|</span>';
       i++;
       if(i>full.length){
-        clearInterval(tick);
+        clearInterval(_lbTypeTick);_lbTypeTick=null;
         el.innerHTML=esc(full)+(byline?`<span class="byline">— ${esc(byline)}</span>`:'');
         if(onDone) onDone();
       }
@@ -3150,6 +3150,7 @@ window.showPanel=function(id,btn){
   document.getElementById('panel-'+id).classList.add('active');
   btn.classList.add('active');
   if(id!=='leaderboard'){
+    if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}
     _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
   }
