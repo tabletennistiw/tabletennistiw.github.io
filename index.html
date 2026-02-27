@@ -655,28 +655,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
         </div>
       </div>
 
-      <div class="admin-section">
-        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">Manage Players <span class="collapse-arrow">▼</span></div>
-        <div class="admin-collapse-body collapsed">
-          <div id="admin-players-list"><div class="loading">Loading</div></div>
-        </div>
-      </div>
 
-      <div class="admin-section">
-        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">Match Log (Delete &amp; Recalculate) <span class="collapse-arrow">▼</span></div>
-        <div class="admin-collapse-body collapsed">
-          <p style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5">Deleting a match will recalculate all ratings, RD, and volatility from that point forward, including time-based decay.</p>
-          <div id="admin-matches-list"><div class="loading">Loading</div></div>
-        </div>
-      </div>
-
-      <div class="admin-section">
-        <div class="admin-stitle collapsed" onclick="toggleAdminSection(this)">Admin Action Log <span class="collapse-arrow">▼</span></div>
-        <div class="admin-collapse-body collapsed">
-          <p style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5">All manual stat edits and decay setting changes are logged here. Delete an action to remove it from the audit trail. When you run <strong style="color:var(--text)">Repair All Ratings</strong>, the repair replays these actions in chronological order — deleting one means the repair won't re-apply it.</p>
-          <div id="admin-actions-list"><div class="loading">Loading</div></div>
-        </div>
-      </div>
 
     </div>
   </div>
@@ -853,6 +832,13 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
     <div class="field"><label>Volatility (σ)</label><input type="number" id="edit-sigma" step="0.001" min="0.01" max="0.30"></div>
     <div class="field"><label>Wins</label><input type="number" id="edit-wins" step="1" min="0"></div>
     <div class="field"><label>Losses</label><input type="number" id="edit-losses" step="1" min="0"></div>
+    <div class="field">
+      <label>RD Decay Immunity</label>
+      <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-size:.78rem;font-weight:400;color:var(--text)">
+        <input type="checkbox" id="edit-decay-immune" style="width:1rem;height:1rem;accent-color:var(--admin)">
+        <span>Exempt from RD decay (RD stays fixed between matches)</span>
+      </label>
+    </div>
     <div style="display:flex;gap:.65rem">
       <button class="btn" onclick="submitEditPlayer()">Save Changes</button>
       <button class="btn-ghost" onclick="document.getElementById('admin-edit-overlay').classList.remove('open')">Cancel</button>
@@ -1108,6 +1094,7 @@ function currentDecayPeriod(ms){
 }
 
 function computeDecay(p){
+  if(p.decayImmune)return null;
   const ms=decayMs();
   const sigma=p.sigma||SIGMA_DEFAULT;
   const lastProcessed=p.lastDecayAt||0;
@@ -1285,8 +1272,10 @@ function makeCard(p){
       <div class="s-history-data" id="s-data-${p.firestoreId}" style="display:none"></div>
     </div>`;
   }
+  const immuneBadge=p.decayImmune?'<span class="pc-tag" style="background:rgba(201,160,220,.15);color:var(--admin);border-color:rgba(201,160,220,.4)">DECAY IMMUNE</span>':'';
+  const adminButtons=isAdmin?`<div style="display:flex;gap:.5rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--border)" onclick="event.stopPropagation()"><button class="btn-admin" style="font-size:.55rem;padding:.3rem .7rem" onclick="openEditPlayer('${p.firestoreId}')">Edit Stats</button><button class="btn-danger" style="font-size:.55rem;padding:.3rem .7rem" onclick="adminRemovePlayer('${p.firestoreId}','${esc(p.name)}')">Delete</button></div>`:'';
   return`<div class="player-card" onclick="window.openProfile('${p.firestoreId}')">
-    <div class="pc-header">${av}<div class="pc-name-block"><div class="pc-name">${esc(p.name)}</div>${rdH?'<span class="pc-tag">HIDDEN</span>':''}</div></div>
+    <div class="pc-header">${av}<div class="pc-name-block"><div class="pc-name">${esc(p.name)}</div>${rdH?'<span class="pc-tag">HIDDEN</span>':''}${immuneBadge}</div></div>
     ${badgesHtml}
     <div class="pc-stats">
       <div class="pc-stat"><span class="pc-stat-l">Rating</span><span class="pc-stat-v" style="color:var(--accent)">${r2(p.rating)}</span></div>
@@ -1298,6 +1287,7 @@ function makeCard(p){
     </div>
     <div class="pc-foot"><span class="pc-hint">TAP TO VIEW PROFILE</span></div>
     ${histHtml}
+    ${adminButtons}
   </div>`;
 }
 
@@ -2087,9 +2077,10 @@ window.renderHistory=function(){
     const d1=(m.p1delta>=0?'+':'')+m.p1delta,d2=(m.p2delta>=0?'+':'')+m.p2delta;
     const s1=m.p1newSigma?` σ:${m.p1newSigma.toFixed(4)}`:'';
     const s2=m.p2newSigma?` σ:${m.p2newSigma.toFixed(4)}`:'';
-    return`<div class="match-row">
+    const delBtn=isAdmin?`<button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem;margin-left:.5rem;flex-shrink:0;align-self:center" onclick="event.stopPropagation();adminRemoveMatch('${m.firestoreId}')">Delete</button>`:'';
+    return`<div class="match-row" style="position:relative">
       <div class="match-player"><span class="name">${esc(m.p1name)}</span><span class="delta ${m.p1delta>=0?'pos':'neg'}">${d1} (${r2(m.p1oldRating)}→${r2(m.p1newRating)})</span><span class="rdi">RD:±${r2(m.p1newRD)}${s1}</span></div>
-      <div class="match-mid"><div class="match-result"><span class="ws">WIN</span>${m.matchScore?`<span class="match-score-lbl">${esc(m.matchScore)}</span>`:'<span style="font-size:.8rem;color:var(--muted)">vs</span>'}<span class="ls">LOSS</span></div></div>
+      <div class="match-mid"><div class="match-result"><span class="ws">WIN</span>${m.matchScore?`<span class="match-score-lbl">${esc(m.matchScore)}</span>`:'<span style="font-size:.8rem;color:var(--muted)">vs</span>'}<span class="ls">LOSS</span></div>${delBtn}</div>
       <div class="match-player" style="text-align:right"><span class="name">${esc(m.p2name)}</span><span class="delta ${m.p2delta>=0?'pos':'neg'}">${d2} (${r2(m.p2oldRating)}→${r2(m.p2newRating)})</span><span class="rdi">RD:±${r2(m.p2newRD)}${s2}</span></div>
       <div class="match-meta-col">${ds} · ${ti}</div>
     </div>`;
@@ -2121,6 +2112,7 @@ window.renderHistory=function(){
       <span class="admin-action-badge">${typeLabel}</span>
       <span class="admin-action-desc">${esc(a.description||'')}</span>
       <span class="admin-action-time">${ds} · ${ti}</span>
+      <button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem;flex-shrink:0;margin-left:auto" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button>
     </div>`;
   }).join('');
 };
@@ -2132,15 +2124,8 @@ function renderAdminPanel(){
   updateDecayInfo();
   simPopulateDropdowns();
   loadGitHubConfigUI();
-  const sorted=[...players].sort((a,b)=>b.rating-a.rating);
-  const pl=document.getElementById('admin-players-list');
-  if(pl)pl.innerHTML=sorted.length?sorted.map(p=>`<div class="admin-prow"><span class="admin-pname">${esc(p.name)}</span><span class="admin-prating">${r2(p.rating)} ±${r2(p.rd)} σ:${(p.sigma||SIGMA_DEFAULT).toFixed(4)}</span><button class="btn-admin" onclick="openEditPlayer('${p.firestoreId}')">Edit Stats</button><button class="btn-danger" onclick="adminRemovePlayer('${p.firestoreId}','${esc(p.name)}')">Remove</button></div>`).join(''):'<div class="empty">No players.</div>';
-  const ml=document.getElementById('admin-matches-list');
-  if(ml)ml.innerHTML=matches.length?matches.slice(0,60).map(m=>{
-    const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
-    return`<div class="admin-mrow"><div class="admin-minfo"><strong>${esc(m.p1name)} beat ${esc(m.p2name)}</strong>${m.matchScore?' · '+esc(m.matchScore):''}<br>${ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div><button class="btn-danger" onclick="adminRemoveMatch('${m.firestoreId}')">Delete</button></div>`;
-  }).join(''):'<div class="empty">No matches.</div>';
-  renderAdminActionsLog();
+  // Edit Stats buttons are injected directly into player cards via makeCard()
+  // Delete match + admin action controls are rendered inline in the Matches panel via renderHistory()
 }
 
 function renderAdminActionsLog(){
@@ -2287,14 +2272,17 @@ window.repairAllRatings=async function(){
     // so no decay has ever been applied.
     const state={};
     const initPlayer=pid=>{
-      if(!state[pid])state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastDecayAt:null};
+      if(!state[pid]){
+        const liveP=players.find(x=>x.firestoreId===pid);
+        state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastDecayAt:null,decayImmune:!!(liveP?.decayImmune)};
+      }
     };
 
     // applyDecayToTs: bring a player's RD up to date with all period boundaries
     // that have passed between their last processed boundary and the given timestamp.
     // This exactly mirrors applyDecayLocally: it fires once per boundary crossing.
     const applyDecayToTs=(s,ts)=>{
-      if(periodMs<=0)return;
+      if(periodMs<=0||s.decayImmune)return;
       // First time a player appears — set their baseline to the period boundary
       // just before their first match, so the match itself uses RD=120 (no decay yet).
       if(s.lastDecayAt===null){
@@ -2357,6 +2345,7 @@ window.repairAllRatings=async function(){
           if(after.sigma!=null)state[pid].sigma=after.sigma;
           if(after.wins!=null)state[pid].wins=after.wins;
           if(after.losses!=null)state[pid].losses=after.losses;
+          if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
         }
         continue;
       }
@@ -2408,7 +2397,7 @@ window.repairAllRatings=async function(){
       if(!s)continue;
       let rd=s.rd;
       const sigma=s.sigma||SIGMA_DEFAULT;
-      if(s.lastDecayAt!==null&&periodMs>0){
+      if(!s.decayImmune&&s.lastDecayAt!==null&&periodMs>0){
         const basePeriod=Math.floor(s.lastDecayAt/periodMs);
         const nowPeriod=Math.floor(now/periodMs);
         const periods=nowPeriod-basePeriod;
@@ -2444,6 +2433,7 @@ window.openEditPlayer=function(fid){
   document.getElementById('edit-sigma').value=(p.sigma||SIGMA_DEFAULT).toFixed(5);
   document.getElementById('edit-wins').value=p.wins;
   document.getElementById('edit-losses').value=p.losses;
+  document.getElementById('edit-decay-immune').checked=!!(p.decayImmune);
   document.getElementById('edit-player-msg').style.display='none';
   document.getElementById('admin-edit-overlay').classList.add('open');
 };
@@ -2455,14 +2445,14 @@ window.submitEditPlayer=async function(){
   const sigma=parseFloat(document.getElementById('edit-sigma').value);
   const wins=parseInt(document.getElementById('edit-wins').value);
   const losses=parseInt(document.getElementById('edit-losses').value);
+  const decayImmune=document.getElementById('edit-decay-immune').checked;
   if(!name){showMsg('edit-player-msg','Name cannot be empty.',true);return;}
   if([rating,rd,sigma,wins,losses].some(isNaN)){showMsg('edit-player-msg','Invalid values.',true);return;}
   if(sigma<0.001||sigma>SIGMA_MAX){showMsg('edit-player-msg',`Volatility must be between 0.001 and ${SIGMA_MAX}.`,true);return;}
   try{
     const p=players.find(x=>x.firestoreId===fid);
-    const before={name:p?.name,rating:p?.rating,rd:p?.rd,sigma:p?.sigma,wins:p?.wins,losses:p?.losses};
-    const after={name,rating,rd,sigma,wins,losses};
-    // Build a human-readable description of what changed
+    const before={name:p?.name,rating:p?.rating,rd:p?.rd,sigma:p?.sigma,wins:p?.wins,losses:p?.losses,decayImmune:!!(p?.decayImmune)};
+    const after={name,rating,rd,sigma,wins,losses,decayImmune};
     const changes=[];
     if(before.rating!==rating)changes.push(`rating ${r2(before.rating)}→${r2(rating)}`);
     if(before.rd!==rd)changes.push(`RD ${r2(before.rd)}→${r2(rd)}`);
@@ -2470,8 +2460,9 @@ window.submitEditPlayer=async function(){
     if(before.wins!==wins)changes.push(`wins ${before.wins}→${wins}`);
     if(before.losses!==losses)changes.push(`losses ${before.losses}→${losses}`);
     if(before.name!==name)changes.push(`name "${before.name}"→"${name}"`);
-    const desc=`Edited ${name}: ${changes.length?changes.join(', '):'no stat changes'}`;
-    await updateDoc(doc(db,'players',fid),{name,rating,rd,sigma,wins,losses});
+    if(before.decayImmune!==decayImmune)changes.push(`decay immunity ${before.decayImmune?'ON':'OFF'}→${decayImmune?'ON':'OFF'}`);
+    const desc=`Edited ${name}: ${changes.length?changes.join(', '):'no changes'}`;
+    await updateDoc(doc(db,'players',fid),{name,rating,rd,sigma,wins,losses,decayImmune});
     await logAdminAction('stat_edit',desc,{playerId:fid,playerName:name,before,after});
     showMsg('edit-player-msg','Saved! Logged as admin action.');
     setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1400);
