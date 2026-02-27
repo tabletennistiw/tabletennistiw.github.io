@@ -2281,10 +2281,36 @@ window.repairAllRatings=async function(){
     // Starting decay period from config (may change mid-timeline via decay_change actions)
     let periodMs=decayMs();
 
-    // Build a fresh state map for every player, starting from scratch
+    // Build a fresh state map for every player, starting from scratch.
+    // lastDecayAt = the last period BOUNDARY that has been processed for this player,
+    // exactly mirroring how the live system tracks it. null = player hasn't played yet,
+    // so no decay has ever been applied.
     const state={};
     const initPlayer=pid=>{
-      if(!state[pid])state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastMatchAt:null};
+      if(!state[pid])state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastDecayAt:null};
+    };
+
+    // applyDecayToTs: bring a player's RD up to date with all period boundaries
+    // that have passed between their last processed boundary and the given timestamp.
+    // This exactly mirrors applyDecayLocally: it fires once per boundary crossing.
+    const applyDecayToTs=(s,ts)=>{
+      if(periodMs<=0)return;
+      // First time a player appears — set their baseline to the period boundary
+      // just before their first match, so the match itself uses RD=120 (no decay yet).
+      if(s.lastDecayAt===null){
+        s.lastDecayAt=Math.floor(ts/periodMs)*periodMs;
+        return;
+      }
+      const basePeriod=Math.floor(s.lastDecayAt/periodMs);
+      const tsPeriod=Math.floor(ts/periodMs);
+      const periods=tsPeriod-basePeriod;
+      if(periods<=0)return;
+      const sigma=s.sigma||SIGMA_DEFAULT;
+      let phi=s.rd/SCALE;const phiMax=RD_MAX/SCALE;
+      for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+      s.rd=Math.min(phi*SCALE,RD_MAX);
+      // Advance lastDecayAt to the boundary just before this match
+      s.lastDecayAt=tsPeriod*periodMs;
     };
 
     // Merge matches and admin actions into a single sorted event timeline
@@ -2305,14 +2331,19 @@ window.repairAllRatings=async function(){
       if(evt._type==='admin'){
         const a=evt.data;
         if(a.type==='decay_change'){
-          // Update the period length going forward in the replay
+          // Decay interval changed — update periodMs going forward.
+          // For all players who have been seen, advance their lastDecayAt
+          // to the new period boundary at this moment so there's no jump.
           const amt=a.data?.newAmount||4;
           const unit=a.data?.newUnit||'hours';
           if(unit==='minutes')periodMs=amt*6e4;
           else if(unit==='hours')periodMs=amt*36e5;
           else periodMs=amt*864e5;
+          // Re-anchor all known players to the new boundary
+          for(const s of Object.values(state)){
+            if(s.lastDecayAt!==null)s.lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
+          }
         } else if(a.type==='stat_edit'){
-          // Apply the stat override directly into the state map
           const pid=a.data?.playerId;
           if(!pid)continue;
           initPlayer(pid);
@@ -2320,8 +2351,8 @@ window.repairAllRatings=async function(){
           if(after.rating!=null)state[pid].rating=after.rating;
           if(after.rd!=null){
             state[pid].rd=after.rd;
-            // Reset decay baseline to the edit time so future decay uses the new RD
-            state[pid].lastMatchAt=evt._ts;
+            // Reset decay boundary to now so future decay starts from the edited RD
+            state[pid].lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
           }
           if(after.sigma!=null)state[pid].sigma=after.sigma;
           if(after.wins!=null)state[pid].wins=after.wins;
@@ -2336,20 +2367,10 @@ window.repairAllRatings=async function(){
       initPlayer(pid1); initPlayer(pid2);
       const s1=state[pid1], s2=state[pid2];
 
-      // Apply inter-match decay before this game using current periodMs
-      if(periodMs>0){
-        const applyDecay=(s,ts)=>{
-          if(!s.lastMatchAt)return;
-          const periods=Math.floor((ts-s.lastMatchAt)/periodMs);
-          if(periods<=0)return;
-          const sigma=s.sigma||SIGMA_DEFAULT;
-          let phi=s.rd/SCALE;const phiMax=RD_MAX/SCALE;
-          for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
-          s.rd=Math.min(phi*SCALE,RD_MAX);
-        };
-        applyDecay(s1,evt._ts);
-        applyDecay(s2,evt._ts);
-      }
+      // Apply all period-boundary decay ticks that occurred before this match,
+      // exactly as the live scheduler would have fired them.
+      applyDecayToTs(s1,evt._ts);
+      applyDecayToTs(s2,evt._ts);
 
       // Recalculate both sides from current state
       const u1=g2Update(
@@ -2370,23 +2391,25 @@ window.repairAllRatings=async function(){
         p2oldRating:s2.rating, p2newRating:u2.rating, p2newRD:u2.rd, p2newSigma:u2.sigma, p2delta,
       }));
 
-      // Advance state
-      state[pid1]={rating:u1.rating,rd:u1.rd,sigma:u1.sigma,wins:s1.wins+1,losses:s1.losses,lastMatchAt:evt._ts};
-      state[pid2]={rating:u2.rating,rd:u2.rd,sigma:u2.sigma,wins:s2.wins,losses:s2.losses+1,lastMatchAt:evt._ts};
+      // Advance state — keep lastDecayAt (already set by applyDecayToTs above)
+      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].sigma=u1.sigma;
+      state[pid1].wins=s1.wins+1;
+      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].sigma=u2.sigma;
+      state[pid2].losses=s2.losses+1;
     }
 
     // Write match records first
     await Promise.all(matchWrites);
 
-    // Now apply decay from last match to now and write player docs
+    // Apply decay from each player's last processed boundary to now, then write player docs.
     const playerWrites=[];
     for(const p of players){
       const s=state[p.firestoreId];
       if(!s)continue;
       let rd=s.rd;
       const sigma=s.sigma||SIGMA_DEFAULT;
-      if(s.lastMatchAt&&periodMs>0){
-        const basePeriod=Math.floor(s.lastMatchAt/periodMs);
+      if(s.lastDecayAt!==null&&periodMs>0){
+        const basePeriod=Math.floor(s.lastDecayAt/periodMs);
         const nowPeriod=Math.floor(now/periodMs);
         const periods=nowPeriod-basePeriod;
         if(periods>0){
