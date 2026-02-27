@@ -84,13 +84,10 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:hidden;}
 }
 /* leaderboard: cap width and center on wide screens */
 #panel-leaderboard{max-width:860px;margin-left:auto;margin-right:auto;}
-/* hide less important columns on small screens */
-@media(max-width:480px){
+/* hide RD column on small screens */
+@media(max-width:500px){
   .lb-col-rd{display:none;}
   col.lb-col-rd{width:0!important;}
-  .lb-table th{padding:.5rem .35rem;}
-  .lb-table td{padding:.55rem .35rem;}
-  .rating-val{font-size:1.2rem;}
 }
 
 /* FORMS */
@@ -263,6 +260,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .chart-section{margin-bottom:1.4rem;position:relative;}
 .chart-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
 .chart-outer{border:1px solid var(--border);background:var(--bg);overflow-x:auto;overflow-y:hidden;position:relative;height:175px;cursor:crosshair;}
+.chart-y-axis{position:absolute;top:0;left:0;width:40px;height:175px;pointer-events:none;z-index:3;background:var(--bg);}
 .chart-outer::-webkit-scrollbar{height:3px;}.chart-outer::-webkit-scrollbar-track{background:var(--bg);}.chart-outer::-webkit-scrollbar-thumb{background:var(--border);}
 .chart-wrap{position:relative;display:inline-block;min-width:100%;}
 .chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
@@ -706,6 +704,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="chart-section">
         <div class="chart-lbl">Rating History</div>
         <div class="chart-outer" id="chart-outer">
+          <div class="chart-y-axis" id="chart-y-axis"></div>
           <div class="chart-wrap" id="chart-wrap">
             <canvas id="rating-chart"></canvas>
             <div class="chart-tip" id="chart-tip"></div>
@@ -2753,44 +2752,41 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay',
 
 // ── CHART ────────────────────────────────────────────────────────────────────
 function drawChart(points){
-  const STEP=54,PAD={top:14,right:8,bottom:24,left:8},H=175;
+  const STEP=54,Y_W=40,PAD={top:14,right:8,bottom:24,left:Y_W},H=175;
   const outer=document.getElementById('chart-outer'),newOuter=outer.cloneNode(false);
   while(outer.firstChild)newOuter.appendChild(outer.firstChild);outer.parentNode.replaceChild(newOuter,outer);
   const wrap=document.getElementById('chart-wrap'),canvas=document.getElementById('rating-chart'),tip=document.getElementById('chart-tip');
 
   const n=points.length;
-  // Fixed STEP px per point; always at least fill container width
-  const W=Math.max(newOuter.clientWidth||300, PAD.left+PAD.right+(n>1?(n-1)*STEP:0)+PAD.left);
+  const W=Math.max(newOuter.clientWidth||300, PAD.left+PAD.right+(n>1?(n-1)*STEP:STEP));
   wrap.style.width=W+'px';wrap.style.height=H+'px';canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d'),cW=W-PAD.left-PAD.right,cH=H-PAD.top-PAD.bottom;
+  const ctx=canvas.getContext('2d'),cH=H-PAD.top-PAD.bottom;
 
   const ratings=n?points.map(p=>p.rating):[1500];
   const minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
 
-  // Points start at PAD.left, each STEP apart
-  const xOf=i=>PAD.left+(n>1?i*STEP:cW/2);
+  const xOf=i=>PAD.left+(n>1?i*STEP:W/2-PAD.left);
   const yOf=r=>PAD.top+(1-(r-lo)/(hi-lo))*cH;
 
-  function drawLabels(){
-    ctx.font='9px DM Mono,monospace';
-    ctx.textAlign='left';
-    ctx.textBaseline='middle';
-    for(let g=0;g<=4;g++){
-      const val=Math.round(hi-(g/4)*(hi-lo));
-      const y=PAD.top+(g/4)*cH;
-      // small bg rect to punch through grid line
-      const txt=String(val);
-      const tw=ctx.measureText(txt).width;
-      ctx.fillStyle='#1a0d14';
-      ctx.fillRect(2,y-6,tw+4,12);
-      ctx.fillStyle='#8a6a78';
-      ctx.fillText(txt,4,y);
-    }
+  // Y-axis overlay — sits on chart-outer (position:absolute), never scrolls
+  const yAxis=document.createElement('div');
+  yAxis.className='chart-y-axis';
+  newOuter.appendChild(yAxis);
+  for(let g=0;g<=4;g++){
+    const val=Math.round(hi-(g/4)*(hi-lo));
+    const y=PAD.top+(g/4)*cH;
+    const lbl=document.createElement('span');
+    lbl.textContent=val;
+    lbl.style.cssText=`position:absolute;top:${y}px;transform:translateY(-50%);left:3px;right:3px;text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:#8a6a78;`;
+    yAxis.appendChild(lbl);
   }
+
+  // Re-add wrap (was moved out during clone swap)
+  newOuter.appendChild(wrap);
 
   function redraw(hl){
     ctx.clearRect(0,0,W,H);
-    // grid lines — full width edge to edge
+    // grid lines — full width, edge to edge
     for(let g=0;g<=4;g++){
       const y=PAD.top+(g/4)*cH;
       ctx.strokeStyle='rgba(74,42,56,.9)';ctx.lineWidth=1;
@@ -2798,10 +2794,8 @@ function drawChart(points){
     }
     if(n<2){
       ctx.fillStyle='#8a6a78';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText('Play more matches to see history',W/2,H/2);
-      drawLabels();return;
+      ctx.fillText('Play more matches to see history',W/2,H/2);return;
     }
-    // area fill + line segments
     for(let i=1;i<n;i++){
       const pv=points[i-1],cv=points[i],col=cv.won?'#7ec8a0':'#ff4757';
       ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
@@ -2810,20 +2804,16 @@ function drawChart(points){
       ctx.beginPath();ctx.moveTo(xOf(i-1),yOf(pv.rating));ctx.lineTo(xOf(i),yOf(cv.rating));
       ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
     }
-    // dots
     for(let i=0;i<n;i++){
       const pt=points[i],col=i===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757'),isHl=i===hl;
       if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),8,0,Math.PI*2);ctx.fillStyle=i===0?'rgba(138,106,120,.2)':(pt.won?'rgba(126,200,160,.2)':'rgba(217,83,79,.2)');ctx.fill();}
       ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),isHl?5:3.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
       if(isHl){ctx.beginPath();ctx.arc(xOf(i),yOf(pt.rating),1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();}
     }
-    // hover crosshair
     if(hl>=0){
       ctx.beginPath();ctx.moveTo(xOf(hl),PAD.top);ctx.lineTo(xOf(hl),H-PAD.bottom);
       ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.stroke();ctx.setLineDash([]);
     }
-    // labels drawn last so they sit on top of everything
-    drawLabels();
   }
 
   function showTip(idx){
