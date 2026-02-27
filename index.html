@@ -1266,18 +1266,28 @@ function applyDecayToPlayer(p, nowMs, periodMs){
 
 // ── LEADERBOARD QUOTE ZONE ───────────────────────────────────────────────────
 let _lbQuoteTimer=null, _lbFloatTimers=[], _lbNo1Typed=false, _lbLastVis=null;
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-    // Kill everything when leaving the tab
-    _lbFloatTimers.forEach(t=>clearTimeout(t));
-    _lbFloatTimers=[];
-    document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
-  } else if(_lbLastVis && document.getElementById('panel-leaderboard')?.classList.contains('active')){
-    // Restart when coming back
+function _lbHandleHide(){
+  _lbWasHidden=true;
+  _lbFloatTimers.forEach(t=>clearTimeout(t));
+  _lbFloatTimers=[];
+  document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
+}
+function _lbHandleShow(){
+  if(!_lbWasHidden) return;
+  _lbWasHidden=false;
+  if(_lbLastVis && document.getElementById('panel-leaderboard')?.classList.contains('active')){
     _lbNo1Typed=true;
     initLbQuoteZone(_lbLastVis);
   }
+}
+let _lbWasHidden=false;
+document.addEventListener('visibilitychange',()=>{
+  console.log('[vis] fired, hidden='+document.hidden+', _lbWasHidden='+_lbWasHidden+', _lbLastVis='+!!_lbLastVis+', panelActive='+document.getElementById('panel-leaderboard')?.classList.contains('active'));
+  document.hidden ? _lbHandleHide() : _lbHandleShow();
 });
+setInterval(()=>{
+  document.hidden ? _lbHandleHide() : _lbHandleShow();
+},250);
 window.addEventListener('resize',()=>{
   if(window.innerWidth<640){
     _lbFloatTimers.forEach(t=>clearTimeout(t));
