@@ -839,7 +839,7 @@ const FIREBASE_CONFIG = {
   appId:"1:902138155809:web:0860c66b77d07746952460"
 };
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG);
 const db=getFirestore(app);
 
@@ -2716,10 +2716,10 @@ window.brDefaultView=function(bi){
   brApplyT(bi);
 };
 
-window.brDelete=function(bi){
+window.brDelete=async function(bi){
   if(!confirm('Delete this bracket?'))return;
   brackets.splice(bi,1);
-  saveBracketsToStorage();
+  await saveBracketsToStorage();
   renderBrackets();
 };
 
@@ -3040,7 +3040,7 @@ function brConfetti(){
   requestAnimationFrame(draw);
 }
 
-window.brSaveTournament=function(bi){
+window.brSaveTournament=async function(bi){
   const b=brackets[bi];
   if(!b||!isBrComplete(b))return;
   if(!confirm(`Save "${b.name}" to Past Tournaments? It will no longer be editable.`))return;
@@ -3086,8 +3086,7 @@ window.brSaveTournament=function(bi){
   };
   pastTournaments.unshift(pastEntry);
   brackets.splice(bi,1);
-  saveBracketsToStorage();
-  savePastTournamentsToStorage();
+  await Promise.all([saveBracketsToStorage(),savePastTournamentsToStorage()]);
   renderBrackets();
   renderPastTournaments();
 };
@@ -3150,7 +3149,7 @@ window.openNewBracketModal=function(){
   document.getElementById('new-bracket-overlay').classList.add('open');
 };
 
-window.createBracket=function(){
+window.createBracket=async function(){
   const name=document.getElementById('bracket-name-input').value.trim();
   if(!name){showMsg('bracket-create-msg','Enter a tournament name.',true);return;}
   const format=document.getElementById('bracket-format').value;
@@ -3173,20 +3172,21 @@ window.createBracket=function(){
   b.id=Date.now();b.name=name;b.seeding=seedingMode;b.players=seeded;b.createdAt=Date.now();
   propagateBr(b);
   brackets.push(b);
-  saveBracketsToStorage();
+  await saveBracketsToStorage();
   document.getElementById('new-bracket-overlay').classList.remove('open');
   showPanel('brackets',document.querySelector('nav button[onclick*="brackets"]'));
 };
 
-function saveBracketsToStorage(){try{localStorage.setItem('tttiw_brackets',JSON.stringify(brackets));}catch(e){}}
-function loadBracketsFromStorage(){try{const d=localStorage.getItem('tttiw_brackets');if(d)brackets=JSON.parse(d);}catch(e){}}
-loadBracketsFromStorage();
+async function saveBracketsToStorage(){try{await setDoc(doc(db,'config','brackets'),{data:JSON.stringify(brackets)});}catch(e){console.error('Save brackets error',e);}}
+async function loadBracketsFromStorage(){try{const d=await getDoc(doc(db,'config','brackets'));if(d.exists()&&d.data().data)brackets=JSON.parse(d.data().data);}catch(e){console.error('Load brackets error',e);}}
 
 // ── PAST TOURNAMENTS ──────────────────────────────────────────────────────────
 let pastTournaments=[];
-function savePastTournamentsToStorage(){try{localStorage.setItem('tttiw_past_tournaments',JSON.stringify(pastTournaments));}catch(e){}}
-function loadPastTournamentsFromStorage(){try{const d=localStorage.getItem('tttiw_past_tournaments');if(d)pastTournaments=JSON.parse(d);}catch(e){}}
-loadPastTournamentsFromStorage();
+async function savePastTournamentsToStorage(){try{await setDoc(doc(db,'config','pastTournaments'),{data:JSON.stringify(pastTournaments)});}catch(e){console.error('Save past tournaments error',e);}}
+async function loadPastTournamentsFromStorage(){try{const d=await getDoc(doc(db,'config','pastTournaments'));if(d.exists()&&d.data().data)pastTournaments=JSON.parse(d.data().data);}catch(e){console.error('Load past tournaments error',e);}}
+
+// Load both from Firestore on startup
+(async()=>{await Promise.all([loadBracketsFromStorage(),loadPastTournamentsFromStorage()]);renderBrackets();renderPastTournaments();})();
 
 function renderPastTournaments(){
   const el=document.getElementById('past-tournaments-list');
@@ -3254,10 +3254,10 @@ window.togglePastTournament=function(ti){
   if(arrow)arrow.style.transform=open?'':'rotate(180deg)';
 };
 
-window.deletePastTournament=function(ti){
+window.deletePastTournament=async function(ti){
   if(!isAdmin||!confirm('Delete this tournament from history?'))return;
   pastTournaments.splice(ti,1);
-  savePastTournamentsToStorage();
+  await savePastTournamentsToStorage();
   renderPastTournaments();
 };
 
