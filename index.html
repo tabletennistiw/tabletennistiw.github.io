@@ -1281,13 +1281,9 @@ function _lbHandleShow(){
   }
 }
 let _lbWasHidden=false;
-document.addEventListener('visibilitychange',()=>{
-  console.log('[vis] fired, hidden='+document.hidden+', _lbWasHidden='+_lbWasHidden+', _lbLastVis='+!!_lbLastVis+', panelActive='+document.getElementById('panel-leaderboard')?.classList.contains('active'));
-  document.hidden ? _lbHandleHide() : _lbHandleShow();
-});
-setInterval(()=>{
-  document.hidden ? _lbHandleHide() : _lbHandleShow();
-},250);
+document.addEventListener('visibilitychange',()=>{ document.hidden ? _lbHandleHide() : _lbHandleShow(); });
+window.addEventListener('blur', _lbHandleHide);
+window.addEventListener('focus', _lbHandleShow);
 window.addEventListener('resize',()=>{
   if(window.innerWidth<640){
     _lbFloatTimers.forEach(t=>clearTimeout(t));
