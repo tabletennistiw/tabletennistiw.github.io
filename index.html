@@ -1091,7 +1091,6 @@ function _onDataReady(){
 onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
   players=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
   applyDecayLocally();
-  _lbHandleHide();
   renderLeaderboard();renderPlayersList();renderMatchSelects();updateDecayStatus();
   if(isAdmin){renderAdminPanel();simPopulateDropdowns();populateRestoreSeasonDropdown();}
   _dataReady.players=true;_onDataReady();
@@ -1267,19 +1266,7 @@ function applyDecayToPlayer(p, nowMs, periodMs){
 
 // ── LEADERBOARD QUOTE ZONE ───────────────────────────────────────────────────
 let _lbQuoteTimer=null, _lbFloatTimers=[], _lbNo1Typed=false, _lbLastVis=null;
-function _lbHandleHide(){
-  _lbFloatTimers.forEach(t=>clearTimeout(t));
-  _lbFloatTimers=[];
-  document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
-}
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) _lbHandleHide(); });
-window.addEventListener('focus', _lbHandleHide);
-window.addEventListener('blur',()=>{
-  if(_lbLastVis && document.getElementById('panel-leaderboard')?.classList.contains('active')){
-    _lbNo1Typed=true;
-    initLbQuoteZone(_lbLastVis);
-  }
-});
+
 window.addEventListener('resize',()=>{
   if(window.innerWidth<640){
     _lbFloatTimers.forEach(t=>clearTimeout(t));
@@ -3162,8 +3149,11 @@ window.showPanel=function(id,btn){
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   btn.classList.add('active');
-  // Clear floating quote timers when leaving leaderboard
-  if(id!=='leaderboard'){_lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];}
+  if(id!=='leaderboard'){
+    _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
+    document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
+  }
+  if(id==='leaderboard'&&_lbLastVis){_lbNo1Typed=true;initLbQuoteZone(_lbLastVis);}
   if(id==='players')renderPlayersList();
   if(id==='matches')renderHistory();
   if(id==='admin')renderAdminPanel();
