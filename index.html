@@ -1111,6 +1111,9 @@ onSnapshot(query(collection(db,'matches'),orderBy('date','desc')),snap=>{
   _dataReady.matches=true;_onDataReady();
 },err=>console.error(err));
 
+// Listen to admin actions for all users (shown in match log; delete button only for admins)
+listenAdminActions();
+
 onSnapshot(doc(db,'config','decay'),snap=>{
   if(snap.exists()){
     const d=snap.data();
@@ -2402,20 +2405,20 @@ window.renderHistory=function(){
     </div>`;
   }
 
-  if(!ms.length&&(!isAdmin||!adminActions.length)){el.innerHTML='<div class="empty">No matches yet.</div>';return;}
+  if(!ms.length&&!adminActions.length){el.innerHTML='<div class="empty">No matches yet.</div>';return;}
 
-  // Merge admin actions into the timeline (admin-only, shown most-recent-first)
+  // Merge admin actions into the timeline (visible to all, delete only for admins)
   const items=[];
   ms.forEach(m=>items.push({_type:'match',_ts:toTs(m),data:m}));
-  if(isAdmin){
-    adminActions.forEach(a=>{
-      const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-      // Only show admin actions that match the player filter if one is active
-      if(flt!=='all'&&a.type==='stat_edit'&&a.data?.playerId!==flt)return;
-      if(flt!=='all'&&a.type!=='stat_edit')return;// decay changes only in all-players view
-      items.push({_type:'adminAction',_ts:ts,data:a});
-    });
-  }
+  adminActions.forEach(a=>{
+    const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+    // Only show admin actions that match the player filter if one is active
+    if(flt!=='all'&&a.type==='stat_edit'&&a.data?.playerId!==flt)return;
+    if(flt!=='all'&&a.type!=='stat_edit')return;// decay changes only in all-players view
+    items.push({_type:'adminAction',_ts:ts,data:a});
+  });
+
+
   items.sort((a,b)=>b._ts-a._ts);
 
   el.innerHTML=items.map(item=>{
@@ -2428,7 +2431,7 @@ window.renderHistory=function(){
       <span class="admin-action-badge">${typeLabel}</span>
       <span class="admin-action-desc">${esc(a.description||'')}</span>
       <span class="admin-action-time">${ds} · ${ti}</span>
-      <button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem;flex-shrink:0;margin-left:auto" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button>
+      ${isAdmin?'<button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem;flex-shrink:0;margin-left:auto" onclick="deleteAdminAction(\''+a.firestoreId+'\')" >Delete</button>':''}
     </div>`;
   }).join('');
 };
