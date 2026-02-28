@@ -591,6 +591,14 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
               </select>
             </div>
           </div>
+          <div class="field" style="margin-top:.6rem">
+            <label>Volatility System Constant (τ) <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Controls how much volatility can change per match. Lower = more stable. Recommended: 0.3–0.8</span></label>
+            <input type="number" id="tau-value" value="1.2" min="0.1" max="2.0" step="0.05" style="width:120px">
+          </div>
+          <div class="field" style="margin-top:.6rem">
+            <label>Rating-Scaled Decay Multiplier <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Scale = 1500 / (rating × multiplier). At 1.0: 1500-rated players decay at 1x. Higher = everyone decays slower. 0 = disabled (flat decay)</span></label>
+            <input type="number" id="decay-scale-mult" value="0" min="0" step="0.1" style="width:120px">
+          </div>
           <button class="btn" onclick="saveDecay()">Save Decay Settings</button>
           <div class="msg" id="decay-msg"></div>
         </div>
@@ -922,7 +930,8 @@ const ADMIN_PW='pppaddle';
 const RD_MAX=200;
 const SIGMA_DEFAULT=0.06;
 const SIGMA_MAX=0.30;
-const TAU=1.2;
+let TAU=1.2;
+let DECAY_SCALE_MULTIPLIER=1.0;
 const EPSILON=0.000001;
 
 // Show subtitle on wider screens
@@ -1098,7 +1107,7 @@ onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
 
 onSnapshot(query(collection(db,'matches'),orderBy('date','desc')),snap=>{
   matches=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-  renderHistory();if(isAdmin)renderAdminPanel();
+  renderHistory();renderLeaderboard();if(isAdmin)renderAdminPanel();
   _dataReady.matches=true;_onDataReady();
 },err=>console.error(err));
 
@@ -1111,6 +1120,16 @@ onSnapshot(doc(db,'config','decay'),snap=>{
     amtEl.dataset.saved=amt;
     const sel=document.getElementById('decay-unit');
     if(sel){for(let o of sel.options){if(o.value===unt){o.selected=true;break;}}sel.dataset.saved=unt;}
+    if(d.tau!=null){
+      TAU=d.tau;
+      const tauEl=document.getElementById('tau-value');
+      if(tauEl){tauEl.value=d.tau;tauEl.dataset.saved=d.tau;}
+    }
+    if(d.decayScaleMult!=null){
+      DECAY_SCALE_MULTIPLIER=d.decayScaleMult;
+      const smEl=document.getElementById('decay-scale-mult');
+      if(smEl){smEl.value=d.decayScaleMult;smEl.dataset.saved=d.decayScaleMult;}
+    }
   }
   updateDecayStatus();
   updateDecayInfo();
@@ -1165,6 +1184,12 @@ function computeDecay(p){
   }
 
   const newLast=nowPeriod*ms;
+  // Rating-scaled decay: scale = 1500 / (rating * multiplier), applied outside sqrt
+  let rdGrowth=(phi-p.rd/SCALE)*SCALE; // how much RD grew from decay
+  if(DECAY_SCALE_MULTIPLIER>0){
+    const scale=1500/((p.rating||1500)*DECAY_SCALE_MULTIPLIER);
+    phi=p.rd/SCALE+(phi-p.rd/SCALE)*scale; // baseline + scaled growth
+  }
   return{newRD:Math.min(phi*SCALE,RD_MAX), newLast};
 }
 
@@ -1216,18 +1241,44 @@ window.saveDecay=async function(){
   const amount=parseFloat(document.getElementById('decay-amount').value);
   const unit=document.getElementById('decay-unit').value;
   if(!amount||amount<=0){showMsg('decay-msg','Enter a valid period.',true);return;}
+  const newTau=parseFloat(document.getElementById('tau-value')?.value)||0.5;
+  if(!newTau||newTau<=0){showMsg('decay-msg','Enter a valid τ value.',true);return;}
+  const newScaleMult=parseFloat(document.getElementById('decay-scale-mult')?.value);
   try{
-    // Record old setting for audit log
     const oldAmt=parseFloat(document.getElementById('decay-amount').dataset.saved||document.getElementById('decay-amount').value)||4;
     const oldUnit=document.getElementById('decay-unit').dataset.saved||'hours';
-    await setDoc(doc(db,'config','decay'),{amount,unit});
+    const oldTau=parseFloat(document.getElementById('tau-value')?.dataset.saved||'1.2');
+    await setDoc(doc(db,'config','decay'),{amount,unit,tau:newTau,decayScaleMult:isNaN(newScaleMult)?0:newScaleMult});
     document.getElementById('decay-amount').dataset.saved=amount;
     document.getElementById('decay-unit').dataset.saved=unit;
-    // Log this as an admin action so repair can account for it
-    await logAdminAction('decay_change',`RD decay changed to ${amount} ${unit}`,{
-      oldAmount:oldAmt,oldUnit,newAmount:amount,newUnit:unit
-    });
-    showMsg('decay-msg',`Decay set to every ${amount} ${unit}. Logged as admin action.`);
+    const tauEl=document.getElementById('tau-value');
+    if(tauEl)tauEl.dataset.saved=newTau;
+    TAU=newTau;
+    const smEl=document.getElementById('decay-scale-mult');
+    const oldScaleMult=parseFloat(smEl?.dataset.saved??'0');
+    const resolvedNewScale=isNaN(newScaleMult)?0:newScaleMult;
+    if(smEl)smEl.dataset.saved=resolvedNewScale;
+    DECAY_SCALE_MULTIPLIER=resolvedNewScale;
+    const msgs=[];
+    if(amount!==oldAmt||unit!==oldUnit){
+      await logAdminAction('decay_change',`RD decay changed to ${amount} ${unit}`,{
+        oldAmount:oldAmt,oldUnit,newAmount:amount,newUnit:unit
+      });
+      msgs.push(`decay → ${amount} ${unit}`);
+    }
+    if(newTau!==oldTau){
+      await logAdminAction('tau_change',`Volatility τ changed to ${newTau}`,{
+        oldTau,newTau
+      });
+      msgs.push(`τ → ${newTau}`);
+    }
+    if(resolvedNewScale!==oldScaleMult){
+      await logAdminAction('decay_scale_change',`Rating-scaled decay multiplier changed to ${resolvedNewScale}`,{
+        oldMult:oldScaleMult,newMult:resolvedNewScale
+      });
+      msgs.push(`decay scale → ${resolvedNewScale}`);
+    }
+    showMsg('decay-msg',msgs.length?`Saved: ${msgs.join(', ')}. Logged as admin action.`:'No changes to save.');
     updateDecayInfo();
   }catch(e){showMsg('decay-msg','Error: '+e.message,true);}
 };
@@ -1481,7 +1532,9 @@ function renderLeaderboard(){
     const sBadge=lastS?(()=>{const rk=lastS.rank,cls=rk===1?'rank1':rk===2?'rank2':rk===3?'rank3':'rankN',emoji=rk===1?'🥇':rk===2?'🥈':rk===3?'🥉':'';return`<span class="s-badge ${cls}" title="Last season: ${esc(lastS.seasonName||'Season '+lastS.seasonNum)}" style="font-size:.6rem;padding:.12rem .35rem">${emoji}${emoji?'':('#'+rk)}</span>`})():'';
     const no1Since=p.no1Since||null;
     const no1Tag=i===0?`<span class="no1-timer" data-since="${no1Since||Date.now()}">👑 0s</span>`:'';
-    return`<tr onclick="window.openProfile('${p.firestoreId}')"><td class="rank ${rc} lb-col-rank">${i+1}</td><td><div class="pname-cell">${av}<span class="player-name">${escCap(p.name)}</span>${sBadge}${no1Tag}</div></td><td class="lb-col-rating"><span class="rating-val">${r2(p.rating)}</span></td><td class="lb-col-rd"><span class="rd-val" style="${p.rd>=95?'color:var(--loss)':''}">±${r2(p.rd)}</span></td><td class="lb-col-wl"><span class="record-badge"><span class="w">${p.wins}W</span><span class="l">${p.losses}L</span></span></td></tr>`;
+    const{cs:pCs}=pStats(p.firestoreId);
+    const streakTag=pCs>=3?`<span style="font-family:'DM Mono',monospace;font-size:.55rem;color:${pCs>=5?'var(--win)':'var(--accent)'};border:1px solid ${pCs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;opacity:.85">${pCs}W</span>`:'';
+    return`<tr onclick="window.openProfile('${p.firestoreId}')"><td class="rank ${rc} lb-col-rank">${i+1}</td><td><div class="pname-cell">${av}<span class="player-name">${escCap(p.name)}</span>${sBadge}${no1Tag}${streakTag}</div></td><td class="lb-col-rating"><span class="rating-val">${r2(p.rating)}</span></td><td class="lb-col-rd"><span class="rd-val" style="${p.rd>=95?'color:var(--loss)':''}">±${r2(p.rd)}</span></td><td class="lb-col-wl"><span class="record-badge"><span class="w">${p.wins}W</span><span class="l">${p.losses}L</span></span></td></tr>`;
   }).join('')+(sorted.length>vis.length?`<tr><td colspan="5" style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);padding:.55rem .7rem;text-align:center">${sorted.length-vis.length} hidden (RD>100)</td></tr>`:'');
 }
 
@@ -1508,7 +1561,7 @@ function makeCard(p){
   const rdH=p.rd>100,rdC=rdH?'var(--loss)':p.rd>80?'var(--accent)':'var(--win)';
   const sigma=p.sigma||SIGMA_DEFAULT;
   const sigmaC=sigma>0.15?'var(--loss)':sigma>0.09?'var(--accent)':'var(--win)';
-  const{ls,la}=pStats(p.firestoreId),sc=ls>=5?'var(--win)':ls>=3?'var(--accent)':'var(--text)';
+  const{ls,cs,la}=pStats(p.firestoreId),sc=cs>=5?'var(--win)':cs>=3?'var(--accent)':'var(--text)';
   const av=p.photoURL?`<img class="pc-avatar" src="${esc(p.photoURL)}" alt="">`:`<div class="pc-av-ph">${esc(p.name.charAt(0).toUpperCase())}</div>`;
   const seasons=p.seasons||[];
   let badgesHtml='',histHtml='';
@@ -1536,7 +1589,7 @@ function makeCard(p){
       <div class="pc-stat"><span class="pc-stat-l">RD</span><span class="pc-stat-v" style="color:${rdC}">±${r2(p.rd)}</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Record</span><span class="pc-stat-v">${p.wins}W–${p.losses}L</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Win%</span><span class="pc-stat-v" style="color:${wc}">${wr}%</span></div>
-      <div class="pc-stat"><span class="pc-stat-l">Streak</span><span class="pc-stat-v" style="color:${sc}">${ls>0?ls+'W':'—'}</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">Streak</span><span class="pc-stat-v" style="color:${sc}">${cs>0?cs+'W':'—'}</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Volatility σ</span><span class="pc-stat-v" style="color:${sigmaC};font-size:.9rem">${sigma.toFixed(4)}</span></div>
     </div>
     <div class="pc-foot"><span class="pc-hint">TAP TO VIEW PROFILE</span></div>
@@ -1576,7 +1629,7 @@ window.showSeasonData=function(sel,dataId){
 function pStats(fid){
   const ids=new Set(players.map(x=>x.firestoreId));
   const pm=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)&&(m.p1id===fid||m.p2id===fid)).sort((a,b)=>toTs(a)-toTs(b));
-  let ls=0,cs=0;pm.forEach(m=>{const w=m.p1id===fid?m.score===1:m.score===0;w?(cs++,ls=Math.max(ls,cs)):cs=0;});
+  let ls=0,cs=0,cur=0;pm.forEach(m=>{const w=m.p1id===fid?m.score===1:m.score===0;w?(cur++,ls=Math.max(ls,cur)):cur=0;});cs=cur;
   let la=0;
   const all=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)).sort((a,b)=>toTs(a)-toTs(b));
   if(all.length&&players.length>=2){
@@ -1627,7 +1680,7 @@ function pStats(fid){
     const liveRd=livePlayer?.rd??rds[fid];
     if(top()===fid&&liveRd<=100&&a1!==null)la=Math.max(la,Date.now()-a1);
   }
-  return{ls,la};
+  return{ls,cs,la};
 }
 function toTs(m){return m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();}
 const r2=v=>Number(v).toFixed(2);
@@ -1645,6 +1698,15 @@ function tickNo1Timers(){
     else if(m>0)label=m+'m '+s+'s';
     else label=s+'s';
     el.textContent='👑 '+label;
+    // If timer has beaten the record, update the main text to also count up
+    const record=parseInt(el.dataset.record||'0');
+    if(record&&ms>record){
+      const main=el.previousElementSibling;
+      if(main&&main.classList.contains('no1-record-main')){
+        const d2=Math.floor(ms/864e5),h2=Math.floor((ms%864e5)/36e5),m2=Math.floor((ms%36e5)/6e4),s2=Math.floor((ms%6e4)/1e3);
+        main.textContent=d2>0?d2+'d '+h2+'h '+m2+'m '+s2+'s':h2>0?h2+'h '+m2+'m '+s2+'s':m2>0?m2+'m '+s2+'s':s2+'s';
+      }
+    }
   });
 }
 setInterval(tickNo1Timers,1000);
@@ -2361,7 +2423,7 @@ window.renderHistory=function(){
     const a=item.data;
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':'ADMIN ACTION';
+    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='tau_change'?'TAU CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':'ADMIN ACTION';
     return`<div class="admin-action-row">
       <span class="admin-action-badge">${typeLabel}</span>
       <span class="admin-action-desc">${esc(a.description||'')}</span>
@@ -2394,7 +2456,7 @@ function renderAdminActionsLog(){
   el.innerHTML=sorted.map(a=>{
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':'★ ADMIN';
+    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='tau_change'?'★ TAU CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':'★ ADMIN';
     return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04)">
       <div class="admin-minfo">
         <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}<br>
@@ -2549,7 +2611,12 @@ window.repairAllRatings=async function(){
       if(periods<=0)return;
       const sigma=s.sigma||SIGMA_DEFAULT;
       let phi=s.rd/SCALE;const phiMax=RD_MAX/SCALE;
+      const startPhi=phi;
       for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+      if(replayScaleMult>0){
+        const scale=1500/((s.rating||1500)*replayScaleMult);
+        phi=startPhi+(phi-startPhi)*scale;
+      }
       s.rd=Math.min(phi*SCALE,RD_MAX);
       // Advance lastDecayAt to the boundary just before this match
       s.lastDecayAt=tsPeriod*periodMs;
@@ -2568,6 +2635,8 @@ window.repairAllRatings=async function(){
     events.sort((a,b)=>a._ts-b._ts);
 
     const matchWrites=[];
+    let replayTau=TAU;
+    let replayScaleMult=DECAY_SCALE_MULTIPLIER;
 
     // #1 tracking state — mirrors live submitMatch logic
     const no1State={};
@@ -2583,18 +2652,18 @@ window.repairAllRatings=async function(){
       if(evt._type==='admin'){
         const a=evt.data;
         if(a.type==='decay_change'){
-          // Decay interval changed — update periodMs going forward.
-          // For all players who have been seen, advance their lastDecayAt
-          // to the new period boundary at this moment so there's no jump.
           const amt=a.data?.newAmount||4;
           const unit=a.data?.newUnit||'hours';
           if(unit==='minutes')periodMs=amt*6e4;
           else if(unit==='hours')periodMs=amt*36e5;
           else periodMs=amt*864e5;
-          // Re-anchor all known players to the new boundary
           for(const s of Object.values(state)){
             if(s.lastDecayAt!==null)s.lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
           }
+        } else if(a.type==='tau_change'){
+          replayTau=a.data?.newTau??0.5;
+        } else if(a.type==='decay_scale_change'){
+          replayScaleMult=a.data?.newMult??0;
         } else if(a.type==='stat_edit'){
           const pid=a.data?.playerId;
           if(!pid)continue;
@@ -2614,7 +2683,8 @@ window.repairAllRatings=async function(){
         continue;
       }
 
-      // Normal match event
+      // Normal match event — use TAU as it was at this point in time
+      TAU=replayTau;
       const m=evt.data;
       const pid1=m.p1id, pid2=m.p2id;
       initPlayer(pid1); initPlayer(pid2);
@@ -2715,6 +2785,8 @@ window.repairAllRatings=async function(){
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
+    TAU=parseFloat(document.getElementById('tau-value')?.value)||0.5;
+    DECAY_SCALE_MULTIPLIER=parseFloat(document.getElementById('decay-scale-mult')?.value)||0;
     if(btn){btn.disabled=false;btn.textContent='🔧 Repair All Ratings From Match History';}
   }
 };
@@ -2919,18 +2991,21 @@ window.openProfile=async function(fid){
   const qEl=document.getElementById('profile-quote');
   if(p.quote){qEl.innerHTML=`"${esc(p.quote)}"`;qEl.style.display='block';}else qEl.style.display='none';
   const wr=(p.wins+p.losses)>0?Math.round(p.wins/(p.wins+p.losses)*100):0,wc=wr>=60?'green':wr>=40?'neutral':'red';
-  const{ls,la}=pStats(fid);
+  const{ls,cs,la}=pStats(fid);
   const sigma=p.sigma||SIGMA_DEFAULT;
 
   function renderProfileStats(){
     const liveP=players.find(x=>x.firestoreId===fid)||p;
     const vis=[...players].filter(x=>x.rd<=100).sort((a,b)=>b.rating-a.rating);
     const isTop=vis[0]?.firestoreId===fid;
-    const no1Html=isTop&&liveP.no1Since
-      ?`<span class="no1-timer counting" data-since="${liveP.no1Since}">👑 —</span>`
+    const _no1Since=isTop?(liveP.no1Since||Date.now()):null;
+    const _liveMs=_no1Since?(Date.now()-_no1Since):0;
+    const _record=liveP.longestNo1Ms||0;
+    const no1Html=isTop&&_liveMs>_record
+      ?`<span class="no1-timer counting" data-since="${_no1Since}">👑 —</span>`
       :isTop
-        ?`<span class="no1-timer counting" data-since="${Date.now()}">👑 —</span>`
-        :fmtDur(liveP.longestNo1Ms||la);
+        ?`<span class="no1-record-main">${fmtDur(_record||la)}</span> <span class="no1-timer counting" data-since="${_no1Since}" data-record="${_record||la}">👑 —</span>`
+        :fmtDur(_record||la);
     const liveSigma=(liveP.sigma||SIGMA_DEFAULT).toFixed(4);
     const sigC=(liveP.sigma||SIGMA_DEFAULT)>0.15?'red':(liveP.sigma||SIGMA_DEFAULT)>0.09?'':'neutral';
     document.getElementById('profile-stats').innerHTML=`
@@ -2939,8 +3014,8 @@ window.openProfile=async function(fid){
     <div class="m-stat"><span class="m-stat-l">Volatility σ</span><span class="m-stat-v ${sigC}" style="font-size:1rem">${liveSigma}</span></div>
     <div class="m-stat"><span class="m-stat-l">Record</span><span class="m-stat-v neutral">${liveP.wins}W–${liveP.losses}L</span></div>
     <div class="m-stat"><span class="m-stat-l">Win%</span><span class="m-stat-v ${wc}">${wr}%</span></div>
-    <div class="m-stat"><span class="m-stat-l">Streak</span><span class="m-stat-v ${ls>=5?'green':ls>=3?'':'neutral'}">${ls>0?ls+'W':'—'}</span></div>
-    <div class="m-stat"><span class="m-stat-l">Longest #1</span><span class="m-stat-v" style="color:var(--accent3);font-size:1rem">${no1Html}</span></div>`;
+    <div class="m-stat"><span class="m-stat-l">Best Streak</span><span class="m-stat-v neutral" style="display:inline-flex;align-items:center;gap:.3rem">${ls>0?ls+'W':'—'}${cs>0?`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:${cs>=5?'var(--win)':'var(--accent)'};border:1px solid ${cs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;line-height:1">${cs}W</span>`:''}</span></div>
+    <div class="m-stat"><span class="m-stat-l">Longest #1</span><span class="m-stat-v" style="color:var(--accent3);font-size:1rem;display:inline-flex;align-items:center;gap:.3rem">${no1Html}</span></div>`;
   }
   renderProfileStats();
 
@@ -4082,9 +4157,9 @@ window.simResult=function(winner){
   const newB=g2Update(pB,[{rating:pA.rating,rd:pA.rd,sigma:pA.sigma,s:sLoses}]);
   const dA=+(newA.rating-pA.rating).toFixed(1);
   const dB=+(newB.rating-pB.rating).toFixed(1);
-  const{mu:muA}=toG2(pA.rating,pA.rd);
+  const{mu:muA,phi:phiA}=toG2(pA.rating,pA.rd);
   const{mu:muB,phi:phiB}=toG2(pB.rating,pB.rd);
-  const expA=(E(muA,muB,phiB)*100).toFixed(1);
+  const expA=(E(muA,muB,Math.sqrt(phiA*phiA+phiB*phiB))*100).toFixed(1);
   const expB=(100-parseFloat(expA)).toFixed(1);
   const winnerName=winner==='A'?nameA:nameB;
   const loserName=winner==='A'?nameB:nameA;
