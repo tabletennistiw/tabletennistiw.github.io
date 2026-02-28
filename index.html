@@ -3001,10 +3001,12 @@ window.openProfile=async function(fid){
     const _no1Since=isTop?(liveP.no1Since||Date.now()):null;
     const _liveMs=_no1Since?(Date.now()-_no1Since):0;
     const _record=liveP.longestNo1Ms||0;
-    const no1Html=isTop&&_liveMs>_record
-      ?`<span class="no1-timer counting" data-since="${_no1Since}">👑 —</span>`
+    var _no1Prefix=_record?fmtDur(_record)+String.fromCharCode(32):"";
+    var _no1Attr=_record?" data-record=\""+_record+"\"":"";
+    var no1Html=isTop&&_liveMs>_record
+      ?_no1Prefix+"<span class=\"no1-timer counting\" data-since=\""+_no1Since+"\""+_no1Attr+">👑 —</span>"
       :isTop
-        ?`<span class="no1-record-main">${fmtDur(_record||la)}</span> <span class="no1-timer counting" data-since="${_no1Since}" data-record="${_record||la}">👑 —</span>`
+        ?"<span class=\"no1-record-main\">"+fmtDur(_record||la)+"</span> <span class=\"no1-timer counting\" data-since=\""+_no1Since+"\" data-record=\""+(String(_record||la))+"\">👑 —</span>"
         :fmtDur(_record||la);
     const liveSigma=(liveP.sigma||SIGMA_DEFAULT).toFixed(4);
     const sigC=(liveP.sigma||SIGMA_DEFAULT)>0.15?'red':(liveP.sigma||SIGMA_DEFAULT)>0.09?'':'neutral';
