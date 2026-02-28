@@ -3330,10 +3330,20 @@ window.showPanel=function(id,btn){
   }
   if(id==='leaderboard'&&_lbLastVis){_lbNo1Typed=true;initLbQuoteZone(_lbLastVis);}
   if(id==='players')renderPlayersList();
+
   if(id==='matches')renderHistory();
   if(id==='admin')renderAdminPanel();
   if(id==='brackets'){renderBrackets();renderPastTournaments();}
 };
+
+// Kill floating quotes when the user switches away from the tab
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}
+    _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
+    document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
+  }
+});
 
 function isBrComplete(b){
   const allMatches=[...b.piRound,...(b.lPiRound||[])];
