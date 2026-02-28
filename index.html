@@ -498,7 +498,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
             <div class="rule-item"><div class="rule-icon">2&times;</div><div><div class="rule-title">2 Serves Each</div><div class="rule-desc">Players alternate with 2 serves per turn.</div></div></div>
             <div class="rule-item"><div class="rule-icon">&infin;</div><div><div class="rule-title">Deuce Serving</div><div class="rule-desc">At 10&ndash;10 (deuce), alternate serves every point.</div></div></div>
             <div class="rule-item"><div class="rule-icon">6&Prime;</div><div><div class="rule-title">Serve Height</div><div class="rule-desc">Ball must be struck 6 inches above the table surface.</div></div></div>
-            <div class="rule-item"><div class="rule-icon">&#9878;</div><div><div class="rule-title">Fairness Rule</div><div class="rule-desc">Beating stronger players gains more rating points.</div></div></div>
+
           </div>
         </div>
         <!-- Rating System Column -->
@@ -506,9 +506,9 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <div class="rules-col-title">Rating System</div>
           <div class="rules-list">
             <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">RD</div><div><div class="rule-title">Rating Deviation</div><div class="rule-desc">RD measures how confident the system is in a player's rating. A low RD means the rating is reliable; a high RD means more uncertainty. New players start at RD 120. After enough games, RD can drop below 100 &mdash; only then does a player appear on the leaderboard.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&sigma;</div><div><div class="rule-title">Volatility (&sigma;)</div><div class="rule-desc">Volatility measures how erratic a player's performance is. A higher &sigma; means results are unpredictable &mdash; the system reacts more strongly to upsets. It's updated each match using the full Glicko-2 Illinois algorithm. Starting &sigma;: 0.06. Capped at 0.30.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">RD Decay (Inactivity)</div><div class="rule-desc">If you stop playing, your RD slowly increases using your personal volatility: &phi;* = &radic;(&phi;&sup2; + &sigma;&sup2;). This means volatile players decay faster than consistent ones. RD is capped at 200. If RD rises above 100 you'll be hidden from the leaderboard.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">G2</div><div><div class="rule-title">Glicko-2 Algorithm</div><div class="rule-desc">Full Glicko-2 implementation including per-player volatility updates via the Illinois root-finding method. Every match updates rating, RD, and volatility based on expected outcome &mdash; upsets gain more, expected wins gain less. Starting rating: 1500.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&sigma;</div><div><div class="rule-title">Volatility (&sigma;)</div><div class="rule-desc">Volatility measures how erratic a player's performance is. A higher &sigma; means results are unpredictable &mdash; the system reacts more strongly to upsets. It's recalculated <span id="rules-sigma-update-period">every match</span> using the Glicko-2 Illinois algorithm. Starting &sigma;: <span id="rules-sigma-default"></span>. Capped at 0.30.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">RD Decay (Inactivity)</div><div class="rule-desc">If you stop playing, your RD slowly increases using your personal volatility: &phi;* = &radic;(&phi;&sup2; + &sigma;&sup2;). Volatile players decay faster. One decay period = <span id="rules-decay-period"></span>. RD is capped at 200 &mdash; above 100 you're hidden from the leaderboard.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.6rem">R&#x2193;</div><div><div class="rule-title">Rating-Scaled Decay</div><div class="rule-desc" id="rules-scaled-decay-desc"></div></div></div>
           </div>
         </div>
       </div>
@@ -576,7 +576,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">RD Decay Settings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
-          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases each inactive period using each player's personal volatility: <strong style="color:var(--text)">φ* = √(φ² + σ²)</strong>. Volatile players decay faster. Default: 4 hours · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases each inactive period using each player's personal volatility: <strong style="color:var(--text)">φ* = √(φ² + σ²)</strong>. Volatile players decay faster. Current period: <strong id="admin-decay-period-display" style="color:var(--text)">—</strong> · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
           <div id="decay-info" style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.6rem .8rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem">
             Loading current settings…
           </div>
@@ -598,6 +598,17 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <div class="field" style="margin-top:.6rem">
             <label>Rating-Scaled Decay Multiplier <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Scale = 1500 / (rating × multiplier). At 1.0: 1500-rated players decay at 1x. Higher = everyone decays slower. 0 = disabled (flat decay)</span></label>
             <input type="number" id="decay-scale-mult" value="0" min="0" step="0.1" style="width:120px">
+          </div>
+          <div class="field" style="margin-top:.6rem">
+            <label>Volatility (σ) Update Period <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">How often σ is recalculated via Illinois. 0 = update every match (legacy). Changes take effect starting now for all players.</span></label>
+            <div style="display:flex;gap:.6rem">
+              <input type="number" id="sigma-update-amount" value="0" min="0" style="width:90px;flex-shrink:0;flex:none">
+              <select id="sigma-update-unit">
+                <option value="hours">Hours</option>
+                <option value="days" selected>Days</option>
+              </select>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:.35rem" id="sigma-update-info"></div>
           </div>
           <button class="btn" onclick="saveDecay()">Save Decay Settings</button>
           <div class="msg" id="decay-msg"></div>
@@ -955,15 +966,24 @@ function E(mu, muj, phij) {
   return 1 / (1 + Math.exp(-gPhi(phij) * (mu - muj)));
 }
 
-function g2Update(player, opps) {
+let SIGMA_UPDATE_INTERVAL_MS = 864e5; // configurable via admin; default 24 hours
+let SIGMA_UPDATE_ENABLED_AT = 0;    // timestamp when this feature was first turned on; 0 = use legacy per-match behaviour
+
+function g2Update(player, opps, nowMs) {
   const { mu, phi } = toG2(player.rating, player.rd);
   const sigma = player.sigma || SIGMA_DEFAULT;
+  const now = nowMs || Date.now();
+
+  // Only update sigma if feature is enabled and the interval has elapsed.
+  // lastSigmaUpdate=0 means never updated under the new system — treat as enabledAt so first update is one full period after activation.
+  const lastSigmaUpdate = player.lastSigmaUpdate || 0;
+  const baseline = lastSigmaUpdate > 0 ? lastSigmaUpdate : SIGMA_UPDATE_ENABLED_AT;
+  const sigmaUpdateDue = SIGMA_UPDATE_ENABLED_AT > 0 && (now - baseline) >= SIGMA_UPDATE_INTERVAL_MS;
 
   if (!opps.length) {
     const phiStar = Math.sqrt(phi * phi + sigma * sigma);
     const r = fromG2(mu, Math.min(phiStar, RD_MAX / SCALE));
-    // Return full float precision — only round for display (r2/toFixed)
-    return { rating: r.r, rd: r.rd, sigma };
+    return { rating: r.r, rd: r.rd, sigma, lastSigmaUpdate: lastSigmaUpdate };
   }
 
   let vInv = 0, deltaSum = 0;
@@ -977,17 +997,20 @@ function g2Update(player, opps) {
   const v = 1 / vInv;
   const delta = v * deltaSum;
 
-  const newSigma = computeNewSigma(sigma, phi, v, delta);
+  // Only run the Illinois sigma solve if a day has passed; otherwise keep sigma frozen
+  const newSigma = sigmaUpdateDue ? Math.min(computeNewSigma(sigma, phi, v, delta), SIGMA_MAX) : sigma;
+  const newLastSigmaUpdate = sigmaUpdateDue ? now : lastSigmaUpdate;
+
   const phiStar = Math.sqrt(phi * phi + newSigma * newSigma);
   const phiNew = 1 / Math.sqrt(1 / (phiStar * phiStar) + 1 / v);
   const muNew = mu + phiNew * phiNew * deltaSum;
 
   const r = fromG2(muNew, phiNew);
-  // Return full float precision — only round for display (r2/toFixed)
   return {
     rating: r.r,
     rd: Math.min(r.rd, RD_MAX),
-    sigma: Math.min(newSigma, SIGMA_MAX)
+    sigma: newSigma,
+    lastSigmaUpdate: newLastSigmaUpdate
   };
 }
 
@@ -1052,6 +1075,7 @@ async function logAdminAction(type,description,data){
 }
 
 function applyAdminUI(){
+  if(document.getElementById('admin-btn').classList.contains('on'))return; // already applied
   const lbl=document.querySelector('#admin-btn .admin-btn-label');
   if(lbl)lbl.textContent=' Logout';
   document.getElementById('admin-btn').classList.add('on');
@@ -1094,7 +1118,7 @@ let _dataReady={players:false,matches:false};
 function _onDataReady(){
   if(!_dataReady.players||!_dataReady.matches)return;
   // If admin session was restored from localStorage, boot the admin UI now
-  if(isAdmin&&!adminActionsUnsub){applyAdminUI();}
+  if(isAdmin){applyAdminUI();}
 }
 
 onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
@@ -1111,8 +1135,7 @@ onSnapshot(query(collection(db,'matches'),orderBy('date','desc')),snap=>{
   _dataReady.matches=true;_onDataReady();
 },err=>console.error(err));
 
-// Listen to admin actions for all users (shown in match log; delete button only for admins)
-listenAdminActions();
+// Admin actions listener is started in applyAdminUI (for admins only)
 
 onSnapshot(doc(db,'config','decay'),snap=>{
   if(snap.exists()){
@@ -1132,6 +1155,19 @@ onSnapshot(doc(db,'config','decay'),snap=>{
       DECAY_SCALE_MULTIPLIER=d.decayScaleMult;
       const smEl=document.getElementById('decay-scale-mult');
       if(smEl){smEl.value=d.decayScaleMult;smEl.dataset.saved=d.decayScaleMult;}
+    }
+    if(d.sigmaUpdateEnabledAt!=null){
+      SIGMA_UPDATE_ENABLED_AT=d.sigmaUpdateEnabledAt;
+    }
+    if(d.sigmaUpdateAmount!=null){
+      const sua=d.sigmaUpdateAmount, suu=d.sigmaUpdateUnit||'days';
+      if(sua===0){SIGMA_UPDATE_INTERVAL_MS=0;}
+      else if(suu==='hours'){SIGMA_UPDATE_INTERVAL_MS=sua*36e5;}
+      else{SIGMA_UPDATE_INTERVAL_MS=sua*864e5;}
+      const suaEl=document.getElementById('sigma-update-amount');
+      const suuEl=document.getElementById('sigma-update-unit');
+      if(suaEl){suaEl.value=sua;suaEl.dataset.saved=String(sua);}
+      if(suuEl){for(let o of suuEl.options){if(o.value===suu){o.selected=true;break;}}suuEl.dataset.saved=suu;}
     }
   }
   updateDecayStatus();
@@ -1154,6 +1190,42 @@ function updateDecayInfo(){
   const a=document.getElementById('decay-amount').value||'4';
   const u=document.getElementById('decay-unit').value||'hours';
   di.textContent=`Decay period: ${a} ${u} · Max RD: 200 · Players hidden if RD > 100 · Uses personal σ per player`;
+  // Update admin description text
+  const adp=document.getElementById('admin-decay-period-display');
+  if(adp)adp.textContent=`${a} ${u}`;
+  // Update rules panel live values
+  const rPeriod=document.getElementById('rules-decay-period');
+  if(rPeriod)rPeriod.textContent=`${a} ${u}`;
+  const rSigma=document.getElementById('rules-sigma-default');
+  if(rSigma)rSigma.textContent=SIGMA_DEFAULT;
+  const rScale=document.getElementById('rules-scaled-decay-desc');
+  if(rScale){
+    const mult=DECAY_SCALE_MULTIPLIER;
+    if(!mult||mult<=0){
+      rScale.textContent='Rating-scaled decay is currently disabled. All players decay at the same flat rate.';
+    } else {
+      rScale.innerHTML=`Higher-rated players decay more slowly. Scale = 1500 / (rating × ${mult}), so a 1500-rated player decays at 1×, a higher-rated player at less than 1×. Current multiplier: <strong style="color:var(--text)">${mult}</strong>.`;
+    }
+  }
+  // Sigma update period info display
+  const suaEl=document.getElementById('sigma-update-amount');
+  const suuEl=document.getElementById('sigma-update-unit');
+  const suaV=parseFloat(suaEl?.value??'0');
+  const suuV=suuEl?.value||'days';
+  const sigmaInfoEl=document.getElementById('sigma-update-info');
+  if(sigmaInfoEl){
+    if(!suaV||suaV<=0){
+      sigmaInfoEl.textContent='Currently: σ recalculates every match (legacy mode).';
+    } else {
+      const sinceStr=SIGMA_UPDATE_ENABLED_AT>0?(' · Active since '+new Date(SIGMA_UPDATE_ENABLED_AT).toLocaleString()):'';
+      sigmaInfoEl.textContent=`Currently: σ recalculates every ${suaV} ${suuV}${sinceStr}.`;
+    }
+  }
+  // Update volatility rule text in rules panel
+  const rSigmaUpdate=document.getElementById('rules-sigma-update-period');
+  if(rSigmaUpdate){
+    rSigmaUpdate.textContent=(!suaV||suaV<=0)?'every match':`every ${suaV} ${suuV}`;
+  }
 }
 
 // ── DECAY ────────────────────────────────────────────────────────────────────
@@ -1247,21 +1319,41 @@ window.saveDecay=async function(){
   const newTau=parseFloat(document.getElementById('tau-value')?.value)||0.5;
   if(!newTau||newTau<=0){showMsg('decay-msg','Enter a valid τ value.',true);return;}
   const newScaleMult=parseFloat(document.getElementById('decay-scale-mult')?.value);
+  const resolvedNewScale=isNaN(newScaleMult)?0:newScaleMult;
+  // Sigma update period
+  const suaRaw=parseFloat(document.getElementById('sigma-update-amount')?.value??'0');
+  const newSigmaAmt=isNaN(suaRaw)||suaRaw<0?0:suaRaw;
+  const newSigmaUnit=document.getElementById('sigma-update-unit')?.value||'days';
   try{
     const oldAmt=parseFloat(document.getElementById('decay-amount').dataset.saved||document.getElementById('decay-amount').value)||4;
     const oldUnit=document.getElementById('decay-unit').dataset.saved||'hours';
     const oldTau=parseFloat(document.getElementById('tau-value')?.dataset.saved||'1.2');
-    await setDoc(doc(db,'config','decay'),{amount,unit,tau:newTau,decayScaleMult:isNaN(newScaleMult)?0:newScaleMult});
+    const smEl=document.getElementById('decay-scale-mult');
+    const oldScaleMult=parseFloat(smEl?.dataset.saved??'0');
+    const oldSigmaAmt=parseFloat(document.getElementById('sigma-update-amount')?.dataset.saved??'0');
+    const oldSigmaUnit=document.getElementById('sigma-update-unit')?.dataset.saved||'days';
+    const sigmaChanged=newSigmaAmt!==oldSigmaAmt||newSigmaUnit!==oldSigmaUnit;
+    // If sigma period changed and new value is non-zero, record enabledAt = now (starting now semantics)
+    const now=Date.now();
+    const newEnabledAt=sigmaChanged&&newSigmaAmt>0?now:(sigmaChanged&&newSigmaAmt===0?0:SIGMA_UPDATE_ENABLED_AT);
+    await setDoc(doc(db,'config','decay'),{amount,unit,tau:newTau,decayScaleMult:resolvedNewScale,
+      sigmaUpdateAmount:newSigmaAmt,sigmaUpdateUnit:newSigmaUnit,sigmaUpdateEnabledAt:newEnabledAt});
     document.getElementById('decay-amount').dataset.saved=amount;
     document.getElementById('decay-unit').dataset.saved=unit;
     const tauEl=document.getElementById('tau-value');
     if(tauEl)tauEl.dataset.saved=newTau;
     TAU=newTau;
-    const smEl=document.getElementById('decay-scale-mult');
-    const oldScaleMult=parseFloat(smEl?.dataset.saved??'0');
-    const resolvedNewScale=isNaN(newScaleMult)?0:newScaleMult;
-    if(smEl)smEl.dataset.saved=resolvedNewScale;
+    if(smEl)smEl.dataset.saved=String(resolvedNewScale);
     DECAY_SCALE_MULTIPLIER=resolvedNewScale;
+    const suaEl=document.getElementById('sigma-update-amount');
+    const suuEl=document.getElementById('sigma-update-unit');
+    if(suaEl)suaEl.dataset.saved=String(newSigmaAmt);
+    if(suuEl)suuEl.dataset.saved=newSigmaUnit;
+    // Apply in-memory immediately
+    SIGMA_UPDATE_ENABLED_AT=newEnabledAt;
+    if(newSigmaAmt===0){SIGMA_UPDATE_INTERVAL_MS=0;}
+    else if(newSigmaUnit==='hours'){SIGMA_UPDATE_INTERVAL_MS=newSigmaAmt*36e5;}
+    else{SIGMA_UPDATE_INTERVAL_MS=newSigmaAmt*864e5;}
     const msgs=[];
     if(amount!==oldAmt||unit!==oldUnit){
       await logAdminAction('decay_change',`RD decay changed to ${amount} ${unit}`,{
@@ -1280,6 +1372,14 @@ window.saveDecay=async function(){
         oldMult:oldScaleMult,newMult:resolvedNewScale
       });
       msgs.push(`decay scale → ${resolvedNewScale}`);
+    }
+    if(sigmaChanged){
+      const desc=newSigmaAmt===0?'Volatility σ update period disabled (per-match mode)':
+        `Volatility σ update period changed to ${newSigmaAmt} ${newSigmaUnit} (effective now)`;
+      await logAdminAction('sigma_update_change',desc,{
+        oldAmount:oldSigmaAmt,oldUnit:oldSigmaUnit,newAmount:newSigmaAmt,newUnit:newSigmaUnit,enabledAt:newEnabledAt
+      });
+      msgs.push(newSigmaAmt===0?'σ update → per-match':`σ update → ${newSigmaAmt} ${newSigmaUnit}`);
     }
     showMsg('decay-msg',msgs.length?`Saved: ${msgs.join(', ')}. Logged as admin action.`:'No changes to save.');
     updateDecayInfo();
@@ -1701,14 +1801,10 @@ function tickNo1Timers(){
     else if(m>0)label=m+'m '+s+'s';
     else label=s+'s';
     el.textContent='👑 '+label;
-    // If timer has beaten the record, update the main text to also count up
-    const record=parseInt(el.dataset.record||'0');
-    if(record&&ms>record){
-      const main=el.previousElementSibling;
-      if(main&&main.classList.contains('no1-record-main')){
-        const d2=Math.floor(ms/864e5),h2=Math.floor((ms%864e5)/36e5),m2=Math.floor((ms%36e5)/6e4),s2=Math.floor((ms%6e4)/1e3);
-        main.textContent=d2>0?d2+'d '+h2+'h '+m2+'m '+s2+'s':h2>0?h2+'h '+m2+'m '+s2+'s':m2>0?m2+'m '+s2+'s':s2+'s';
-      }
+    // Always sync the main span with the live timer when it exists next to the tag
+    const main=el.previousElementSibling;
+    if(main&&main.classList.contains('no1-record-main')){
+      main.textContent=label;
     }
   });
 }
@@ -2263,16 +2359,15 @@ window.submitMatch=async function(){
       if(!ws.exists()||!ls.exists())throw new Error('Player not found');
       const w=ws.data(),l=ls.data();
 
+      const now=Date.now();
       const uw=g2Update(
-        {rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT},
-        [{rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT, s:1}]
+        {rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT, lastSigmaUpdate:w.lastSigmaUpdate||0},
+        [{rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT, s:1}], now
       );
       const ul=g2Update(
-        {rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT},
-        [{rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT, s:0}]
+        {rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT, lastSigmaUpdate:l.lastSigmaUpdate||0},
+        [{rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT, s:0}], now
       );
-
-      const now=Date.now();
       const allSnap=await getDocs(query(collection(db,'players')));
       const allP=allSnap.docs.map(d=>({id:d.id,...d.data()}));
       const ranked=p=>p.rd<=100;
@@ -2284,8 +2379,8 @@ window.submitMatch=async function(){
       });
       const topAfter=simP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
 
-      const wUpdate={rating:uw.rating,rd:uw.rd,sigma:uw.sigma,wins:w.wins+1};
-      const lUpdate={rating:ul.rating,rd:ul.rd,sigma:ul.sigma,losses:l.losses+1};
+      const wUpdate={rating:uw.rating,rd:uw.rd,sigma:uw.sigma,lastSigmaUpdate:uw.lastSigmaUpdate,wins:w.wins+1};
+      const lUpdate={rating:ul.rating,rd:ul.rd,sigma:ul.sigma,lastSigmaUpdate:ul.lastSigmaUpdate,losses:l.losses+1};
 
       if(topBefore?.id!==topAfter?.id){
         if(topBefore){
@@ -2533,8 +2628,8 @@ window.adminRemoveMatch=async function(fid){
       const oppSigma=isWinner?(m.p2newSigma??SIGMA_DEFAULT):(m.p1newSigma??SIGMA_DEFAULT);
 
       const newState=g2Update(
-        {rating:ourState.rating, rd:ourState.rd, sigma:ourState.sigma||SIGMA_DEFAULT},
-        [{rating:oppRating, rd:oppRD, sigma:oppSigma, s:isWinner?1:0}]
+        {rating:ourState.rating, rd:ourState.rd, sigma:ourState.sigma||SIGMA_DEFAULT, lastSigmaUpdate:ourState.lastSigmaUpdate||0},
+        [{rating:oppRating, rd:oppRD, sigma:oppSigma, s:isWinner?1:0}], ts
       );
       const oldRating=ourState.rating;
       const delta=Math.round((newState.rating-oldRating)*10)/10;
@@ -2542,6 +2637,7 @@ window.adminRemoveMatch=async function(fid){
       pmap[ourId].rating=newState.rating;
       pmap[ourId].rd=newState.rd;
       pmap[ourId].sigma=newState.sigma;
+      pmap[ourId].lastSigmaUpdate=newState.lastSigmaUpdate;
       if(isWinner)pmap[ourId].wins=(pmap[ourId].wins||0)+1;
       else pmap[ourId].losses=(pmap[ourId].losses||0)+1;
       pmap[ourId].lastMatchAt=ts;
@@ -2560,11 +2656,11 @@ window.adminRemoveMatch=async function(fid){
 
     const writes=Object.values(playerUpdates).map(p=>
       updateDoc(doc(db,'players',p.firestoreId),{
-        rating:p.rating,rd:p.rd,sigma:p.sigma||SIGMA_DEFAULT,wins:p.wins||0,losses:p.losses||0,lastDecayAt:p.lastMatchAt||Date.now()
+        rating:p.rating,rd:p.rd,sigma:p.sigma||SIGMA_DEFAULT,lastSigmaUpdate:p.lastSigmaUpdate||0,wins:p.wins||0,losses:p.losses||0,lastDecayAt:p.lastMatchAt||Date.now()
       })
     );
-    if(!playerUpdates[pid1])writes.push(updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}));
-    if(!playerUpdates[pid2])writes.push(updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}));
+    if(!playerUpdates[pid1])writes.push(updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,lastSigmaUpdate:s1.lastSigmaUpdate||0,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}));
+    if(!playerUpdates[pid2])writes.push(updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,lastSigmaUpdate:s2.lastSigmaUpdate||0,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}));
 
     await Promise.all([...writes,...matchUpdates]);
     alert('Match deleted and ratings recalculated from that point forward.');
@@ -2704,12 +2800,12 @@ window.repairAllRatings=async function(){
 
       // Recalculate both sides from current state
       const u1=g2Update(
-        {rating:s1.rating,rd:s1.rd,sigma:s1.sigma},
-        [{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,s:1}]
+        {rating:s1.rating,rd:s1.rd,sigma:s1.sigma,lastSigmaUpdate:s1.lastSigmaUpdate||0},
+        [{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,s:1}], evt._ts
       );
       const u2=g2Update(
-        {rating:s2.rating,rd:s2.rd,sigma:s2.sigma},
-        [{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,s:0}]
+        {rating:s2.rating,rd:s2.rd,sigma:s2.sigma,lastSigmaUpdate:s2.lastSigmaUpdate||0},
+        [{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,s:0}], evt._ts
       );
 
       const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
@@ -2722,9 +2818,9 @@ window.repairAllRatings=async function(){
       }));
 
       // Advance state — keep lastDecayAt (already set by applyDecayToTs above)
-      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].sigma=u1.sigma;
+      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].sigma=u1.sigma; state[pid1].lastSigmaUpdate=u1.lastSigmaUpdate;
       state[pid1].wins=s1.wins+1;
-      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].sigma=u2.sigma;
+      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].sigma=u2.sigma; state[pid2].lastSigmaUpdate=u2.lastSigmaUpdate;
       state[pid2].losses=s2.losses+1;
 
       // Track #1 changes — mirrors live submitMatch logic
@@ -2776,7 +2872,7 @@ window.repairAllRatings=async function(){
         no1Since=now; // edge case: they are #1 but no1Since was never set
       }
       playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
-        rating:s.rating,rd,sigma,wins:s.wins,losses:s.losses,lastDecayAt,
+        rating:s.rating,rd,sigma,lastSigmaUpdate:s.lastSigmaUpdate||0,wins:s.wins,losses:s.losses,lastDecayAt,
         no1Since:p.firestoreId===currentTop?no1Since:null,
         longestNo1Ms
       }));
@@ -3006,11 +3102,9 @@ window.openProfile=async function(fid){
     const _record=liveP.longestNo1Ms||0;
     var _no1Prefix=_record?fmtDur(_record)+String.fromCharCode(32):"";
     var _no1Attr=_record?" data-record=\""+_record+"\"":"";
-    var no1Html=isTop&&_liveMs>_record
-      ?_no1Prefix+"<span class=\"no1-timer counting\" data-since=\""+_no1Since+"\""+_no1Attr+">👑 —</span>"
-      :isTop
-        ?"<span class=\"no1-record-main\">"+fmtDur(_record||la)+"</span> <span class=\"no1-timer counting\" data-since=\""+_no1Since+"\" data-record=\""+(String(_record||la))+"\">👑 —</span>"
-        :fmtDur(_record||la);
+    var no1Html=isTop
+      ?"<span class=\"no1-record-main\">"+fmtDur(_liveMs||0)+"</span> <span class=\"no1-timer counting\" data-since=\""+_no1Since+"\" data-record=\""+(String(_record||la||0))+"\">👑 —</span>"
+      :fmtDur(_record||la);
     const liveSigma=(liveP.sigma||SIGMA_DEFAULT).toFixed(4);
     const sigC=(liveP.sigma||SIGMA_DEFAULT)>0.15?'red':(liveP.sigma||SIGMA_DEFAULT)>0.09?'':'neutral';
     document.getElementById('profile-stats').innerHTML=`
@@ -4391,6 +4485,7 @@ window.showPanel=function(id,btn){
     const saved=JSON.parse(localStorage.getItem('tttiw-theme')||'null');
     buildSliders(saved||THEMES['Default']);
   }
+  if(id==='rules'){updateDecayInfo();}
 };
 
 function cap(s){return String(s).replace(/\b\w/g,c=>c.toUpperCase());}
