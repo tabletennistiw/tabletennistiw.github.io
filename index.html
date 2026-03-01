@@ -78,6 +78,7 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:visible;}
 .no1-timer{display:none;font-family:'DM Mono',monospace;font-size:.58rem;color:var(--accent3);
   letter-spacing:.03em;line-height:1;white-space:nowrap;border:1px solid rgba(201,160,220,.3);
   padding:.1rem .35rem;flex-shrink:0;}
+.no1-record-main{flex-shrink:0;}
 .m-stat .no1-timer{display:inline-flex;align-items:center;}
 @media(min-width:641px){
   .no1-timer{display:inline-flex;align-items:center;}
@@ -498,6 +499,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
             <div class="rule-item"><div class="rule-icon">2&times;</div><div><div class="rule-title">2 Serves Each</div><div class="rule-desc">Players alternate with 2 serves per turn.</div></div></div>
             <div class="rule-item"><div class="rule-icon">&infin;</div><div><div class="rule-title">Deuce Serving</div><div class="rule-desc">At 10&ndash;10 (deuce), alternate serves every point.</div></div></div>
             <div class="rule-item"><div class="rule-icon">6&Prime;</div><div><div class="rule-title">Serve Height</div><div class="rule-desc">Ball must be struck 6 inches above the table surface.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">HIT</div><div><div class="rule-title">Contact</div><div class="rule-desc">The ball must be struck on the way down, behind the end line and above the table surface.</div></div></div>
 
           </div>
         </div>
@@ -506,8 +508,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <div class="rules-col-title">Rating System</div>
           <div class="rules-list">
             <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">RD</div><div><div class="rule-title">Rating Deviation</div><div class="rule-desc">RD measures how confident the system is in a player's rating. A low RD means the rating is reliable; a high RD means more uncertainty. New players start at RD 120. After enough games, RD can drop below 100 &mdash; only then does a player appear on the leaderboard.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&sigma;</div><div><div class="rule-title">Volatility (&sigma;)</div><div class="rule-desc">Volatility measures how erratic a player's performance is. A higher &sigma; means results are unpredictable &mdash; the system reacts more strongly to upsets. It's recalculated <span id="rules-sigma-update-period">every match</span> using the Glicko-2 Illinois algorithm. Starting &sigma;: <span id="rules-sigma-default"></span>. Capped at 0.30.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">RD Decay (Inactivity)</div><div class="rule-desc">If you stop playing, your RD slowly increases using your personal volatility: &phi;* = &radic;(&phi;&sup2; + &sigma;&sup2;). Volatile players decay faster. One decay period = <span id="rules-decay-period"></span>. RD is capped at 200 &mdash; above 100 you're hidden from the leaderboard.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">RD Decay (Inactivity)</div><div class="rule-desc">If you stop playing, your RD slowly increases each inactive period. One decay period = <span id="rules-decay-period"></span>. RD is capped at 200 &mdash; above 100 you're hidden from the leaderboard.</div></div></div>
             <div class="rule-item"><div class="rule-icon" style="font-size:.6rem">R&#x2193;</div><div><div class="rule-title">Rating-Scaled Decay</div><div class="rule-desc" id="rules-scaled-decay-desc"></div></div></div>
           </div>
         </div>
@@ -522,7 +523,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">Season Settings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.3)">
-          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Set a season end date. When the deadline passes, you can trigger a season reset — all ratings return to 1500, RD to 120, volatility to 0.06, wins/losses to 0, and a snapshot of final rankings is saved to each player's history.</p>
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Set a season end date. When the deadline passes, you can trigger a season reset — all ratings return to 1500, RD to 120, wins/losses to 0, and a snapshot of final rankings is saved to each player's history.</p>
           <div class="field">
             <label>Season Name</label>
             <input type="text" id="season-name-input" placeholder="e.g. Spring 2025">
@@ -576,7 +577,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">RD Decay Settings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
-          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases each inactive period using each player's personal volatility: <strong style="color:var(--text)">φ* = √(φ² + σ²)</strong>. Volatile players decay faster. Current period: <strong id="admin-decay-period-display" style="color:var(--text)">—</strong> · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases by a fixed amount each inactive period. Current period: <strong id="admin-decay-period-display" style="color:var(--text)">—</strong> · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
           <div id="decay-info" style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.6rem .8rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem">
             Loading current settings…
           </div>
@@ -592,23 +593,12 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
             </div>
           </div>
           <div class="field" style="margin-top:.6rem">
-            <label>Volatility System Constant (τ) <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Controls how much volatility can change per match. Lower = more stable. Recommended: 0.3–0.8</span></label>
-            <input type="number" id="tau-value" value="1.2" min="0.1" max="2.0" step="0.05" style="width:120px">
           </div>
           <div class="field" style="margin-top:.6rem">
-            <label>Rating-Scaled Decay Multiplier <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Scale = 1500 / (rating × multiplier). At 1.0: 1500-rated players decay at 1x. Higher = everyone decays slower. 0 = disabled (flat decay)</span></label>
+            <label>Rating-Scaled Decay Exponent (m) <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Scale = (1500/rating)^m. At m=1: 1500-rated players decay at 1×, higher-rated decay slower. 0 = disabled (flat decay)</span></label>
             <input type="number" id="decay-scale-mult" value="0" min="0" step="0.1" style="width:120px">
           </div>
           <div class="field" style="margin-top:.6rem">
-            <label>Volatility (σ) Update Period <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">How often σ is recalculated via Illinois. 0 = update every match (legacy). Changes take effect starting now for all players.</span></label>
-            <div style="display:flex;gap:.6rem">
-              <input type="number" id="sigma-update-amount" value="0" min="0" style="width:90px;flex-shrink:0;flex:none">
-              <select id="sigma-update-unit">
-                <option value="hours">Hours</option>
-                <option value="days" selected>Days</option>
-              </select>
-            </div>
-            <div style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:.35rem" id="sigma-update-info"></div>
           </div>
           <button class="btn" onclick="saveDecay()">Save Decay Settings</button>
           <div class="msg" id="decay-msg"></div>
@@ -618,7 +608,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">Repair Ratings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
-          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Recalculates every player's rating, RD, and volatility directly from their last stored match result, then applies any accumulated decay since that match. Use this to fix any players whose values were incorrectly reset.</p>
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Recalculates every player's rating and RD directly from their last stored match result, then applies any accumulated decay since that match. Use this to fix any players whose values were incorrectly reset.</p>
           <button class="btn-admin" onclick="repairAllRatings()" style="font-size:.68rem;padding:.65rem 1.2rem">🔧 Repair All Ratings From Match History</button>
           <div class="msg" id="repair-msg" style="margin-top:.65rem"></div>
         </div>
@@ -661,7 +651,6 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
               </div>
               <div class="field" style="margin-bottom:.5rem"><label>Rating</label><input type="number" id="sim-a-rating" value="1500" step="1"></div>
               <div class="field" style="margin-bottom:.5rem"><label>RD</label><input type="number" id="sim-a-rd" placeholder="120" step="0.1" min="30" max="200"></div>
-              <div class="field" style="margin-bottom:0"><label>Volatility σ</label><input type="number" id="sim-a-sigma" placeholder="0.06" step="0.001" min="0.01" max="0.30"></div>
             </div>
             <div>
               <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--admin);margin-bottom:.5rem">Player B</div>
@@ -673,7 +662,6 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
               </div>
               <div class="field" style="margin-bottom:.5rem"><label>Rating</label><input type="number" id="sim-b-rating" value="1500" step="1"></div>
               <div class="field" style="margin-bottom:.5rem"><label>RD</label><input type="number" id="sim-b-rd" placeholder="120" step="0.1" min="30" max="200"></div>
-              <div class="field" style="margin-bottom:0"><label>Volatility σ</label><input type="number" id="sim-b-sigma" placeholder="0.06" step="0.001" min="0.01" max="0.30"></div>
             </div>
           </div>
           <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap">
@@ -684,7 +672,6 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <div id="sim-result" style="display:none;margin-top:1rem;background:rgba(0,0,0,.25);border:1px solid var(--border);padding:.85rem 1rem;font-family:'DM Mono',monospace;font-size:.65rem;line-height:2;"></div>
         </div>
       </div>
-
 
 
     </div>
@@ -868,8 +855,19 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       </div>
     </div>
     <div class="field">
-      <label>Select Players</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem">
+        <label style="margin:0">Select Players</label>
+        <div style="display:flex;gap:.4rem">
+          <button class="btn-ghost" style="padding:.25rem .55rem;font-size:.52rem" onclick="brSelectAll(true)">All</button>
+          <button class="btn-ghost" style="padding:.25rem .55rem;font-size:.52rem" onclick="brSelectAll(false)">None</button>
+        </div>
+      </div>
       <div id="bracket-player-checkboxes" style="max-height:180px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);padding:.5rem .75rem;display:flex;flex-direction:column;gap:.35rem;"></div>
+      <div style="display:flex;gap:.5rem;margin-top:.5rem;align-items:center">
+        <input type="text" id="bracket-add-player-input" placeholder="Add player by name…" style="flex:1;font-size:.72rem;padding:.4rem .65rem" onkeydown="if(event.key==='Enter'){brAddPlayerToList();event.preventDefault();}">
+        <button class="btn-ghost" style="padding:.4rem .75rem;font-size:.58rem;white-space:nowrap;flex-shrink:0" onclick="brAddPlayerToList()">+ Add</button>
+      </div>
+      <div id="bracket-add-msg" style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--loss);margin-top:.3rem;display:none"></div>
     </div>
     <div style="display:flex;gap:.65rem;margin-top:.5rem">
       <button class="btn" onclick="createBracket()">Create Bracket</button>
@@ -902,7 +900,6 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
     <div class="field"><label>Name</label><input type="text" id="edit-name" autocomplete="off"></div>
     <div class="field"><label>Rating</label><input type="number" id="edit-rating" step="0.1"></div>
     <div class="field"><label>RD</label><input type="number" id="edit-rd" step="0.1"></div>
-    <div class="field"><label>Volatility (σ)</label><input type="number" id="edit-sigma" step="0.001" min="0.01" max="0.30"></div>
     <div class="field"><label>Wins</label><input type="number" id="edit-wins" step="1" min="0"></div>
     <div class="field"><label>Losses</label><input type="number" id="edit-losses" step="1" min="0"></div>
     <div class="field">
@@ -939,9 +936,6 @@ const db=getFirestore(app);
 let players=[],matches=[],isAdmin=false,curProfileId=null;
 const ADMIN_PW='pppaddle';
 const RD_MAX=200;
-const SIGMA_DEFAULT=0.06;
-const SIGMA_MAX=0.30;
-let TAU=1.2;
 let DECAY_SCALE_MULTIPLIER=1.0;
 const EPSILON=0.000001;
 
@@ -966,24 +960,13 @@ function E(mu, muj, phij) {
   return 1 / (1 + Math.exp(-gPhi(phij) * (mu - muj)));
 }
 
-let SIGMA_UPDATE_INTERVAL_MS = 864e5; // configurable via admin; default 24 hours
-let SIGMA_UPDATE_ENABLED_AT = 0;    // timestamp when this feature was first turned on; 0 = use legacy per-match behaviour
 
-function g2Update(player, opps, nowMs) {
+function g2Update(player, opps) {
   const { mu, phi } = toG2(player.rating, player.rd);
-  const sigma = player.sigma || SIGMA_DEFAULT;
-  const now = nowMs || Date.now();
 
-  // Only update sigma if feature is enabled and the interval has elapsed.
-  // lastSigmaUpdate=0 means never updated under the new system — treat as enabledAt so first update is one full period after activation.
-  const lastSigmaUpdate = player.lastSigmaUpdate || 0;
-  const baseline = lastSigmaUpdate > 0 ? lastSigmaUpdate : SIGMA_UPDATE_ENABLED_AT;
-  const sigmaUpdateDue = SIGMA_UPDATE_ENABLED_AT > 0 && (now - baseline) >= SIGMA_UPDATE_INTERVAL_MS;
 
   if (!opps.length) {
-    const phiStar = Math.sqrt(phi * phi + sigma * sigma);
-    const r = fromG2(mu, Math.min(phiStar, RD_MAX / SCALE));
-    return { rating: r.r, rd: r.rd, sigma, lastSigmaUpdate: lastSigmaUpdate };
+    return { rating: player.rating, rd: player.rd };
   }
 
   let vInv = 0, deltaSum = 0;
@@ -997,62 +980,15 @@ function g2Update(player, opps, nowMs) {
   const v = 1 / vInv;
   const delta = v * deltaSum;
 
-  // Only run the Illinois sigma solve if a day has passed; otherwise keep sigma frozen
-  const newSigma = sigmaUpdateDue ? Math.min(computeNewSigma(sigma, phi, v, delta), SIGMA_MAX) : sigma;
-  const newLastSigmaUpdate = sigmaUpdateDue ? now : lastSigmaUpdate;
 
-  const phiStar = Math.sqrt(phi * phi + newSigma * newSigma);
-  const phiNew = 1 / Math.sqrt(1 / (phiStar * phiStar) + 1 / v);
+  const phiNew = 1 / Math.sqrt(1 / (phi * phi) + 1 / v);
   const muNew = mu + phiNew * phiNew * deltaSum;
 
   const r = fromG2(muNew, phiNew);
   return {
     rating: r.r,
     rd: Math.min(r.rd, RD_MAX),
-    sigma: newSigma,
-    lastSigmaUpdate: newLastSigmaUpdate
   };
-}
-
-function computeNewSigma(sigma, phi, v, delta) {
-  const a = Math.log(sigma * sigma);
-  const tau2 = TAU * TAU;
-  const phi2 = phi * phi;
-  const delta2 = delta * delta;
-
-  function f(x) {
-    const ex = Math.exp(x);
-    const d2 = phi2 + v + ex;
-    return (ex * (delta2 - phi2 - v - ex)) / (2 * d2 * d2) - (x - a) / tau2;
-  }
-
-  let A = a;
-  let B;
-  if (delta2 > phi2 + v) {
-    B = Math.log(delta2 - phi2 - v);
-  } else {
-    let k = 1;
-    while (f(a - k * TAU) < 0) k++;
-    B = a - k * TAU;
-  }
-
-  let fA = f(A);
-  let fB = f(B);
-
-  let iterations = 0;
-  while (Math.abs(B - A) > EPSILON && iterations < 500) {
-    const C = A + (A - B) * fA / (fB - fA);
-    const fC = f(C);
-    if (fC * fB <= 0) {
-      A = B; fA = fB;
-    } else {
-      fA = fA / 2;
-    }
-    B = C; fB = fC;
-    iterations++;
-  }
-
-  return Math.exp(A / 2);
 }
 
 // ── ADMIN ────────────────────────────────────────────────────────────────────
@@ -1146,28 +1082,10 @@ onSnapshot(doc(db,'config','decay'),snap=>{
     amtEl.dataset.saved=amt;
     const sel=document.getElementById('decay-unit');
     if(sel){for(let o of sel.options){if(o.value===unt){o.selected=true;break;}}sel.dataset.saved=unt;}
-    if(d.tau!=null){
-      TAU=d.tau;
-      const tauEl=document.getElementById('tau-value');
-      if(tauEl){tauEl.value=d.tau;tauEl.dataset.saved=d.tau;}
-    }
     if(d.decayScaleMult!=null){
       DECAY_SCALE_MULTIPLIER=d.decayScaleMult;
       const smEl=document.getElementById('decay-scale-mult');
       if(smEl){smEl.value=d.decayScaleMult;smEl.dataset.saved=d.decayScaleMult;}
-    }
-    if(d.sigmaUpdateEnabledAt!=null){
-      SIGMA_UPDATE_ENABLED_AT=d.sigmaUpdateEnabledAt;
-    }
-    if(d.sigmaUpdateAmount!=null){
-      const sua=d.sigmaUpdateAmount, suu=d.sigmaUpdateUnit||'days';
-      if(sua===0){SIGMA_UPDATE_INTERVAL_MS=0;}
-      else if(suu==='hours'){SIGMA_UPDATE_INTERVAL_MS=sua*36e5;}
-      else{SIGMA_UPDATE_INTERVAL_MS=sua*864e5;}
-      const suaEl=document.getElementById('sigma-update-amount');
-      const suuEl=document.getElementById('sigma-update-unit');
-      if(suaEl){suaEl.value=sua;suaEl.dataset.saved=String(sua);}
-      if(suuEl){for(let o of suuEl.options){if(o.value===suu){o.selected=true;break;}}suuEl.dataset.saved=suu;}
     }
   }
   updateDecayStatus();
@@ -1189,42 +1107,21 @@ function updateDecayInfo(){
   if(!di)return;
   const a=document.getElementById('decay-amount').value||'4';
   const u=document.getElementById('decay-unit').value||'hours';
-  di.textContent=`Decay period: ${a} ${u} · Max RD: 200 · Players hidden if RD > 100 · Uses personal σ per player`;
+  di.textContent=`Decay period: ${a} ${u} · Max RD: 200 · Players hidden if RD > 100`;
   // Update admin description text
   const adp=document.getElementById('admin-decay-period-display');
   if(adp)adp.textContent=`${a} ${u}`;
   // Update rules panel live values
   const rPeriod=document.getElementById('rules-decay-period');
   if(rPeriod)rPeriod.textContent=`${a} ${u}`;
-  const rSigma=document.getElementById('rules-sigma-default');
-  if(rSigma)rSigma.textContent=SIGMA_DEFAULT;
   const rScale=document.getElementById('rules-scaled-decay-desc');
   if(rScale){
     const mult=DECAY_SCALE_MULTIPLIER;
     if(!mult||mult<=0){
       rScale.textContent='Rating-scaled decay is currently disabled. All players decay at the same flat rate.';
     } else {
-      rScale.innerHTML=`Higher-rated players decay more slowly. Scale = 1500 / (rating × ${mult}), so a 1500-rated player decays at 1×, a higher-rated player at less than 1×. Current multiplier: <strong style="color:var(--text)">${mult}</strong>.`;
+      rScale.innerHTML=`Higher-rated players decay more slowly. Scale = (1500/rating)^${mult}, so a 1500-rated player decays at 1×, a higher-rated player at less than 1×. Current exponent: <strong style="color:var(--text)">${mult}</strong>.`;
     }
-  }
-  // Sigma update period info display
-  const suaEl=document.getElementById('sigma-update-amount');
-  const suuEl=document.getElementById('sigma-update-unit');
-  const suaV=parseFloat(suaEl?.value??'0');
-  const suuV=suuEl?.value||'days';
-  const sigmaInfoEl=document.getElementById('sigma-update-info');
-  if(sigmaInfoEl){
-    if(!suaV||suaV<=0){
-      sigmaInfoEl.textContent='Currently: σ recalculates every match (legacy mode).';
-    } else {
-      const sinceStr=SIGMA_UPDATE_ENABLED_AT>0?(' · Active since '+new Date(SIGMA_UPDATE_ENABLED_AT).toLocaleString()):'';
-      sigmaInfoEl.textContent=`Currently: σ recalculates every ${suaV} ${suuV}${sinceStr}.`;
-    }
-  }
-  // Update volatility rule text in rules panel
-  const rSigmaUpdate=document.getElementById('rules-sigma-update-period');
-  if(rSigmaUpdate){
-    rSigmaUpdate.textContent=(!suaV||suaV<=0)?'every match':`every ${suaV} ${suuV}`;
   }
 }
 
@@ -1245,7 +1142,6 @@ function currentDecayPeriod(ms){
 function computeDecay(p){
   if(p.decayImmune)return null;
   const ms=decayMs();
-  const sigma=p.sigma||SIGMA_DEFAULT;
   const lastProcessed=p.lastDecayAt||0;
   const basePeriod=Math.floor(lastProcessed/ms);
   const nowPeriod=currentDecayPeriod(ms);
@@ -1254,15 +1150,14 @@ function computeDecay(p){
 
   let phi=p.rd/SCALE, phiMax=RD_MAX/SCALE;
   for(let i=0;i<per;i++){
-    phi=Math.sqrt(phi*phi+sigma*sigma);
+    phi=Math.sqrt(phi*phi+0.0036);
     if(phi>=phiMax){phi=phiMax;break;}
   }
 
   const newLast=nowPeriod*ms;
-  // Rating-scaled decay: scale = 1500 / (rating * multiplier), applied outside sqrt
-  let rdGrowth=(phi-p.rd/SCALE)*SCALE; // how much RD grew from decay
+  // Rating-scaled decay: scale = (1500/rating)^m
   if(DECAY_SCALE_MULTIPLIER>0){
-    const scale=1500/((p.rating||1500)*DECAY_SCALE_MULTIPLIER);
+    const scale=Math.pow((1500/(p.rating||1500)),DECAY_SCALE_MULTIPLIER);
     phi=p.rd/SCALE+(phi-p.rd/SCALE)*scale; // baseline + scaled growth
   }
   return{newRD:Math.min(phi*SCALE,RD_MAX), newLast};
@@ -1316,44 +1211,21 @@ window.saveDecay=async function(){
   const amount=parseFloat(document.getElementById('decay-amount').value);
   const unit=document.getElementById('decay-unit').value;
   if(!amount||amount<=0){showMsg('decay-msg','Enter a valid period.',true);return;}
-  const newTau=parseFloat(document.getElementById('tau-value')?.value)||0.5;
-  if(!newTau||newTau<=0){showMsg('decay-msg','Enter a valid τ value.',true);return;}
   const newScaleMult=parseFloat(document.getElementById('decay-scale-mult')?.value);
   const resolvedNewScale=isNaN(newScaleMult)?0:newScaleMult;
-  // Sigma update period
-  const suaRaw=parseFloat(document.getElementById('sigma-update-amount')?.value??'0');
-  const newSigmaAmt=isNaN(suaRaw)||suaRaw<0?0:suaRaw;
-  const newSigmaUnit=document.getElementById('sigma-update-unit')?.value||'days';
   try{
     const oldAmt=parseFloat(document.getElementById('decay-amount').dataset.saved||document.getElementById('decay-amount').value)||4;
     const oldUnit=document.getElementById('decay-unit').dataset.saved||'hours';
-    const oldTau=parseFloat(document.getElementById('tau-value')?.dataset.saved||'1.2');
     const smEl=document.getElementById('decay-scale-mult');
     const oldScaleMult=parseFloat(smEl?.dataset.saved??'0');
-    const oldSigmaAmt=parseFloat(document.getElementById('sigma-update-amount')?.dataset.saved??'0');
-    const oldSigmaUnit=document.getElementById('sigma-update-unit')?.dataset.saved||'days';
-    const sigmaChanged=newSigmaAmt!==oldSigmaAmt||newSigmaUnit!==oldSigmaUnit;
-    // If sigma period changed and new value is non-zero, record enabledAt = now (starting now semantics)
     const now=Date.now();
-    const newEnabledAt=sigmaChanged&&newSigmaAmt>0?now:(sigmaChanged&&newSigmaAmt===0?0:SIGMA_UPDATE_ENABLED_AT);
-    await setDoc(doc(db,'config','decay'),{amount,unit,tau:newTau,decayScaleMult:resolvedNewScale,
-      sigmaUpdateAmount:newSigmaAmt,sigmaUpdateUnit:newSigmaUnit,sigmaUpdateEnabledAt:newEnabledAt});
+    await setDoc(doc(db,'config','decay'),{amount,unit,decayScaleMult:resolvedNewScale});// 
+      
     document.getElementById('decay-amount').dataset.saved=amount;
     document.getElementById('decay-unit').dataset.saved=unit;
-    const tauEl=document.getElementById('tau-value');
-    if(tauEl)tauEl.dataset.saved=newTau;
-    TAU=newTau;
     if(smEl)smEl.dataset.saved=String(resolvedNewScale);
     DECAY_SCALE_MULTIPLIER=resolvedNewScale;
-    const suaEl=document.getElementById('sigma-update-amount');
-    const suuEl=document.getElementById('sigma-update-unit');
-    if(suaEl)suaEl.dataset.saved=String(newSigmaAmt);
-    if(suuEl)suuEl.dataset.saved=newSigmaUnit;
     // Apply in-memory immediately
-    SIGMA_UPDATE_ENABLED_AT=newEnabledAt;
-    if(newSigmaAmt===0){SIGMA_UPDATE_INTERVAL_MS=0;}
-    else if(newSigmaUnit==='hours'){SIGMA_UPDATE_INTERVAL_MS=newSigmaAmt*36e5;}
-    else{SIGMA_UPDATE_INTERVAL_MS=newSigmaAmt*864e5;}
     const msgs=[];
     if(amount!==oldAmt||unit!==oldUnit){
       await logAdminAction('decay_change',`RD decay changed to ${amount} ${unit}`,{
@@ -1361,25 +1233,11 @@ window.saveDecay=async function(){
       });
       msgs.push(`decay → ${amount} ${unit}`);
     }
-    if(newTau!==oldTau){
-      await logAdminAction('tau_change',`Volatility τ changed to ${newTau}`,{
-        oldTau,newTau
-      });
-      msgs.push(`τ → ${newTau}`);
-    }
     if(resolvedNewScale!==oldScaleMult){
       await logAdminAction('decay_scale_change',`Rating-scaled decay multiplier changed to ${resolvedNewScale}`,{
         oldMult:oldScaleMult,newMult:resolvedNewScale
       });
       msgs.push(`decay scale → ${resolvedNewScale}`);
-    }
-    if(sigmaChanged){
-      const desc=newSigmaAmt===0?'Volatility σ update period disabled (per-match mode)':
-        `Volatility σ update period changed to ${newSigmaAmt} ${newSigmaUnit} (effective now)`;
-      await logAdminAction('sigma_update_change',desc,{
-        oldAmount:oldSigmaAmt,oldUnit:oldSigmaUnit,newAmount:newSigmaAmt,newUnit:newSigmaUnit,enabledAt:newEnabledAt
-      });
-      msgs.push(newSigmaAmt===0?'σ update → per-match':`σ update → ${newSigmaAmt} ${newSigmaUnit}`);
     }
     showMsg('decay-msg',msgs.length?`Saved: ${msgs.join(', ')}. Logged as admin action.`:'No changes to save.');
     updateDecayInfo();
@@ -1388,33 +1246,30 @@ window.saveDecay=async function(){
 
 // Helper: reconstruct a player's state from match history up to (not including) a given point
 function playerStateFromHistory(allMatchesBefore, pid) {
-  let rating=1500, rd=120, sigma=SIGMA_DEFAULT, wins=0, losses=0, lastMatchAt=null;
+  let rating=1500, rd=120, wins=0, losses=0, lastMatchAt=null;
   for(const m of allMatchesBefore){
     if(m.p1id===pid){
       rating=m.p1newRating;
       rd=m.p1newRD;
-      sigma=m.p1newSigma||SIGMA_DEFAULT;
       wins++;
       lastMatchAt=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
     } else if(m.p2id===pid){
       rating=m.p2newRating;
       rd=m.p2newRD;
-      sigma=m.p2newSigma||SIGMA_DEFAULT;
       losses++;
       lastMatchAt=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
     }
   }
-  return{rating,rd,sigma,wins,losses,lastMatchAt};
+  return{rating,rd,wins,losses,lastMatchAt};
 }
 
 function applyDecayToPlayer(p, nowMs, periodMs){
   if(!p.lastMatchAt||periodMs<=0)return;
-  const sigma=p.sigma||SIGMA_DEFAULT;
   const periods=Math.floor((nowMs-p.lastMatchAt)/periodMs);
   if(periods<=0)return;
   let phi=p.rd/SCALE;
   const phiMax=RD_MAX/SCALE;
-  for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+  for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
   p.rd=Math.min(phi*SCALE,RD_MAX);
 }
 
@@ -1529,7 +1384,6 @@ function initLbQuoteZone(vis){
           x:rect.left-zR.left-PAD, y:rect.top-zR.top-PAD, w:rect.width+PAD*2, h:rect.height+PAD*2
         });
       });
-    } else {
       node.childNodes.forEach(collectTextRects);
     }
   }
@@ -1649,7 +1503,7 @@ window.addPlayer=async function(){
   const btn=document.getElementById('add-player-btn');btn.disabled=true;
   try{
     await addDoc(collection(db,'players'),{
-      name, rating:1500, rd:120, sigma:SIGMA_DEFAULT,
+      name, rating:1500, rd:120,
       wins:0, losses:0, lastDecayAt:Date.now(), createdAt:serverTimestamp()
     });
     document.getElementById('player-name').value='';
@@ -1662,8 +1516,6 @@ function makeCard(p){
   const wr=(p.wins+p.losses)>0?Math.round(p.wins/(p.wins+p.losses)*100):0;
   const wc=wr>=60?'var(--win)':wr>=40?'var(--text)':'var(--loss)';
   const rdH=p.rd>100,rdC=rdH?'var(--loss)':p.rd>80?'var(--accent)':'var(--win)';
-  const sigma=p.sigma||SIGMA_DEFAULT;
-  const sigmaC=sigma>0.15?'var(--loss)':sigma>0.09?'var(--accent)':'var(--win)';
   const{ls,cs,la}=pStats(p.firestoreId),sc=cs>=5?'var(--win)':cs>=3?'var(--accent)':'var(--text)';
   const av=p.photoURL?`<img class="pc-avatar" src="${esc(p.photoURL)}" alt="">`:`<div class="pc-av-ph">${esc(p.name.charAt(0).toUpperCase())}</div>`;
   const seasons=p.seasons||[];
@@ -1693,7 +1545,6 @@ function makeCard(p){
       <div class="pc-stat"><span class="pc-stat-l">Record</span><span class="pc-stat-v">${p.wins}W–${p.losses}L</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Win%</span><span class="pc-stat-v" style="color:${wc}">${wr}%</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Streak</span><span class="pc-stat-v" style="color:${sc}">${cs>0?cs+'W':'—'}</span></div>
-      <div class="pc-stat"><span class="pc-stat-l">Volatility σ</span><span class="pc-stat-v" style="color:${sigmaC};font-size:.9rem">${sigma.toFixed(4)}</span></div>
     </div>
     <div class="pc-foot"><span class="pc-hint">TAP TO VIEW PROFILE</span></div>
     ${histHtml}
@@ -1724,7 +1575,6 @@ window.showSeasonData=function(sel,dataId){
   el.innerHTML=`<strong>${emoji}${esc(s.seasonName||('Season '+s.seasonNum))}</strong><br>
     Final Rank: <strong style="color:${rk===1?'var(--accent)':rk===2?'#c0c0c0':rk===3?'#cd7f32':'var(--text)'}">#${rk}</strong><br>
     Final Rating: <strong style="color:var(--accent)">${r2(s.rating)}</strong> ±${r2(s.rd)}<br>
-    Volatility σ: <strong>${(s.sigma||SIGMA_DEFAULT).toFixed(4)}</strong><br>
     Record: <strong>${s.wins}W – ${s.losses}L</strong><br>
     Season ended: ${ended}`;
 };
@@ -1759,8 +1609,8 @@ function pStats(fid){
           for(const id of Object.keys(rds)){
             let phi=rds[id]/SCALE;
             const phiMax=RD_MAX/SCALE;
-            const pSigma=(players.find(x=>x.firestoreId===id)?.sigma)||SIGMA_DEFAULT;
-            for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+pSigma*pSigma);if(phi>=phiMax){phi=phiMax;break;}}
+
+            for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
             rds[id]=Math.min(phi*SCALE,RD_MAX);
           }
           if(wasFidTop&&top()!==fid){
@@ -1871,7 +1721,7 @@ window.saveSeason=async function(){
 };
 
 window.triggerSeasonReset=async function(){
-  if(!confirm(`This will:\n1. Save each player's rank, stats & full match history for this season\n2. Reset ALL ratings to 1500, RD to 120, volatility to 0.06, wins/losses to 0\n3. Clear all matches from the active log\n\nSeason: "${seasonConfig.name||'Current'}"\n\nThis cannot be undone. Continue?`))return;
+  if(!confirm(`This will:\n1. Save each player's rank, stats & full match history for this season\n2. Reset ALL ratings to 1500, RD to 120, wins/losses to 0\n3. Clear all matches from the active log\n\nSeason: "${seasonConfig.name||'Current'}"\n\nThis cannot be undone. Continue?`))return;
   const btn=document.getElementById('reset-season-btn');btn.disabled=true;btn.textContent='Archiving…';
   try{
     const sNum=seasonConfig.seasonNum||1;
@@ -1925,11 +1775,11 @@ window.triggerSeasonReset=async function(){
       const existing=p.seasons||[];
       const entry={
         seasonNum:sNum,seasonName:sName,rank:rankMap[pid],
-        rating:p.rating,rd:p.rd,sigma:p.sigma||SIGMA_DEFAULT,
+        rating:p.rating,rd:p.rd,
         wins:p.wins,losses:p.losses,endedAt,longestWinStreak:ls
       };
       return updateDoc(doc(db,'players',pid),{
-        rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastDecayAt:Date.now(),
+        rating:1500,rd:120,wins:0,losses:0,lastDecayAt:Date.now(),
         seasons:[...existing,entry]
       });
     }));
@@ -1977,7 +1827,6 @@ async function testGitHubBackup(){
     const d=await res.json();
     if(res.ok){
       showMsg('gh-msg',`✅ Connected to ${d.full_name} (${d.private?'private':'public'}) on branch "${cfg.branch}"`);
-    } else {
       showMsg('gh-msg',`❌ ${d.message||'Access denied'}`,true);
     }
   }catch(e){showMsg('gh-msg','❌ Network error: '+e.message,true);}
@@ -1992,7 +1841,7 @@ async function backupSeasonToGitHub(sNum, sName, endedAt, ranked, rankMap, allMa
     seasonNum:sNum, seasonName:sName, endedAt,
     finalRankings:ranked.map((p,i)=>({
       rank:i+1, name:p.name, firestoreId:p.firestoreId,
-      rating:p.rating, rd:p.rd, sigma:p.sigma||SIGMA_DEFAULT,
+      rating:p.rating, rd:p.rd,
       wins:p.wins, losses:p.losses
     })),
     allPlayersRankMap:Object.entries(rankMap).map(([id,rank])=>{
@@ -2193,7 +2042,6 @@ window.restoreSeason=async function(){
       return updateDoc(doc(db,'players',player.firestoreId),{
         rating:entry.rating,
         rd:entry.rd,
-        sigma:entry.sigma||SIGMA_DEFAULT,
         wins:entry.wins,
         losses:entry.losses,
         lastDecayAt:Date.now(),
@@ -2339,7 +2187,6 @@ function lockMatchForm(locked){
       notice.textContent='⚠ Season has ended. Match submission is locked until the admin resets the season.';
       panel.querySelector('.form-card').prepend(notice);
     }
-  } else {
     if(notice)notice.remove();
   }
 }
@@ -2361,12 +2208,12 @@ window.submitMatch=async function(){
 
       const now=Date.now();
       const uw=g2Update(
-        {rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT, lastSigmaUpdate:w.lastSigmaUpdate||0},
-        [{rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT, s:1}], now
+        {rating:w.rating, rd:w.rd},
+        [{rating:l.rating, rd:l.rd, s:1}], now
       );
       const ul=g2Update(
-        {rating:l.rating, rd:l.rd, sigma:l.sigma||SIGMA_DEFAULT, lastSigmaUpdate:l.lastSigmaUpdate||0},
-        [{rating:w.rating, rd:w.rd, sigma:w.sigma||SIGMA_DEFAULT, s:0}], now
+        {rating:l.rating, rd:l.rd},
+        [{rating:w.rating, rd:w.rd, s:0}], now
       );
       const allSnap=await getDocs(query(collection(db,'players')));
       const allP=allSnap.docs.map(d=>({id:d.id,...d.data()}));
@@ -2379,8 +2226,8 @@ window.submitMatch=async function(){
       });
       const topAfter=simP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
 
-      const wUpdate={rating:uw.rating,rd:uw.rd,sigma:uw.sigma,lastSigmaUpdate:uw.lastSigmaUpdate,wins:w.wins+1};
-      const lUpdate={rating:ul.rating,rd:ul.rd,sigma:ul.sigma,lastSigmaUpdate:ul.lastSigmaUpdate,losses:l.losses+1};
+      const wUpdate={rating:uw.rating,rd:uw.rd,wins:w.wins+1};
+      const lUpdate={rating:ul.rating,rd:ul.rd,losses:l.losses+1};
 
       if(topBefore?.id!==topAfter?.id){
         if(topBefore){
@@ -2415,7 +2262,6 @@ window.submitMatch=async function(){
         p1delta:Math.round((uw.rating-w.rating)*10)/10,
         p2delta:Math.round((ul.rating-l.rating)*10)/10,
         p1newRD:uw.rd,p2newRD:ul.rd,
-        p1newSigma:uw.sigma,p2newSigma:ul.sigma,
         p1oldRating:w.rating,p1newRating:uw.rating,
         p2oldRating:l.rating,p2newRating:ul.rating,
         date:serverTimestamp()
@@ -2448,7 +2294,6 @@ function renderHistoryFilter(){
     sel2.innerHTML='<option value="all">vs Everyone</option>'+players.filter(p=>p.firestoreId!==flt).map(p=>`<option value="${p.firestoreId}">${escCap(p.name)}</option>`).join('');
     sel2.value=players.find(p=>p.firestoreId===cur2&&p.firestoreId!==flt)?cur2:'all';
     sel2.style.display='';
-  } else {
     sel2.style.display='none';
     sel2.value='all';
   }
@@ -2481,7 +2326,6 @@ window.renderHistory=function(){
     const sub=`<span style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted)">${total} match${total!==1?'es':''} played · ${esc(p1.name)} ${p1wins}W · ${esc(p2.name)} ${p2wins}W</span>`;
     banner.style.display='flex';
     banner.innerHTML=`<div style="display:flex;flex-direction:column;gap:.3rem">${headline}${sub}</div>`;
-  } else {
     banner.style.display='none';
   }
 
@@ -2521,7 +2365,7 @@ window.renderHistory=function(){
     const a=item.data;
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='tau_change'?'TAU CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':'ADMIN ACTION';
+    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':'ADMIN ACTION';
     return`<div class="admin-action-row">
       <span class="admin-action-badge">${typeLabel}</span>
       <span class="admin-action-desc">${esc(a.description||'')}</span>
@@ -2554,7 +2398,7 @@ function renderAdminActionsLog(){
   el.innerHTML=sorted.map(a=>{
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='tau_change'?'★ TAU CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':'★ ADMIN';
+    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':'★ ADMIN';
     return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04)">
       <div class="admin-minfo">
         <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}<br>
@@ -2595,8 +2439,8 @@ window.adminRemoveMatch=async function(fid){
 
     if(matchesAfter.length===0){
       await Promise.all([
-        updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}),
-        updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}),
+        updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}),
+        updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}),
       ]);
       alert('Match deleted. Ratings rewound to previous state.');
       return;
@@ -2625,30 +2469,26 @@ window.adminRemoveMatch=async function(fid){
       const isWinner=(m.p1id===ourId);
       const oppRating=isWinner?m.p2oldRating:m.p1oldRating;
       const oppRD=isWinner?(m.p2newRD??120):(m.p1newRD??120);
-      const oppSigma=isWinner?(m.p2newSigma??SIGMA_DEFAULT):(m.p1newSigma??SIGMA_DEFAULT);
 
       const newState=g2Update(
-        {rating:ourState.rating, rd:ourState.rd, sigma:ourState.sigma||SIGMA_DEFAULT, lastSigmaUpdate:ourState.lastSigmaUpdate||0},
-        [{rating:oppRating, rd:oppRD, sigma:oppSigma, s:isWinner?1:0}], ts
+        {rating:ourState.rating, rd:ourState.rd},
+        [{rating:oppRating, rd:oppRD, s:isWinner?1:0}], ts
       );
       const oldRating=ourState.rating;
       const delta=Math.round((newState.rating-oldRating)*10)/10;
 
       pmap[ourId].rating=newState.rating;
       pmap[ourId].rd=newState.rd;
-      pmap[ourId].sigma=newState.sigma;
-      pmap[ourId].lastSigmaUpdate=newState.lastSigmaUpdate;
       if(isWinner)pmap[ourId].wins=(pmap[ourId].wins||0)+1;
       else pmap[ourId].losses=(pmap[ourId].losses||0)+1;
       pmap[ourId].lastMatchAt=ts;
 
       if(m.p1id===ourId){
         matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
-          p1delta:delta,p1oldRating:oldRating,p1newRating:newState.rating,p1newRD:newState.rd,p1newSigma:newState.sigma
+          p1delta:delta,p1oldRating:oldRating,p1newRating:newState.rating,p1newRD:newState.rd
         }));
-      } else {
         matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
-          p2delta:delta,p2oldRating:oldRating,p2newRating:newState.rating,p2newRD:newState.rd,p2newSigma:newState.sigma
+          p2delta:delta,p2oldRating:oldRating,p2newRating:newState.rating,p2newRD:newState.rd
         }));
       }
       playerUpdates[ourId]=pmap[ourId];
@@ -2656,11 +2496,11 @@ window.adminRemoveMatch=async function(fid){
 
     const writes=Object.values(playerUpdates).map(p=>
       updateDoc(doc(db,'players',p.firestoreId),{
-        rating:p.rating,rd:p.rd,sigma:p.sigma||SIGMA_DEFAULT,lastSigmaUpdate:p.lastSigmaUpdate||0,wins:p.wins||0,losses:p.losses||0,lastDecayAt:p.lastMatchAt||Date.now()
+        rating:p.rating,rd:p.rd,wins:p.wins||0,losses:p.losses||0,lastDecayAt:p.lastMatchAt||Date.now()
       })
     );
-    if(!playerUpdates[pid1])writes.push(updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,lastSigmaUpdate:s1.lastSigmaUpdate||0,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}));
-    if(!playerUpdates[pid2])writes.push(updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,lastSigmaUpdate:s2.lastSigmaUpdate||0,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}));
+    if(!playerUpdates[pid1])writes.push(updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}));
+    if(!playerUpdates[pid2])writes.push(updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}));
 
     await Promise.all([...writes,...matchUpdates]);
     alert('Match deleted and ratings recalculated from that point forward.');
@@ -2669,7 +2509,7 @@ window.adminRemoveMatch=async function(fid){
 
 // ── REPAIR RATINGS ─────────────────────────────────────────────────────────
 window.repairAllRatings=async function(){
-  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings, RD, and volatility? Admin stat edits and decay changes in the Action Log will be applied in chronological order.'))return;
+  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings and RD? Admin stat edits and decay changes in the Action Log will be applied in chronological order.'))return;
   const btn=document.querySelector('[onclick="repairAllRatings()"]');
   if(btn){btn.disabled=true;btn.textContent='Repairing…';}
   try{
@@ -2689,7 +2529,7 @@ window.repairAllRatings=async function(){
     const initPlayer=pid=>{
       if(!state[pid]){
         const liveP=players.find(x=>x.firestoreId===pid);
-        state[pid]={rating:1500,rd:120,sigma:SIGMA_DEFAULT,wins:0,losses:0,lastDecayAt:null,decayImmune:!!(liveP?.decayImmune)};
+        state[pid]={rating:1500,rd:120,wins:0,losses:0,lastDecayAt:null,decayImmune:!!(liveP?.decayImmune)};
       }
     };
 
@@ -2708,12 +2548,12 @@ window.repairAllRatings=async function(){
       const tsPeriod=Math.floor(ts/periodMs);
       const periods=tsPeriod-basePeriod;
       if(periods<=0)return;
-      const sigma=s.sigma||SIGMA_DEFAULT;
+
       let phi=s.rd/SCALE;const phiMax=RD_MAX/SCALE;
       const startPhi=phi;
-      for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+      for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
       if(replayScaleMult>0){
-        const scale=1500/((s.rating||1500)*replayScaleMult);
+        const scale=Math.pow((1500/(s.rating||1500)),replayScaleMult);
         phi=startPhi+(phi-startPhi)*scale;
       }
       s.rd=Math.min(phi*SCALE,RD_MAX);
@@ -2734,7 +2574,6 @@ window.repairAllRatings=async function(){
     events.sort((a,b)=>a._ts-b._ts);
 
     const matchWrites=[];
-    let replayTau=TAU;
     let replayScaleMult=DECAY_SCALE_MULTIPLIER;
 
     // #1 tracking state — mirrors live submitMatch logic
@@ -2759,8 +2598,6 @@ window.repairAllRatings=async function(){
           for(const s of Object.values(state)){
             if(s.lastDecayAt!==null)s.lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
           }
-        } else if(a.type==='tau_change'){
-          replayTau=a.data?.newTau??0.5;
         } else if(a.type==='decay_scale_change'){
           replayScaleMult=a.data?.newMult??0;
         } else if(a.type==='stat_edit'){
@@ -2774,7 +2611,6 @@ window.repairAllRatings=async function(){
             // Reset decay boundary to now so future decay starts from the edited RD
             state[pid].lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
           }
-          if(after.sigma!=null)state[pid].sigma=after.sigma;
           if(after.wins!=null)state[pid].wins=after.wins;
           if(after.losses!=null)state[pid].losses=after.losses;
           if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
@@ -2782,8 +2618,6 @@ window.repairAllRatings=async function(){
         continue;
       }
 
-      // Normal match event — use TAU as it was at this point in time
-      TAU=replayTau;
       const m=evt.data;
       const pid1=m.p1id, pid2=m.p2id;
       initPlayer(pid1); initPlayer(pid2);
@@ -2800,12 +2634,12 @@ window.repairAllRatings=async function(){
 
       // Recalculate both sides from current state
       const u1=g2Update(
-        {rating:s1.rating,rd:s1.rd,sigma:s1.sigma,lastSigmaUpdate:s1.lastSigmaUpdate||0},
-        [{rating:s2.rating,rd:s2.rd,sigma:s2.sigma,s:1}], evt._ts
+        {rating:s1.rating,rd:s1.rd},
+        [{rating:s2.rating,rd:s2.rd,s:1}], evt._ts
       );
       const u2=g2Update(
-        {rating:s2.rating,rd:s2.rd,sigma:s2.sigma,lastSigmaUpdate:s2.lastSigmaUpdate||0},
-        [{rating:s1.rating,rd:s1.rd,sigma:s1.sigma,s:0}], evt._ts
+        {rating:s2.rating,rd:s2.rd},
+        [{rating:s1.rating,rd:s1.rd,s:0}], evt._ts
       );
 
       const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
@@ -2813,14 +2647,14 @@ window.repairAllRatings=async function(){
 
       // Rewrite the match record with correct values
       matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
-        p1oldRating:s1.rating, p1newRating:u1.rating, p1newRD:u1.rd, p1newSigma:u1.sigma, p1delta,
-        p2oldRating:s2.rating, p2newRating:u2.rating, p2newRD:u2.rd, p2newSigma:u2.sigma, p2delta,
+        p1oldRating:s1.rating, p1newRating:u1.rating, p1newRD:u1.rd, p1delta,
+        p2oldRating:s2.rating, p2newRating:u2.rating, p2newRD:u2.rd, p2delta,
       }));
 
       // Advance state — keep lastDecayAt (already set by applyDecayToTs above)
-      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].sigma=u1.sigma; state[pid1].lastSigmaUpdate=u1.lastSigmaUpdate;
+      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd;
       state[pid1].wins=s1.wins+1;
-      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].sigma=u2.sigma; state[pid2].lastSigmaUpdate=u2.lastSigmaUpdate;
+      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd;
       state[pid2].losses=s2.losses+1;
 
       // Track #1 changes — mirrors live submitMatch logic
@@ -2847,14 +2681,14 @@ window.repairAllRatings=async function(){
       const s=state[p.firestoreId];
       if(!s)continue;
       let rd=s.rd;
-      const sigma=s.sigma||SIGMA_DEFAULT;
+
       if(!s.decayImmune&&s.lastDecayAt!==null&&periodMs>0){
         const basePeriod=Math.floor(s.lastDecayAt/periodMs);
         const nowPeriod=Math.floor(now/periodMs);
         const periods=nowPeriod-basePeriod;
         if(periods>0){
           let phi=rd/SCALE;const phiMax=RD_MAX/SCALE;
-          for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+sigma*sigma);if(phi>=phiMax){phi=phiMax;break;}}
+          for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
           rd=Math.min(phi*SCALE,RD_MAX);
         }
       }
@@ -2872,7 +2706,7 @@ window.repairAllRatings=async function(){
         no1Since=now; // edge case: they are #1 but no1Since was never set
       }
       playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
-        rating:s.rating,rd,sigma,lastSigmaUpdate:s.lastSigmaUpdate||0,wins:s.wins,losses:s.losses,lastDecayAt,
+        rating:s.rating,rd,wins:s.wins,losses:s.losses,lastDecayAt,
         no1Since:p.firestoreId===currentTop?no1Since:null,
         longestNo1Ms
       }));
@@ -2884,7 +2718,6 @@ window.repairAllRatings=async function(){
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
-    TAU=parseFloat(document.getElementById('tau-value')?.value)||0.5;
     DECAY_SCALE_MULTIPLIER=parseFloat(document.getElementById('decay-scale-mult')?.value)||0;
     if(btn){btn.disabled=false;btn.textContent='🔧 Repair All Ratings From Match History';}
   }
@@ -2896,7 +2729,6 @@ window.openEditPlayer=function(fid){
   document.getElementById('edit-name').value=p.name;
   document.getElementById('edit-rating').value=p.rating;
   document.getElementById('edit-rd').value=p.rd;
-  document.getElementById('edit-sigma').value=(p.sigma||SIGMA_DEFAULT).toFixed(5);
   document.getElementById('edit-wins').value=p.wins;
   document.getElementById('edit-losses').value=p.losses;
   document.getElementById('edit-decay-immune').checked=!!(p.decayImmune);
@@ -2908,27 +2740,24 @@ window.submitEditPlayer=async function(){
   const name=document.getElementById('edit-name').value.trim();
   const rating=parseFloat(document.getElementById('edit-rating').value);
   const rd=parseFloat(document.getElementById('edit-rd').value);
-  const sigma=parseFloat(document.getElementById('edit-sigma').value);
   const wins=parseInt(document.getElementById('edit-wins').value);
   const losses=parseInt(document.getElementById('edit-losses').value);
   const decayImmune=document.getElementById('edit-decay-immune').checked;
   if(!name){showMsg('edit-player-msg','Name cannot be empty.',true);return;}
-  if([rating,rd,sigma,wins,losses].some(isNaN)){showMsg('edit-player-msg','Invalid values.',true);return;}
-  if(sigma<0.001||sigma>SIGMA_MAX){showMsg('edit-player-msg',`Volatility must be between 0.001 and ${SIGMA_MAX}.`,true);return;}
+  if([rating,rd,wins,losses].some(isNaN)){showMsg('edit-player-msg','Invalid values.',true);return;}
   try{
     const p=players.find(x=>x.firestoreId===fid);
-    const before={name:p?.name,rating:p?.rating,rd:p?.rd,sigma:p?.sigma,wins:p?.wins,losses:p?.losses,decayImmune:!!(p?.decayImmune)};
-    const after={name,rating,rd,sigma,wins,losses,decayImmune};
+    const before={name:p?.name,rating:p?.rating,rd:p?.rd,wins:p?.wins,losses:p?.losses,decayImmune:!!(p?.decayImmune)};
+    const after={name,rating,rd,wins,losses,decayImmune};
     const changes=[];
     if(before.rating!==rating)changes.push(`rating ${r2(before.rating)}→${r2(rating)}`);
     if(before.rd!==rd)changes.push(`RD ${r2(before.rd)}→${r2(rd)}`);
-    if(before.sigma!==sigma)changes.push(`σ ${(before.sigma||SIGMA_DEFAULT).toFixed(4)}→${sigma.toFixed(4)}`);
     if(before.wins!==wins)changes.push(`wins ${before.wins}→${wins}`);
     if(before.losses!==losses)changes.push(`losses ${before.losses}→${losses}`);
     if(before.name!==name)changes.push(`name "${before.name}"→"${name}"`);
     if(before.decayImmune!==decayImmune)changes.push(`decay immunity ${before.decayImmune?'ON':'OFF'}→${decayImmune?'ON':'OFF'}`);
     const desc=`Edited ${name}: ${changes.length?changes.join(', '):'no changes'}`;
-    await updateDoc(doc(db,'players',fid),{name,rating,rd,sigma,wins,losses,decayImmune});
+    await updateDoc(doc(db,'players',fid),{name,rating,rd,wins,losses,decayImmune});
     await logAdminAction('stat_edit',desc,{playerId:fid,playerName:name,before,after});
     showMsg('edit-player-msg','Saved! Logged as admin action.');
     setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1400);
@@ -3091,7 +2920,6 @@ window.openProfile=async function(fid){
   if(p.quote){qEl.innerHTML=`"${esc(p.quote)}"`;qEl.style.display='block';}else qEl.style.display='none';
   const wr=(p.wins+p.losses)>0?Math.round(p.wins/(p.wins+p.losses)*100):0,wc=wr>=60?'green':wr>=40?'neutral':'red';
   const{ls,cs,la}=pStats(fid);
-  const sigma=p.sigma||SIGMA_DEFAULT;
 
   function renderProfileStats(){
     const liveP=players.find(x=>x.firestoreId===fid)||p;
@@ -3105,16 +2933,13 @@ window.openProfile=async function(fid){
     var no1Html=isTop
       ?"<span class=\"no1-record-main\">"+fmtDur(_liveMs||0)+"</span> <span class=\"no1-timer counting\" data-since=\""+_no1Since+"\" data-record=\""+(String(_record||la||0))+"\">👑 —</span>"
       :fmtDur(_record||la);
-    const liveSigma=(liveP.sigma||SIGMA_DEFAULT).toFixed(4);
-    const sigC=(liveP.sigma||SIGMA_DEFAULT)>0.15?'red':(liveP.sigma||SIGMA_DEFAULT)>0.09?'':'neutral';
     document.getElementById('profile-stats').innerHTML=`
     <div class="m-stat"><span class="m-stat-l">Rating</span><span class="m-stat-v">${r2(liveP.rating)}</span></div>
     <div class="m-stat"><span class="m-stat-l">RD</span><span class="m-stat-v neutral">±${r2(liveP.rd)}</span></div>
-    <div class="m-stat"><span class="m-stat-l">Volatility σ</span><span class="m-stat-v ${sigC}" style="font-size:1rem">${liveSigma}</span></div>
     <div class="m-stat"><span class="m-stat-l">Record</span><span class="m-stat-v neutral">${liveP.wins}W–${liveP.losses}L</span></div>
     <div class="m-stat"><span class="m-stat-l">Win%</span><span class="m-stat-v ${wc}">${wr}%</span></div>
     <div class="m-stat"><span class="m-stat-l">Best Streak</span><span class="m-stat-v neutral" style="display:inline-flex;align-items:center;gap:.3rem">${ls>0?ls+'W':'—'}${cs>0?`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:${cs>=5?'var(--win)':'var(--accent)'};border:1px solid ${cs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;line-height:1">${cs}W</span>`:''}</span></div>
-    <div class="m-stat"><span class="m-stat-l">Longest #1</span><span class="m-stat-v" style="color:var(--accent3);font-size:1rem;display:inline-flex;align-items:center;gap:.3rem">${no1Html}</span></div>`;
+    <div class="m-stat"><span class="m-stat-l">Longest #1</span><span class="m-stat-v" style="color:var(--accent3);font-size:1rem;display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap">${no1Html}</span></div>`;
   }
   renderProfileStats();
 
@@ -3149,7 +2974,6 @@ window.openProfile=async function(fid){
         ${opts}
       </select>
     </div>`;
-  } else {
     seasonSelectorHtml=`<div class="chart-lbl" style="margin-bottom:.65rem">Match History</div>`;
   }
 
@@ -3193,9 +3017,8 @@ window.loadProfileSeason=async function(fid,val){
       const emoji=sEntry.rank===1?'🥇':sEntry.rank===2?'🥈':sEntry.rank===3?'🥉':'';
       const ended=sEntry.endedAt?new Date(sEntry.endedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
       const streakHtml=sEntry.longestWinStreak>0?` · Best streak <strong style="color:var(--win)">${sEntry.longestWinStreak}W</strong>`:'';
-      const sigmaHtml=sEntry.sigma?` · σ: <strong>${sEntry.sigma.toFixed(4)}</strong>`:'';
       headerHtml=`<div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);padding:.55rem .75rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.65rem;line-height:1.8">
-        ${emoji} <strong style="color:var(--text)">${esc(sEntry.seasonName||'Season '+sEntry.seasonNum)}</strong> · Final rank <strong style="color:var(--accent)">#${sEntry.rank}</strong> · ${sEntry.wins}W–${sEntry.losses}L · Rating <strong style="color:var(--accent)">${r2(sEntry.rating)}</strong>${sigmaHtml}${streakHtml}${ended?' · Ended '+ended:''}
+        ${emoji} <strong style="color:var(--text)">${esc(sEntry.seasonName||'Season '+sEntry.seasonNum)}</strong> · Final rank <strong style="color:var(--accent)">#${sEntry.rank}</strong> · ${sEntry.wins}W–${sEntry.losses}L · Rating <strong style="color:var(--accent)">${r2(sEntry.rating)}</strong>${streakHtml}${ended?' · Ended '+ended:''}
       </div>`;
     }
     if(!ms.length){el.innerHTML=headerHtml+'<div class="empty">No matches recorded for this season.</div>';return;}
@@ -3328,7 +3151,7 @@ window.showPanel=function(id,btn){
     _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
   }
-  if(id==='leaderboard'&&_lbLastVis){_lbNo1Typed=true;initLbQuoteZone(_lbLastVis);}
+  if(id==='leaderboard'&&_lbLastVis){_lbNo1Typed=true;requestAnimationFrame(()=>initLbQuoteZone(_lbLastVis));}
   if(id==='players')renderPlayersList();
 
   if(id==='matches')renderHistory();
@@ -3342,6 +3165,11 @@ document.addEventListener('visibilitychange',()=>{
     if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}
     _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
+  } else {
+    const activePanel=document.querySelector('.panel.active');
+    if(activePanel&&activePanel.id==='panel-leaderboard'&&_lbLastVis){
+      requestAnimationFrame(()=>initLbQuoteZone(_lbLastVis));
+    }
   }
 });
 
@@ -3400,7 +3228,6 @@ function renderBrackets(){
     renderBrWorld(bi);
     if(!brViewInitialized[bi]){
       setTimeout(()=>brDefaultView(bi),60);
-    } else {
       // Already viewed — re-apply saved pan/zoom immediately so there's no jump
       brApplyT(bi);
     }
@@ -3554,7 +3381,6 @@ window.brFullscreen=function(bi){
     card.classList.add('br-card-expanded');
     btn.textContent='✕ Exit';
     document.body.style.overflow='hidden';
-  } else {
     card.classList.remove('br-card-expanded');
     card.dataset.expanded='';
     if(card._origParent){
@@ -3778,7 +3604,10 @@ function renderBrWorld(bi){
   const doLPI=doL&&b.lPiRound&&b.lPiRound.length>0;
   const ln0=doL?b.lRounds[0].matches.length:0;
   const wH=brSecH(wn0);
-  const lH=doL?brSecH(ln0):0;
+  // Losers section height: lPi column spans wn0 wr1-slots; lr1+ use wr2+ spacing
+  const lPiH=doLPI?brSecH(wn0):0;
+  const lRndH=doL?brSecH(ln0)*2:0; // lr1 at wr2 spacing covers ln0*2 wr1-slots worth
+  const lH=doL?Math.max(lPiH,lRndH):0;
   const wTop=TOP,lTop=wTop+wH+LSEP+26;
   const lBottom=lTop+lH;
 
@@ -3789,10 +3618,9 @@ function renderBrWorld(bi){
   const wc=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
 
   function lCY(li,mi){
-    const strideRi=Math.floor(li/2);
-    const matchesInRound=Math.max(1,ln0/Math.pow(2,strideRi));
-    const mirrorMi=(matchesInRound-1)-mi;
-    return lBottom-brCY(strideRi,mirrorMi);
+    // lr0 aligns with wr2 spacing, lr1/lr2 with wr3, etc. → stride = floor(li/2)+1
+    const strideRi=Math.floor(li/2)+1;
+    return lTop+brCY(strideRi,mi);
   }
 
   // Draw a Y-fork: two source lines meet at midY, then one line goes to dest
@@ -3834,11 +3662,13 @@ function renderBrWorld(bi){
       if(li<rounds.length-1){
         const x1=colX+BR_CW,x2=colX+BR_COL,mx=(x1+x2)/2,nm=rnd.matches.length;
         if(isSurvive){
+          // Survive round: each winner advances 1-to-1 to the next slot
           for(let mi=0;mi<nm;mi++){
             const cy1=lCY(li,mi),cy2=lCY(li+1,mi);
             brDrawPoly([[x1,cy1],[mx,cy1],[mx,cy2],[x2,cy2]],bc,bi);
           }
         } else {
+          // Drop round: 2 survivors merge into 1 next slot
           for(let mi=0;mi<nm;mi+=2){
             const cy1=lCY(li,mi);
             const cy2=mi+1<nm?lCY(li,mi+1):cy1;
@@ -3884,23 +3714,51 @@ function renderBrWorld(bi){
     world.appendChild(brEl('div',{position:'absolute',left:PAD+'px',top:(wTop+wH+LSEP/2)+'px',width:'3000px',height:'1px',background:'repeating-linear-gradient(90deg,rgba(255,107,53,.25) 0,rgba(255,107,53,.25) 6px,transparent 6px,transparent 12px)',pointerEvents:'none'}));
   }
 
-  // L Play-in
+  // L Play-in — cards spaced at wr1 rhythm (brCY(0,*)), forks into lr1 at wr2 rhythm
   if(doLPI){
-    const lr1len=b.lRounds[0].matches.length;
+    const extras=b.extras||0;
     const lpiLbl=brEl('div',{position:'absolute',left:lpiX+'px',top:(lTop-22)+'px',width:BR_CW+'px',textAlign:'center',fontSize:'.46rem',letterSpacing:'.14em',textTransform:'uppercase',color:'#ff6b35',userSelect:'none',pointerEvents:'none'});
     lpiLbl.textContent='L Play-In';world.appendChild(lpiLbl);
-    b.lPiRound.forEach((lpi,i)=>{
-      const lpiCY=lCY(0,lr1len-1-i);
-      brDrawCard(lpi,lpiX,lpiCY-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
-      const x1=lpiX+BR_CW,x2=lX,mx=(x1+x2)/2,lr1CY=lCY(0,lr1len-1-i);
-      brDrawPoly([[x1,lpiCY],[mx,lpiCY],[mx,lr1CY],[x2,lr1CY]],'rgba(255,107,53,.18)',bi);
-    });
+
+    const x1=lpiX+BR_CW,x2=lX,mx=(x1+x2)/2;
+    const bc='rgba(255,107,53,.18)';
+
+    // lPiRound[i] sits at wr1 slot i (top-down), so slot 0 is always filled
+    // Pairs: (slot 0,1)→lr1[0], (slot 2,3)→lr1[1], etc. Gaps appear at bottom.
+    for(let slot=0;slot<wn0;slot+=2){
+      const lpiIdxA=slot;    // upper card of pair
+      const lpiIdxB=slot+1;  // lower card of pair
+
+      const hasA=lpiIdxA<extras;
+      const hasB=lpiIdxB<extras;
+      if(!hasA&&!hasB)continue;
+
+      const cyA=lTop+brCY(0,slot);   // y center of upper card
+      const cyB=lTop+brCY(0,slot+1); // y center of lower card
+      const targetLr1Mi=Math.floor(slot/2);
+      const lr1CY=targetLr1Mi<ln0?lCY(0,targetLr1Mi):null;
+
+      if(hasA&&hasB){
+        brDrawCard(b.lPiRound[lpiIdxA],lpiX,cyA-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
+        brDrawCard(b.lPiRound[lpiIdxB],lpiX,cyB-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
+        if(lr1CY!=null){
+          const midY=(cyA+cyB)/2;
+          drawFork(x1,cyA,cyB,midY,lr1CY,x2,mx,bc);
+        }
+      } else if(hasA){
+        brDrawCard(b.lPiRound[lpiIdxA],lpiX,cyA-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
+        if(lr1CY!=null) brDrawPoly([[x1,cyA],[mx,cyA],[mx,lr1CY],[x2,lr1CY]],bc,bi);
+      } else {
+        brDrawCard(b.lPiRound[lpiIdxB],lpiX,cyB-BR_CH/2,'L Play-In',true,'#ff6b35',bi);
+        if(lr1CY!=null) brDrawPoly([[x1,cyB],[mx,cyB],[mx,lr1CY],[x2,lr1CY]],bc,bi);
+      }
+    }
   }
 
   // Losers bracket
   let lEndX=lX;
   if(doL){
-    const tag=brEl('div',{position:'absolute',left:lX+'px',top:(lTop-22)+'px',fontSize:'.4rem',letterSpacing:'.16em',textTransform:'uppercase',color:'#ff6b35',background:'rgba(255,107,53,.07)',border:'1px solid rgba(255,107,53,.18)',padding:'2px 8px',borderRadius:'2px',userSelect:'none',pointerEvents:'none'});
+    const tag=brEl('div',{position:'absolute',left:lX+'px',top:(lTop-36)+'px',fontSize:'.4rem',letterSpacing:'.16em',textTransform:'uppercase',color:'#ff6b35',background:'rgba(255,107,53,.07)',border:'1px solid rgba(255,107,53,.18)',padding:'2px 8px',borderRadius:'2px',userSelect:'none',pointerEvents:'none'});
     tag.textContent='Losers Bracket';world.appendChild(tag);
     lEndX=drawLSection(b.lRounds,lX);
   }
@@ -3946,7 +3804,6 @@ function renderBrWorld(bi){
           const gf=b.grand?.matches[0];
           if(gr&&gr.w!=null)champ=gr.w===0?gr.p1:gr.p2;
           else if(gf&&gf.w!=null)champ=gf.w===0?gf.p1:gf.p2;
-        } else {
           const lastR=b.wRounds[b.wRounds.length-1];
           const fm=lastR?.matches[0];
           if(fm&&fm.w!=null)champ=fm.w===0?fm.p1:fm.p2;
@@ -3956,7 +3813,6 @@ function renderBrWorld(bi){
       // Only fire confetti once per bracket completion (tracked by bracket id)
       const bid=b.id||bi;
       if(!brCelebrated.has(bid)){brCelebrated.add(bid);brConfetti();}
-    } else {
       // If bracket was un-completed, allow confetti again next time
       brCelebrated.delete(b.id||bi);
     }
@@ -4026,7 +3882,6 @@ window.brSaveTournament=async function(bi){
     const lastL=b.lRounds[b.lRounds.length-1];
     const lFinal=lastL?.matches[0];
     if(lFinal&&lFinal.w!=null)p3=lFinal.w===0?lFinal.p2:lFinal.p1;
-  } else {
     const lastR=b.wRounds[b.wRounds.length-1];const fm=lastR?.matches[0];
     if(fm&&fm.w!=null)p1=fm.w===0?fm.p1:fm.p2;
   }
@@ -4098,23 +3953,58 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBrScore();});
 // ── BRACKET CREATE / STORAGE ──────────────────────────────────────────────────
 window.openNewBracketModal=function(){
   if(!isAdmin){alert('Admin login required to create brackets.');return;}
+  brRebuildChecklist();
+  document.getElementById('bracket-name-input').value='';
+  document.getElementById('bracket-create-msg').style.display='none';
+  document.getElementById('bracket-add-player-input').value='';
+  document.getElementById('bracket-add-msg').style.display='none';
+  document.getElementById('new-bracket-overlay').classList.add('open');
+};
+
+function brRebuildChecklist(){
   const cb=document.getElementById('bracket-player-checkboxes');
+  // Always reset to default state: rated checked, unrated unchecked
+  cb.innerHTML='';
   const rated=players.filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
   const unrated=players.filter(p=>p.rd>100).sort((a,b)=>a.name.localeCompare(b.name));
-  const sorted=[...rated,...unrated];
-  cb.innerHTML=sorted.map((p,i)=>{
+  [...rated,...unrated].forEach((p,i)=>{
     const isRated=p.rd<=100;
-    const ratingStr=isRated?`<span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;margin-left:auto">${Math.round(p.rating)}</span>`:`<span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.58rem;margin-left:auto">unrated</span>`;
-    return`<label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.78rem;padding:.3rem .1rem;border-bottom:1px solid rgba(74,42,56,.3)">
-      <input type="checkbox" value="${esc(p.name)}" checked>
+    const ratingStr=isRated
+      ?`<span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;margin-left:auto">${Math.round(p.rating)}</span>`
+      :`<span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.58rem;margin-left:auto">unrated</span>`;
+    cb.insertAdjacentHTML('beforeend',`<label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.78rem;padding:.3rem .1rem;border-bottom:1px solid rgba(74,42,56,.3)">
+      <input type="checkbox" value="${esc(p.name)}"${isRated?' checked':''}>
       <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.55rem;min-width:14px">${i+1}</span>
       <span style="flex:1">${escCap(p.name)}</span>
       ${ratingStr}
-    </label>`;
-  }).join('');
-  document.getElementById('bracket-name-input').value='';
-  document.getElementById('bracket-create-msg').style.display='none';
-  document.getElementById('new-bracket-overlay').classList.add('open');
+    </label>`);
+  });
+}
+
+window.brSelectAll=function(check){
+  document.querySelectorAll('#bracket-player-checkboxes input[type=checkbox]').forEach(el=>el.checked=check);
+};
+
+window.brAddPlayerToList=function(){
+  const inp=document.getElementById('bracket-add-player-input');
+  const msgEl=document.getElementById('bracket-add-msg');
+  const typed=inp.value.trim();
+  if(!typed)return;
+  const p=players.find(pl=>pl.name.toLowerCase()===typed.toLowerCase());
+  if(!p){
+    msgEl.textContent=`No player found matching "${typed}"`;
+    msgEl.style.display='block';
+    return;
+  }
+  msgEl.style.display='none';
+  const cb=document.getElementById('bracket-player-checkboxes');
+  const existing=cb.querySelector(`input[type=checkbox][value="${CSS.escape(p.name)}"]`);
+  if(existing){
+    existing.checked=true;
+    // Scroll the row into view
+    existing.closest('label').scrollIntoView({block:'nearest'});
+  }
+  inp.value='';
 };
 
 window.createBracket=async function(){
@@ -4130,6 +4020,7 @@ window.createBracket=async function(){
     for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
     seeded=arr;
   } else {
+    // rated or any other mode: sort by rating desc
     const rated=players.filter(p=>p.rd<=100&&checkedNames.has(p.name)).sort((a,b)=>b.rating-a.rating);
     const unrated=players.filter(p=>p.rd>100&&checkedNames.has(p.name)).sort((a,b)=>a.name.localeCompare(b.name));
     const knownNames=new Set(players.map(p=>p.name));
@@ -4180,7 +4071,6 @@ function renderPastTournaments(){
           <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.05em;color:${p.color};margin-top:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escCap(p.name)}</div>
         </div>`).join('')}
       </div>`;
-    } else {
       // Single elim: just the winner
       resultsHtml=t.champion?`<div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0">
         <span style="font-size:1.3rem">🏆</span>
@@ -4246,7 +4136,6 @@ window.simLoadPlayer=function(side){
   if(!p)return;
   document.getElementById(`sim-${side}-rating`).value=p.rating;
   document.getElementById(`sim-${side}-rd`).value=p.rd;
-  document.getElementById(`sim-${side}-sigma`).value=p.sigma||SIGMA_DEFAULT;
 };
 
 window.simResult=function(winner){
@@ -4256,14 +4145,12 @@ window.simResult=function(winner){
   const rB=parseFloat(document.getElementById('sim-b-rating').value)||1500;
   const rdA=parseFloat(document.getElementById('sim-a-rd').value)||120;
   const rdB=parseFloat(document.getElementById('sim-b-rd').value)||120;
-  const sA=parseFloat(document.getElementById('sim-a-sigma').value)||SIGMA_DEFAULT;
-  const sB=parseFloat(document.getElementById('sim-b-sigma').value)||SIGMA_DEFAULT;
-  const pA={rating:rA,rd:Math.max(30,Math.min(200,rdA)),sigma:Math.max(0.01,Math.min(SIGMA_MAX,sA))};
-  const pB={rating:rB,rd:Math.max(30,Math.min(200,rdB)),sigma:Math.max(0.01,Math.min(SIGMA_MAX,sB))};
+  const pA={rating:rA,rd:Math.max(30,Math.min(200,rdA))};
+  const pB={rating:rB,rd:Math.max(30,Math.min(200,rdB))};
   const sWins=winner==='A'?1:0;
   const sLoses=1-sWins;
-  const newA=g2Update(pA,[{rating:pB.rating,rd:pB.rd,sigma:pB.sigma,s:sWins}]);
-  const newB=g2Update(pB,[{rating:pA.rating,rd:pA.rd,sigma:pA.sigma,s:sLoses}]);
+  const newA=g2Update(pA,[{rating:pB.rating,rd:pB.rd,s:sWins}]);
+  const newB=g2Update(pB,[{rating:pA.rating,rd:pA.rd,s:sLoses}]);
   const dA=+(newA.rating-pA.rating).toFixed(1);
   const dB=+(newB.rating-pB.rating).toFixed(1);
   const{mu:muA,phi:phiA}=toG2(pA.rating,pA.rd);
@@ -4292,8 +4179,6 @@ window.simResult=function(winner){
       <div><span style="color:var(--muted)">Rating:</span> ${pB.rating} → <strong>${newB.rating}</strong> ${fmtD(dB)}</div>
       <div><span style="color:var(--muted)">RD:</span> ${fmtRD(pA.rd,newA.rd)}</div>
       <div><span style="color:var(--muted)">RD:</span> ${fmtRD(pB.rd,newB.rd)}</div>
-      <div><span style="color:var(--muted)">σ:</span> ${pA.sigma} → ${newA.sigma}</div>
-      <div><span style="color:var(--muted)">σ:</span> ${pB.sigma} → ${newB.sigma}</div>
     </div>`;
 };
 
@@ -4301,7 +4186,7 @@ window.clearSim=function(){
   ['sim-a-player','sim-b-player'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('sim-a-rating').value='1500';
   document.getElementById('sim-b-rating').value='1500';
-  ['sim-a-rd','sim-b-rd','sim-a-sigma','sim-b-sigma'].forEach(id=>document.getElementById(id).value='');
+  ['sim-a-rd','sim-b-rd'].forEach(id=>document.getElementById(id).value='');
   const el=document.getElementById('sim-result');if(el)el.style.display='none';
 };
 
