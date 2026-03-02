@@ -606,6 +606,19 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       </div>
 
       <div class="admin-section" style="max-width:480px">
+        <div class="admin-stitle">Rating Snapshot</div>
+        <div class="form-card" style="border-color:rgba(229,178,93,.2)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Saves a snapshot of every player's current rating, RD, wins, and losses. When ratings are recalculated, the snapshot acts as the starting point — all matches <strong style="color:var(--text)">before</strong> it are ignored, and only matches after it are replayed. Also saved as a standalone backup you can restore.</p>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.65rem">
+            <input type="text" id="snapshot-label-input" placeholder="Snapshot label (optional)" style="flex:1;font-size:.68rem">
+            <button class="btn-admin" onclick="takeSnapshot()" style="font-size:.68rem;padding:.65rem 1.2rem">📸 Take Snapshot</button>
+          </div>
+          <div class="msg" id="snapshot-msg" style="margin-top:.0rem"></div>
+          <div id="snapshot-list" style="margin-top:.75rem;display:flex;flex-direction:column;gap:.4rem;max-height:200px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">Repair Ratings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
           <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Recalculates every player's rating and RD directly from their last stored match result, then applies any accumulated decay since that match. Use this to fix any players whose values were incorrectly reset.</p>
@@ -1017,7 +1030,7 @@ function applyAdminUI(){
   document.getElementById('admin-btn').classList.add('on');
   document.getElementById('admin-tab-btn').style.display='';
   renderAdminPanel();renderPastTournaments();populateRestoreSeasonDropdown();
-  renderHistory();
+  renderHistory();renderSnapshotList();
   listenAdminActions();
 }
 // Restore admin session from localStorage on page load
@@ -2509,7 +2522,7 @@ window.adminRemoveMatch=async function(fid){
 
 // ── REPAIR RATINGS ─────────────────────────────────────────────────────────
 window.repairAllRatings=async function(){
-  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings and RD? Admin stat edits and decay changes in the Action Log will be applied in chronological order.'))return;
+  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings and RD? Admin stat edits and decay changes in the Action Log will be applied in chronological order. If a snapshot exists, only matches after the snapshot will be replayed.'))return;
   const btn=document.querySelector('[onclick="repairAllRatings()"]');
   if(btn){btn.disabled=true;btn.textContent='Repairing…';}
   try{
@@ -2521,16 +2534,44 @@ window.repairAllRatings=async function(){
     // Starting decay period from config (may change mid-timeline via decay_change actions)
     let periodMs=decayMs();
 
-    // Build a fresh state map for every player, starting from scratch.
-    // lastDecayAt = the last period BOUNDARY that has been processed for this player,
-    // exactly mirroring how the live system tracks it. null = player hasn't played yet,
-    // so no decay has ever been applied.
+    // Find the most recent snapshot action — if one exists, we only need to replay
+    // events after it since the snapshot already encodes fully-computed state.
+    const allActionsSorted=[...actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}))];
+    let snapshotCutoffTs=0;
+    let snapshotState=null;
+    let snapshotNo1State=null;
+    for(let i=allActionsSorted.length-1;i>=0;i--){
+      const a=allActionsSorted[i];
+      if(a.type==='snapshot'){
+        snapshotCutoffTs=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+        snapshotState=a.data?.players||{};
+        snapshotNo1State={};
+        for(const[pid,s]of Object.entries(snapshotState)){
+          snapshotNo1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
+        }
+        break;
+      }
+    }
+
+    // Build state — either from snapshot (fast path) or from scratch (full replay)
     const state={};
+    const no1State={};
+    if(snapshotState){
+      for(const[pid,s]of Object.entries(snapshotState)){
+        state[pid]={
+          rating:s.rating??1500,rd:s.rd??120,wins:s.wins??0,losses:s.losses??0,
+          lastDecayAt:s.lastDecayAt??Math.floor(snapshotCutoffTs/periodMs)*periodMs,
+          decayImmune:!!s.decayImmune
+        };
+        no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
+      }
+    }
     const initPlayer=pid=>{
       if(!state[pid]){
         const liveP=players.find(x=>x.firestoreId===pid);
         state[pid]={rating:1500,rd:120,wins:0,losses:0,lastDecayAt:null,decayImmune:!!(liveP?.decayImmune)};
       }
+      if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
     };
 
     // applyDecayToTs: bring a player's RD up to date with all period boundaries
@@ -2561,14 +2602,17 @@ window.repairAllRatings=async function(){
       s.lastDecayAt=tsPeriod*periodMs;
     };
 
-    // Merge matches and admin actions into a single sorted event timeline
+    // Merge matches and admin actions into a single sorted event timeline.
+    // If a snapshot exists, skip everything at or before its timestamp.
     const events=[];
     allMatches.forEach(m=>{
       const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+      if(ts<=snapshotCutoffTs)return;
       events.push({_type:'match',_ts:ts,data:m});
     });
     allAdminActions.forEach(a=>{
       const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+      if(ts<=snapshotCutoffTs)return;
       events.push({_type:'admin',_ts:ts,data:a});
     });
     events.sort((a,b)=>a._ts-b._ts);
@@ -2576,8 +2620,7 @@ window.repairAllRatings=async function(){
     const matchWrites=[];
     let replayScaleMult=DECAY_SCALE_MULTIPLIER;
 
-    // #1 tracking state — mirrors live submitMatch logic
-    const no1State={};
+    // #1 tracking state — initialized above from snapshot if available
     const getTop=()=>{
       let top=null,topR=-Infinity;
       for(const[pid,s]of Object.entries(state)){
@@ -2600,6 +2643,27 @@ window.repairAllRatings=async function(){
           }
         } else if(a.type==='decay_scale_change'){
           replayScaleMult=a.data?.newMult??0;
+        } else if(a.type==='snapshot'){
+          // Snapshot acts as a new starting point — reset state to snapshotted values
+          // and discard all prior history. Matches before this point are effectively frozen.
+          const snappedPlayers=a.data?.players||{};
+          // Clear state and reinitialize from snapshot
+          for(const pid of Object.keys(state))delete state[pid];
+          for(const pid of Object.keys(no1State))delete no1State[pid];
+          for(const[pid,s]of Object.entries(snappedPlayers)){
+            state[pid]={
+              rating:s.rating??1500,
+              rd:s.rd??120,
+              wins:s.wins??0,
+              losses:s.losses??0,
+              lastDecayAt:s.lastDecayAt??Math.floor(evt._ts/periodMs)*periodMs,
+              decayImmune:!!s.decayImmune
+            };
+            no1State[pid]={
+              no1Since:s.no1Since??null,
+              longestNo1Ms:s.longestNo1Ms??0
+            };
+          }
         } else if(a.type==='stat_edit'){
           const pid=a.data?.playerId;
           if(!pid)continue;
@@ -4039,7 +4103,92 @@ window.createBracket=async function(){
 async function saveBracketsToStorage(){try{await setDoc(doc(db,'config','brackets'),{data:JSON.stringify(brackets)});}catch(e){console.error('Save brackets error',e);}}
 async function loadBracketsFromStorage(){try{const d=await getDoc(doc(db,'config','brackets'));if(d.exists()&&d.data().data)brackets=JSON.parse(d.data().data);}catch(e){console.error('Load brackets error',e);}}
 
-// ── PAST TOURNAMENTS ──────────────────────────────────────────────────────────
+// ── SNAPSHOTS ─────────────────────────────────────────────────────────────────
+window.takeSnapshot=async function(){
+  const label=document.getElementById('snapshot-label-input').value.trim()||('Snapshot '+new Date().toLocaleString());
+  const msgEl=document.getElementById('snapshot-msg');
+  showMsg('snapshot-msg','Saving snapshot…');
+  try{
+    const playerData={};
+    players.forEach(p=>{
+      if(!p.firestoreId)return;
+      playerData[p.firestoreId]={
+        name:p.name,
+        rating:p.rating,
+        rd:p.rd,
+        wins:p.wins||0,
+        losses:p.losses||0,
+        lastDecayAt:p.lastDecayAt||Date.now(),
+        decayImmune:!!p.decayImmune,
+        no1Since:p.no1Since||null,
+        longestNo1Ms:p.longestNo1Ms||0
+      };
+    });
+    // Save as standalone snapshot doc
+    const snapRef=await addDoc(collection(db,'snapshots'),{
+      label,
+      date:serverTimestamp(),
+      players:playerData
+    });
+    // Also log as admin action so replay picks it up
+    await logAdminAction('snapshot',label,{snapshotId:snapRef.id,players:playerData});
+    document.getElementById('snapshot-label-input').value='';
+    showMsg('snapshot-msg','Snapshot saved: "'+label+'"');
+    renderSnapshotList();
+  }catch(e){showMsg('snapshot-msg','Error: '+e.message,true);}
+};
+
+async function renderSnapshotList(){
+  const el=document.getElementById('snapshot-list');
+  if(!el)return;
+  try{
+    const snap=await getDocs(query(collection(db,'snapshots'),orderBy('date','desc')));
+    if(snap.empty){el.innerHTML='<div style="font-family:\'DM Mono\',monospace;font-size:.6rem;color:var(--muted)">No snapshots yet.</div>';return;}
+    el.innerHTML=snap.docs.map(d=>{
+      const data=d.data();
+      const date=data.date?.toDate?data.date.toDate():new Date();
+      const count=Object.keys(data.players||{}).length;
+      return`<div style="display:flex;align-items:center;gap:.5rem;font-family:'DM Mono',monospace;font-size:.6rem;padding:.35rem .5rem;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:2px">
+        <div style="flex:1">
+          <div style="color:var(--text)">${esc(data.label)}</div>
+          <div style="color:var(--muted)">${date.toLocaleString()} · ${count} players</div>
+        </div>
+        <button class="btn-ghost" style="font-size:.55rem;padding:.25rem .5rem" onclick="restoreSnapshot('${d.id}')">Restore</button>
+        <button class="btn-ghost" style="font-size:.55rem;padding:.25rem .5rem;color:var(--loss);border-color:rgba(217,83,79,.3)" onclick="deleteSnapshot('${d.id}')">Delete</button>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div style="color:var(--loss);font-size:.6rem">'+e.message+'</div>';}
+}
+
+window.restoreSnapshot=async function(snapId){
+  if(!confirm('Restore this snapshot? This will overwrite all current player ratings, RDs, wins, and losses with the snapshot values.'))return;
+  try{
+    const snapDoc=await getDoc(doc(db,'snapshots',snapId));
+    if(!snapDoc.exists()){alert('Snapshot not found.');return;}
+    const playerData=snapDoc.data().players||{};
+    const writes=[];
+    for(const[pid,s]of Object.entries(playerData)){
+      writes.push(updateDoc(doc(db,'players',pid),{
+        rating:s.rating,rd:s.rd,wins:s.wins,losses:s.losses,
+        lastDecayAt:s.lastDecayAt||Date.now(),
+        no1Since:s.no1Since||null,
+        longestNo1Ms:s.longestNo1Ms||0
+      }));
+    }
+    await Promise.all(writes);
+    showMsg('snapshot-msg','Snapshot restored successfully.');
+  }catch(e){showMsg('snapshot-msg','Error: '+e.message,true);}
+};
+
+window.deleteSnapshot=async function(snapId){
+  if(!confirm('Delete this snapshot?'))return;
+  try{
+    await deleteDoc(doc(db,'snapshots',snapId));
+    renderSnapshotList();
+  }catch(e){alert('Error: '+e.message);}
+};
+
+
 let pastTournaments=[];
 async function savePastTournamentsToStorage(){try{await setDoc(doc(db,'config','pastTournaments'),{data:JSON.stringify(pastTournaments)});}catch(e){console.error('Save past tournaments error',e);}}
 async function loadPastTournamentsFromStorage(){try{const d=await getDoc(doc(db,'config','pastTournaments'));if(d.exists()&&d.data().data)pastTournaments=JSON.parse(d.data().data);}catch(e){console.error('Load past tournaments error',e);}}
