@@ -2035,7 +2035,7 @@ window.triggerSeasonReset=async function(){
     const sName=seasonConfig.name||('Season '+sNum);
     const endedAt=new Date().toISOString();
 
-    const ranked=[...players].filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
+    const ranked=[...players].filter(p=>getLiveRD(p)<=100).sort((a,b)=>b.rating-a.rating);
     const rankMap={};ranked.forEach((p,i)=>rankMap[p.firestoreId]=i+1);
     players.forEach(p=>{if(!rankMap[p.firestoreId])rankMap[p.firestoreId]=ranked.length+1;});
 
@@ -2520,17 +2520,20 @@ window.submitMatch=async function(){
       const w=ws.data(),l=ls.data();
 
       const now=Date.now();
+      // Use live RD (continuously decayed) so the match calculation reflects true uncertainty
+      const wLiveRd=_computeRDLive({...w, rdBaseX:w.rdBaseX, rdBaseTime:w.rdBaseTime});
+      const lLiveRd=_computeRDLive({...l, rdBaseX:l.rdBaseX, rdBaseTime:l.rdBaseTime});
       const uw=g2Update(
-        {rating:w.rating, rd:w.rd},
-        [{rating:l.rating, rd:l.rd, s:1}], now
+        {rating:w.rating, rd:wLiveRd},
+        [{rating:l.rating, rd:lLiveRd, s:1}], now
       );
       const ul=g2Update(
-        {rating:l.rating, rd:l.rd},
-        [{rating:w.rating, rd:w.rd, s:0}], now
+        {rating:l.rating, rd:lLiveRd},
+        [{rating:w.rating, rd:wLiveRd, s:0}], now
       );
       const allSnap=await getDocs(query(collection(db,'players')));
       const allP=allSnap.docs.map(d=>({id:d.id,...d.data()}));
-      const ranked=p=>p.rd<=100;
+      const ranked=p=>_computeRDLive(p)<=100;
       const topBefore=allP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
       const simP=allP.map(p=>{
         if(p.id===wid)return{...p,rating:uw.rating,rd:uw.rd};
@@ -2840,16 +2843,33 @@ window.repairAllRatings=async function(){
     // Build state from snapshot or from scratch
     const state={};
     const no1State={};
+    const _stateAnchor=(pid,rd,rating,ts)=>{
+      const a=_rdAnchor(rd,rating);
+      state[pid].rdBaseX=a.rdBaseX;
+      state[pid].rdBaseTime=ts; // use event timestamp not wall clock
+    };
+    const _stateLiveRD=(pid,ts)=>{
+      const s=state[pid];
+      if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,s.rd||120));
+      const elapsedSec=(ts-s.rdBaseTime)/1000;
+      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*_rdRatingScale(s.rating||1500);
+      const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
+      return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
+    };
     if(snapshotState){
       for(const[pid,s]of Object.entries(snapshotState)){
-        state[pid]={rating:s.rating??1500,rd:Math.min(_RD_MAX_NEW-0.01,s.rd??120),wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune};
+        const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
+        const a=_rdAnchor(rd,s.rating??1500);
+        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:snapshotCutoffTs||now};
         no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
       }
     }
-    const initPlayer=pid=>{
+    const initPlayer=(pid,ts)=>{
       if(!state[pid]){
         const liveP=players.find(x=>x.firestoreId===pid);
-        state[pid]={rating:1500,rd:120,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune)};
+        const rd=120, rating=1500;
+        const a=_rdAnchor(rd,rating);
+        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:ts||now};
       }
       if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
     };
@@ -2869,10 +2889,11 @@ window.repairAllRatings=async function(){
     events.sort((a,b)=>a._ts-b._ts);
 
     const matchWrites=[];
-    const getTop=()=>{
+    const getTop=(ts)=>{
       let top=null,topR=-Infinity;
       for(const[pid,s]of Object.entries(state)){
-        if(s.rd<=100&&s.rating>topR){topR=s.rating;top=pid;}
+        const lrd=_stateLiveRD(pid,ts);
+        if(lrd<=100&&s.rating>topR){topR=s.rating;top=pid;}
       }
       return top;
     };
@@ -2887,16 +2908,21 @@ window.repairAllRatings=async function(){
           for(const pid of Object.keys(state))delete state[pid];
           for(const pid of Object.keys(no1State))delete no1State[pid];
           for(const[pid,s]of Object.entries(snappedPlayers)){
-            state[pid]={rating:s.rating??1500,rd:Math.min(_RD_MAX_NEW-0.01,s.rd??120),wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune};
+            const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
+            const a2=_rdAnchor(rd,s.rating??1500);
+            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:evt._ts};
             no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
           }
         } else if(a.type==='stat_edit'){
           const pid=a.data?.playerId;
           if(!pid)continue;
-          initPlayer(pid);
+          initPlayer(pid,evt._ts);
           const after=a.data?.after||{};
           if(after.rating!=null)state[pid].rating=after.rating;
-          if(after.rd!=null)state[pid].rd=after.rd;
+          if(after.rd!=null){
+            state[pid].rd=after.rd;
+            _stateAnchor(pid,after.rd,state[pid].rating,evt._ts);
+          }
           if(after.wins!=null)state[pid].wins=after.wins;
           if(after.losses!=null)state[pid].losses=after.losses;
           if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
@@ -2906,12 +2932,15 @@ window.repairAllRatings=async function(){
 
       const m=evt.data;
       const pid1=m.p1id, pid2=m.p2id;
-      initPlayer(pid1); initPlayer(pid2);
+      initPlayer(pid1,evt._ts); initPlayer(pid2,evt._ts);
       const s1=state[pid1], s2=state[pid2];
-      const topBefore=getTop();
+      // Use live RD at the time of the match
+      const rd1=_stateLiveRD(pid1,evt._ts);
+      const rd2=_stateLiveRD(pid2,evt._ts);
+      const topBefore=getTop(evt._ts);
 
-      const u1=g2Update({rating:s1.rating,rd:s1.rd},[{rating:s2.rating,rd:s2.rd,s:1}],evt._ts);
-      const u2=g2Update({rating:s2.rating,rd:s2.rd},[{rating:s1.rating,rd:s1.rd,s:0}],evt._ts);
+      const u1=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
+      const u2=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
       const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
       const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
 
@@ -2922,8 +2951,10 @@ window.repairAllRatings=async function(){
 
       state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].wins=s1.wins+1;
       state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].losses=s2.losses+1;
+      _stateAnchor(pid1,u1.rd,u1.rating,evt._ts);
+      _stateAnchor(pid2,u2.rd,u2.rating,evt._ts);
 
-      const topAfter=getTop();
+      const topAfter=getTop(evt._ts);
       if(topBefore!==topAfter){
         if(topBefore&&no1State[topBefore]?.no1Since!=null){
           const dur=evt._ts-no1State[topBefore].no1Since;
@@ -2941,7 +2972,7 @@ window.repairAllRatings=async function(){
 
     // Write final player docs — anchor rdBaseX/rdBaseTime to now so live decay works immediately
     const playerWrites=[];
-    const currentTop=getTop();
+    const currentTop=getTop(now);
     for(const p of players){
       const s=state[p.firestoreId];
       if(!s)continue;
@@ -3180,7 +3211,7 @@ window.openProfile=async function(fid){
 
   function renderProfileStats(){
     const liveP=players.find(x=>x.firestoreId===fid)||p;
-    const vis=[...players].filter(x=>x.rd<=100).sort((a,b)=>b.rating-a.rating);
+    const vis=[...players].filter(x=>getLiveRD(x)<=100).sort((a,b)=>b.rating-a.rating);
     const isTop=vis[0]?.firestoreId===fid;
     const _no1Since=isTop?(liveP.no1Since||Date.now()):null;
     const _liveMs=_no1Since?(Date.now()-_no1Since):0;
@@ -3192,7 +3223,7 @@ window.openProfile=async function(fid){
       :fmtDur(_record||la);
     document.getElementById('profile-stats').innerHTML=`
     <div class="m-stat"><span class="m-stat-l">Rating</span><span class="m-stat-v">${r2(liveP.rating)}</span></div>
-    <div class="m-stat"><span class="m-stat-l">RD</span><span class="m-stat-v neutral">±${r2(liveP.rd)}</span></div>
+    <div class="m-stat"><span class="m-stat-l">RD</span><span class="m-stat-v neutral">±${r2(getLiveRD(liveP))}</span></div>
     <div class="m-stat"><span class="m-stat-l">Record</span><span class="m-stat-v neutral">${liveP.wins}W–${liveP.losses}L</span></div>
     <div class="m-stat"><span class="m-stat-l">Win%</span><span class="m-stat-v ${wc}">${wr}%</span></div>
     <div class="m-stat"><span class="m-stat-l">Best Streak</span><span class="m-stat-v neutral" style="display:inline-flex;align-items:center;gap:.3rem">${ls>0?ls+'W':'—'}${cs>0?`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:${cs>=5?'var(--win)':'var(--accent)'};border:1px solid ${cs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;line-height:1">${cs}W</span>`:''}</span></div>
@@ -4230,10 +4261,10 @@ function brRebuildChecklist(){
   const cb=document.getElementById('bracket-player-checkboxes');
   // Always reset to default state: rated checked, unrated unchecked
   cb.innerHTML='';
-  const rated=players.filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
-  const unrated=players.filter(p=>p.rd>100).sort((a,b)=>a.name.localeCompare(b.name));
+  const rated=players.filter(p=>getLiveRD(p)<=100).sort((a,b)=>b.rating-a.rating);
+  const unrated=players.filter(p=>getLiveRD(p)>100).sort((a,b)=>a.name.localeCompare(b.name));
   [...rated,...unrated].forEach((p,i)=>{
-    const isRated=p.rd<=100;
+    const isRated=getLiveRD(p)<=100;
     const ratingStr=isRated
       ?`<span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:.6rem;margin-left:auto">${Math.round(p.rating)}</span>`
       :`<span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.58rem;margin-left:auto">unrated</span>`;
@@ -4286,8 +4317,8 @@ window.createBracket=async function(){
     seeded=arr;
   } else {
     // rated or any other mode: sort by rating desc
-    const rated=players.filter(p=>p.rd<=100&&checkedNames.has(p.name)).sort((a,b)=>b.rating-a.rating);
-    const unrated=players.filter(p=>p.rd>100&&checkedNames.has(p.name)).sort((a,b)=>a.name.localeCompare(b.name));
+    const rated=players.filter(p=>getLiveRD(p)<=100&&checkedNames.has(p.name)).sort((a,b)=>b.rating-a.rating);
+    const unrated=players.filter(p=>getLiveRD(p)>100&&checkedNames.has(p.name)).sort((a,b)=>a.name.localeCompare(b.name));
     const knownNames=new Set(players.map(p=>p.name));
     const unknown=[...checkedNames].filter(n=>!knownNames.has(n)).map(n=>({name:n}));
     seeded=[...rated,...unrated,...unknown].map(p=>p.name);
