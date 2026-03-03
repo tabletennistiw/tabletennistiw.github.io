@@ -6,6 +6,7 @@
 <title>TTTIW</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xIDE1IDY1IDQwIj4KICA8ZyBmaWxsPSIjRTVCMjVEIiB0cmFuc2Zvcm09Im1hdHJpeCgwLjY3NDY1LCAwLCAwLCAwLjY3NDY1LCAwLCAxNykiPgogICAgPHBhdGggZD0iTTAsNTEuMTdsNTkuMjkuMzRMMjkuOTQsMCwwLDUxLjE3Wk0xMC41Nyw0NS4xNkwyOS44NywxMi4xNmwxOC45MiwzMy4yMS0zOC4yMi0uMjJaIi8+CiAgICA8cGF0aCBkPSJNNTYuNDMsNDkuODRsLTUzLjU2LS4zMUwyOS45MiwzLjMxbDI2LjUyLDQ2LjU0Wk00LjYxLDQ4LjU0bDUwLjA5LjI5TDI5LjkxLDUuMzEsNC42MSw0OC41NFpNNTMuMzgsNDguMDZsLTQ3LjQyLS4yN0wyOS45LDYuODVsMjMuNDgsNDEuMlpNNy42OSw0Ni43OWw0My45Ni4yNUwyOS44OSw4Ljg1LDcuNjksNDYuNzlaIi8+CiAgPC9nPgogIDxnPgogICAgPGcgZmlsbD0iI0U1QjI1RCIgdHJhbnNmb3JtPSJtYXRyaXgoMC41MDAyLCAwLCAwLCAwLjUwMDIsIDUuMjQ0MzM3LCAxNi4xNTk2NjIpIiBzdHlsZT0iIj4KICAgICAgPHBhdGggZD0iTTg1LjgzLDEuNjhoLS4yYy0xMy43NSwwLTI0Ljk1LDExLjE3LTI0Ljk5LDI0LjkyLS4wNCwxMy43OCwxMS4xNCwyNS4wMiwyNC45MywyNS4wNmguMmMxMy43NSwwLDI0Ljk1LTExLjE3LDI0Ljk5LTI0LjkyLjA0LTEzLjc4LTExLjE0LTI1LjAyLTI0LjkzLTI1LjA2Wk04Mi40OSw4LjA2bC0uMDksMTUuNDEtMTUuMy0uMDljLjY2LTMuNzksMi40Ni03LjI5LDUuMjMtMTAuMDcsMi44LTIuOCw2LjMzLTQuNiwxMC4xNi01LjI1Wk04Mi4zNiwyOS41NGwtLjA5LDE1LjcxYy0zLjc3LS43LTcuMy0yLjUzLTEwLjAxLTUuMjktMi44Ni0yLjg5LTQuNjUtNi41Ni01LjI0LTEwLjUxbDE1LjM0LjA5Wk04OC4zNSw0NS4zN2wuMDktMTUuNzksMTUuOTEuMDljLTEuMzIsOC4xMi03LjgzLDE0LjU0LTE2LDE1LjdaTTg4LjQ4LDIzLjVsLjA5LTE1LjQ5YzguMDUsMS4yNCwxNC40Myw3LjU3LDE1Ljc3LDE1LjU4bC0xNS44Ni0uMDlaIi8+CiAgICA8L2c+CiAgICA8cmVjdCBzdHlsZT0iZmlsbDogcmdiKDIyOSwgMTc4LCA5Myk7IHRyYW5zZm9ybS1ib3g6IGZpbGwtYm94OyB0cmFuc2Zvcm0tb3JpZ2luOiA1MCUgNTAlOyIgdHJhbnNmb3JtPSJtYXRyaXgoMC44NjYwMjYsIC0wLjUsIDAuNSwgMC44NjYwMjYsIC0xMC4yMDcxODMsIC0xMS44NjcyMjQpIiB4PSI2NC40MDQiIHk9IjQ5LjUxMiIgd2lkdGg9IjUiIGhlaWdodD0iMTQiIHJ4PSIxIiByeT0iMSIvPgogIDwvZz4KICA8cGF0aCBzdHlsZT0iZmlsbDogcmdiKDIyOSwgMTc4LCA5Myk7IiBkPSJNIDQ4LjU4NCA0MS45MzcgQyA1MS41OTUgNDIuMDAzIDUyLjQ4OSA0Mi43MiA1NC4wODkgNDUuMTU3IEwgNTguMzk2IDQyLjUzNCBDIDU3LjI0NyA0MC4wMTEgNTcuMjMzIDM4LjczNiA1OC44NDEgMzUuOTc5IEMgNTUuNzI5IDM3LjI4MiA0OC41NjkgNDEuOTUgNDguNTg0IDQxLjkzNyBaIi8+Cjwvc3ZnPg==">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
   --bg:#1e1018; --surface:#2a1520; --border:#4a2a38;
@@ -61,8 +62,7 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:visible;}
 .lb-head-row span{white-space:nowrap;}
 .lb-h-rating,.lb-h-rd,.lb-h-wl{text-align:right;}
 @media(max-width:480px){
-  .lb-head-row{grid-template-columns:2rem 1fr 4.5rem 0 3rem;}
-  .lb-h-rd{display:none;}
+  .lb-h-wl{display:none;}
 }
 
 .lb-row{
@@ -77,8 +77,7 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:visible;}
 }
 .lb-row:hover{background:color-mix(in srgb,var(--accent) 4%,transparent);}
 @media(max-width:480px){
-  .lb-row{grid-template-columns:2rem 1fr 4.5rem 0 3rem;}
-  .lb-row .lb-col-rd{display:none;}
+  .lb-row .lb-col-wl{display:none;}
 }
 .lb-row .lb-col-rd{text-align:right;}
 .lb-row .lb-col-rating{text-align:right;}
@@ -273,8 +272,8 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .modal-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;}
 .mh-left{display:flex;gap:.75rem;align-items:flex-start;flex:1;min-width:0;}
 .m-av-wrap{position:relative;flex-shrink:0;}
-.m-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);display:block;}
-.m-av-ph{width:52px;height:52px;border-radius:50%;background:var(--bg);border:2px solid var(--border);
+.m-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);display:block;}
+.m-av-ph{width:52px;height:52px;border-radius:50%;background:var(--bg);border:2px solid var(--accent);
   display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--muted);}
 .m-av-upload{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:var(--accent);
   border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
@@ -318,6 +317,42 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
   font-family:'DM Mono',monospace;font-size:.62rem;color:var(--text);pointer-events:none;
   z-index:9999;display:none;line-height:1.6;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.5);}
+#rd-tip{position:fixed;background:var(--surface);border:1px solid var(--border);padding:.38rem .65rem;
+  font-family:'DM Mono',monospace;font-size:.62rem;color:var(--text);pointer-events:none;
+  z-index:9999;display:none;line-height:1.6;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.5);}
+
+/* RD DECAY MODAL */
+#rd-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:flex-end;justify-content:center;padding:0;}
+#rd-modal-overlay.open{display:flex;}
+@media(min-width:600px){#rd-modal-overlay.open{align-items:center;padding:1.25rem;}}
+#rd-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1200px;
+  max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+#rd-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:linear-gradient(90deg,rgba(229,178,93,.06) 0%,transparent 60%);}
+#rd-modal-header .rd-modal-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
+#rd-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
+#rd-modal-header .rd-modal-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+#rd-modal-header .m-close{background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;cursor:pointer;padding:.3rem .55rem;line-height:1;font-family:'DM Mono',monospace;letter-spacing:.06em;transition:all .15s;}
+#rd-modal-header .m-close:hover{border-color:var(--text);color:var(--text);}
+#rd-modal-body{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+#rd-modal-chart-row{display:flex;flex:1;min-height:0;overflow:hidden;}
+#rd-modal-yaxis{width:46px;flex-shrink:0;position:relative;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;}
+#rd-modal-scroll{overflow-x:auto;overflow-y:hidden;flex:1;-webkit-overflow-scrolling:touch;}
+#rd-modal-scroll::-webkit-scrollbar{height:4px;}
+#rd-modal-scroll::-webkit-scrollbar-track{background:var(--bg);}
+#rd-modal-scroll::-webkit-scrollbar-thumb{background:var(--border);}
+#rd-modal-scroll canvas{display:block;cursor:crosshair;}
+.lb-rd-btn,.lb-rating-btn{background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;padding:.1rem .35rem;font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.04em;line-height:1.4;vertical-align:middle;transition:color .15s,border-color .15s,background .15s;margin-left:.35rem;}
+.lb-rd-btn:hover,.lb-rating-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(229,178,93,.08);}
+#rating-trend-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:flex-end;justify-content:center;padding:0;}
+#rating-trend-modal-overlay.open{display:flex;}
+@media(min-width:600px){#rating-trend-modal-overlay.open{align-items:center;padding:1.25rem;}}
+#rating-trend-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1400px;
+  height:92vh;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+#rating-trend-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:linear-gradient(90deg,rgba(229,178,93,.06) 0%,transparent 60%);justify-content:space-between;}
+#rating-trend-modal-header .rating-trend-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
+#rating-trend-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
+#rating-trend-modal-header .rating-trend-modal-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+#rating-trend-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;}
 
 /* PROFILE MATCHES */
 .pm-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.65rem;
@@ -373,7 +408,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .lb-float-quote{
   position:absolute;font-family:'DM Mono',monospace;font-style:italic;
   color:var(--muted);pointer-events:none;line-height:1.4;
-  opacity:0;text-align:center;max-width:180px;white-space:nowrap;
+  opacity:0;white-space:nowrap;
 }
 @media(max-width:639px){.lb-float-quote{display:none;}}
 
@@ -436,6 +471,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 </style>
 </head>
 <body>
+<div id="rd-tip"></div>
 
 <header>
   <div class="header-logo">
@@ -487,13 +523,15 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="lb-head-row">
         <span class="lb-h-rank">#</span>
         <span class="lb-h-player">Player</span>
-        <span class="lb-h-rating">Rating</span>
-        <span class="lb-h-rd">RD</span>
+        <span class="lb-h-rating">Rating<button class="lb-rating-btn" onclick="openRatingTrendModal()" title="Rating Trends">TRENDS</button></span>
+        <span class="lb-h-rd">RD<button class="lb-rd-btn" onclick="openRDModal()" title="RD Decay Chart">CHART</button></span>
         <span class="lb-h-wl">W–L</span>
       </div>
       <div id="lb-list" style="position:relative;width:100%"></div>
     </div>
     <div id="lb-empty" class="empty" style="display:none">No players yet.</div>
+    <!-- rd-decay-section kept as no-op anchor for JS compat -->
+    <div id="rd-decay-section" style="display:none"></div>
   </div>
 
   <!-- PLAYERS -->
@@ -560,9 +598,9 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
         <div class="rules-col">
           <div class="rules-col-title">Rating System</div>
           <div class="rules-list">
-            <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">RD</div><div><div class="rule-title">Rating Deviation</div><div class="rule-desc">RD measures how confident the system is in a player's rating. A low RD means the rating is reliable; a high RD means more uncertainty. New players start at RD 120. After enough games, RD can drop below 100 &mdash; only then does a player appear on the leaderboard.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">RD Decay (Inactivity)</div><div class="rule-desc">If you stop playing, your RD slowly increases each inactive period. One decay period = <span id="rules-decay-period"></span>. RD is capped at 200 &mdash; above 100 you're hidden from the leaderboard.</div></div></div>
-            <div class="rule-item"><div class="rule-icon" style="font-size:.6rem">R&#x2193;</div><div><div class="rule-title">Rating-Scaled Decay</div><div class="rule-desc" id="rules-scaled-decay-desc"></div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.8rem">RD</div><div><div class="rule-title">Rating Deviation</div><div class="rule-desc">RD measures confidence in a player's rating. Low RD = reliable rating; high RD = more uncertainty. New players start at RD&nbsp;120. Playing a match immediately drops RD &mdash; once it falls below 100 you appear on the leaderboard.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.7rem">&#9201; RD</div><div><div class="rule-title">Continuous RD Decay</div><div class="rule-desc">RD rises continuously while you're inactive, following an asymptotic curve that approaches 120 but never exceeds it. The longer you go without playing, the closer to 100 your RD gets &mdash; at which point you fall off the leaderboard.</div></div></div>
+            <div class="rule-item"><div class="rule-icon" style="font-size:.6rem">R&#x2193;</div><div><div class="rule-title">Rating-Scaled Decay</div><div class="rule-desc" id="rules-scaled-decay-desc">Higher-rated players decay more slowly. The decay rate scales as (1500&nbsp;/&nbsp;rating)^<span id="rules-scale-exp">1</span>, so a 1500-rated player decays at 1&times; while a 2000-rated player decays slower &mdash; protecting earned rankings.</div></div></div>
           </div>
         </div>
       </div>
@@ -630,7 +668,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="admin-section" style="max-width:480px">
         <div class="admin-stitle">RD Decay Settings</div>
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
-          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD increases by a fixed amount each inactive period. Current period: <strong id="admin-decay-period-display" style="color:var(--text)">—</strong> · Max RD: 200 · Hidden from leaderboard if RD &gt; 100.</p>
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">RD rises continuously while inactive, approaching 120 asymptotically but never exceeding it. Hidden from leaderboard if RD &gt; 100. Decay rate scales with rating if scale multiplier &gt; 0.</p>
           <div id="decay-info" style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.6rem .8rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem">
             Loading current settings…
           </div>
@@ -1124,9 +1162,10 @@ function _onDataReady(){
 }
 
 onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
+  const _prevRDMap=Object.fromEntries(players.map(p=>[p.firestoreId,{pid:p.firestoreId,name:p.name,rd:p.rd,inactive:_rdInactivePeriods(p),hidden:p.rd>100,immune:!!p.decayImmune}]));
   players=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-  applyDecayLocally();
   renderLeaderboard();renderPlayersList();renderMatchSelects();updateDecayStatus();
+  _rdAnimateOrDraw(_prevRDMap);
   if(isAdmin){renderAdminPanel();simPopulateDropdowns();populateRestoreSeasonDropdown();}
   _dataReady.players=true;_onDataReady();
 },err=>console.error(err));
@@ -1156,110 +1195,30 @@ onSnapshot(doc(db,'config','decay'),snap=>{
   }
   updateDecayStatus();
   updateDecayInfo();
-  // applyDecayLocally is handled solely by scheduleDecay loop, not here
 });
-setInterval(updateDecayStatus,1000);
-
-// ── Decay scheduler: fires once per decay period, self-reschedules ──
-const pendingDecayWrites = new Set();
-function scheduleDecay(){
-  applyDecayLocally();
-  setTimeout(scheduleDecay, decayMs());
-}
-scheduleDecay();
+// updateDecayStatus is a no-op — no interval needed
 
 function updateDecayInfo(){
   const di=document.getElementById('decay-info');
-  if(!di)return;
-  const a=document.getElementById('decay-amount').value||'4';
-  const u=document.getElementById('decay-unit').value||'hours';
-  di.textContent=`Decay period: ${a} ${u} · Max RD: 200 · Players hidden if RD > 100`;
-  // Update admin description text
+  if(di) di.textContent=`Continuous RD decay · Max RD: 120 (asymptote) · Hidden from leaderboard if RD > 100`;
   const adp=document.getElementById('admin-decay-period-display');
-  if(adp)adp.textContent=`${a} ${u}`;
-  // Update rules panel live values
-  const rPeriod=document.getElementById('rules-decay-period');
-  if(rPeriod)rPeriod.textContent=`${a} ${u}`;
+  if(adp) adp.textContent='continuous (asymptotic curve)';
+  // Update rules panel scale exponent
+  const rExp=document.getElementById('rules-scale-exp');
+  if(rExp) rExp.textContent=DECAY_SCALE_MULTIPLIER||1;
   const rScale=document.getElementById('rules-scaled-decay-desc');
   if(rScale){
     const mult=DECAY_SCALE_MULTIPLIER;
     if(!mult||mult<=0){
-      rScale.textContent='Rating-scaled decay is currently disabled. All players decay at the same flat rate.';
+      rScale.innerHTML='Rating-scaled decay is currently disabled &mdash; all players decay at the same flat rate.';
     } else {
-      rScale.innerHTML=`Higher-rated players decay more slowly. Scale = (1500/rating)^${mult}, so a 1500-rated player decays at 1×, a higher-rated player at less than 1×. Current exponent: <strong style="color:var(--text)">${mult}</strong>.`;
+      rScale.innerHTML=`Higher-rated players decay more slowly. The decay rate scales as (1500&nbsp;/&nbsp;rating)<sup>${mult}</sup> &mdash; the current multiplier is <strong style="color:var(--accent)">${mult}</strong>. At this setting a 1500-rated player decays at 1&times;, while a 2000-rated player decays at ${((1500/2000)**mult).toFixed(3)}&times; &mdash; protecting earned rankings.`;
     }
   }
-}
-
-// ── DECAY ────────────────────────────────────────────────────────────────────
-function decayMs(){
-  const a=parseFloat(document.getElementById('decay-amount').value)||4;
-  const u=document.getElementById('decay-unit').value||'hours';
-  if(u==='minutes')return a*6e4;
-  if(u==='hours')return a*36e5;
-  return a*864e5;
-}
-
-// Periods aligned to Unix epoch (midnight UTC for days, top-of-hour for hours)
-function currentDecayPeriod(ms){
-  return Math.floor(Date.now()/ms);
-}
-
-function computeDecay(p){
-  if(p.decayImmune)return null;
-  const ms=decayMs();
-  const lastProcessed=p.lastDecayAt||0;
-  const basePeriod=Math.floor(lastProcessed/ms);
-  const nowPeriod=currentDecayPeriod(ms);
-  const per=nowPeriod-basePeriod;
-  if(per<=0)return null;
-
-  let phi=p.rd/SCALE, phiMax=RD_MAX/SCALE;
-  for(let i=0;i<per;i++){
-    phi=Math.sqrt(phi*phi+0.0036);
-    if(phi>=phiMax){phi=phiMax;break;}
-  }
-
-  const newLast=nowPeriod*ms;
-  // Rating-scaled decay: scale = (1500/rating)^m
-  if(DECAY_SCALE_MULTIPLIER>0){
-    const scale=Math.pow((1500/(p.rating||1500)),DECAY_SCALE_MULTIPLIER);
-    phi=p.rd/SCALE+(phi-p.rd/SCALE)*scale; // baseline + scaled growth
-  }
-  return{newRD:Math.min(phi*SCALE,RD_MAX), newLast};
-}
-
-function applyDecayLocally(){
-  const ranked=players.filter(p=>p.rd<=100).sort((a,b)=>b.rating-a.rating);
-  const topBefore=ranked[0]||null;
-  let anyUpdated=false;
-  players.forEach(p=>{
-    // Skip if a write is already in-flight for this player
-    if(pendingDecayWrites.has(p.firestoreId))return;
-    const r=computeDecay(p);if(!r)return;
-    anyUpdated=true;
-    // Update in-memory state FIRST so the next tick sees the new value
-    p.rd=r.newRD;
-    p.lastDecayAt=r.newLast;
-    const upd={rd:r.newRD,lastDecayAt:r.newLast};
-    if(topBefore&&p.firestoreId===topBefore.firestoreId&&r.newRD>100&&p.no1Since){
-      const dur=Date.now()-(p.no1Since||Date.now());
-      const prev=p.longestNo1Ms||0;
-      upd.no1Since=null;
-      if(dur>prev)upd.longestNo1Ms=dur;
-      p.no1Since=null;if(dur>prev)p.longestNo1Ms=dur;
-    }
-    // Lock this player until Firestore confirms the write
-    pendingDecayWrites.add(p.firestoreId);
-    updateDoc(doc(db,'players',p.firestoreId),upd)
-      .catch(()=>{})
-      .finally(()=>pendingDecayWrites.delete(p.firestoreId));
-  });
-  if(anyUpdated){renderLeaderboard();renderPlayersList();}
 }
 
 function updateDecayStatus(){
-  // decay-status replaced by live signal widget — no-op kept for compat
+  // no-op kept for compat
 }
 
 // ── DECAY SETTINGS ────────────────────────────────────────────────────────────
@@ -1319,18 +1278,26 @@ function playerStateFromHistory(allMatchesBefore, pid) {
   return{rating,rd,wins,losses,lastMatchAt};
 }
 
-function applyDecayToPlayer(p, nowMs, periodMs){
-  if(!p.lastMatchAt||periodMs<=0)return;
-  const periods=Math.floor((nowMs-p.lastMatchAt)/periodMs);
-  if(periods<=0)return;
-  let phi=p.rd/SCALE;
-  const phiMax=RD_MAX/SCALE;
-  for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
-  p.rd=Math.min(phi*SCALE,RD_MAX);
-}
+
 
 // ── LEADERBOARD QUOTE ZONE ───────────────────────────────────────────────────
-let _lbQuoteTimer=null, _lbFloatTimers=[], _lbNo1Typed=false, _lbLastVis=null, _lbTypeTick=null;
+let _lbQuoteTimer=null, _lbFloatTimers=[], _lbNo1Typed=false, _lbLastVis=null, _lbTypeTick=null, _lbTyping=false;
+let _lbDebugMode=false;
+
+function _lbDebugRect(zone,r,color,label){
+  if(!_lbDebugMode) return null;
+  const d=document.createElement('div');
+  d.className='lb-debug-rect';
+  d.style.cssText=`position:absolute;left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;border:1.5px solid ${color};background:${color}22;pointer-events:none;z-index:999;box-sizing:border-box;`;
+  if(label){
+    const l=document.createElement('span');
+    l.style.cssText=`position:absolute;top:1px;left:2px;font-size:9px;font-family:monospace;color:${color};white-space:nowrap;line-height:1;`;
+    l.textContent=label;
+    d.appendChild(l);
+  }
+  zone.appendChild(d);
+  return d;
+}
 
 window.addEventListener('resize',()=>{
   if(window.innerWidth<640){
@@ -1338,25 +1305,28 @@ window.addEventListener('resize',()=>{
     _lbFloatTimers=[];
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
   }
+  const _rdOv=document.getElementById('rd-modal-overlay');
+  if(_rdOv&&_rdOv.classList.contains('open')) drawRDDecayChart({},true);
 });
+
 function initLbQuoteZone(vis){
   _lbLastVis=vis;
-  // Create or find the zone
+
+  // ── zone ──
   let zone=document.getElementById('lb-quote-zone');
   if(!zone){
     zone=document.createElement('div');
     zone.id='lb-quote-zone';
     zone.className='lb-quote-zone';
     const panel=document.getElementById('panel-leaderboard');
-    const loading=document.getElementById('lb-loading');
-    panel.insertBefore(zone,loading);
+    panel.insertBefore(zone,document.getElementById('lb-loading'));
   }
 
   const top=vis[0];
   const others=vis.slice(1).filter(p=>p.quote);
   const total=vis.length||1;
 
-  // ── #1 quote with typewriter + glow ──
+  // ── #1 element ──
   let no1El=document.getElementById('lb-quote-no1');
   if(!no1El){
     no1El=document.createElement('div');
@@ -1364,167 +1334,184 @@ function initLbQuoteZone(vis){
     zone.appendChild(no1El);
   }
 
-  function typewrite(el,text,byline,onDone){
+  // If typewriter is currently running, do nothing — floats will start when it finishes
+  if(_lbTyping) return;
+
+  // Kill existing floats and debug overlays
+  _lbFloatTimers.forEach(t=>clearTimeout(t));
+  _lbFloatTimers=[];
+  zone.querySelectorAll('.lb-float-quote,.lb-debug-rect').forEach(el=>el.remove());
+
+  // ── helpers ──
+  function captureRects(el, PAD){
+    const zR=zone.getBoundingClientRect();
+    const rects=[];
+    function walk(node){
+      if(node.nodeType===Node.TEXT_NODE){
+        const range=document.createRange();
+        range.selectNodeContents(node);
+        for(const r of range.getClientRects()){
+          if(r.width>2) rects.push({
+            x: r.left - zR.left - PAD,
+            y: r.top  - zR.top  - PAD,
+            w: r.width  + PAD*2,
+            h: r.height + PAD*2
+          });
+        }
+      } else {
+        node.childNodes.forEach(walk);
+      }
+    }
+    walk(el);
+    return rects;
+  }
+
+  function overlaps(a, b){
+    return !(a.x+a.w <= b.x || b.x+b.w <= a.x || a.y+a.h <= b.y || b.y+b.h <= a.y);
+  }
+
+  function typewrite(el, text, byline, onDone){
     el.innerHTML='';
     let i=0;
     const full='"'+text+'"';
     _lbTypeTick=setInterval(()=>{
-      el.innerHTML=esc(full.slice(0,i))+'<span style="opacity:.4">|</span>';
       i++;
-      if(i>full.length){
-        clearInterval(_lbTypeTick);_lbTypeTick=null;
+      el.innerHTML=esc(full.slice(0,i))+'<span style="opacity:.4">|</span>';
+      if(i>=full.length){
+        clearInterval(_lbTypeTick); _lbTypeTick=null;
         el.innerHTML=esc(full)+(byline?`<span class="byline">— ${esc(byline)}</span>`:'');
         if(onDone) onDone();
       }
     },120);
   }
 
-  // Pre-render full text invisibly to measure true bounding box
-  const fullNo1Html = top?.quote ? esc('"'+top.quote+'"')+'<span class="byline">— '+esc(top.name.toUpperCase()+' · #1')+'</span>' : '';
-  if(top?.quote){
-    no1El.style.display='block';
-    // Always set full content first so getBoundingClientRect is accurate
-    no1El.innerHTML=fullNo1Html;
-  } else {
+  // ── flow ──
+  if(!top?.quote){
     no1El.style.display='none';
+    if(others.length) _startFloats([]);
+    return;
   }
 
-  // zone height is fixed in CSS
+  no1El.style.display='block';
+  const fullHtml=esc('"'+top.quote+'"')+`<span class="byline">— ${esc(top.name.toUpperCase()+' · #1')}</span>`;
 
-  // ── Floating quotes for rank 2+ ──
-  // Clear old timers and float els
-  _lbFloatTimers.forEach(t=>clearTimeout(t));
-  _lbFloatTimers=[];
-  zone.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
-
-  // Now measure after full content is rendered
-  const no1Rect=no1El.getBoundingClientRect();
-  const zoneRect=zone.getBoundingClientRect();
-
-  // Start typewriter after measuring (replaces innerHTML temporarily)
-  if(top?.quote){
-    if(!_lbNo1Typed){
-      _lbNo1Typed=true;
-      typewrite(no1El, top.quote, top.name.toUpperCase()+' · #1', startFloats);
-    } else {
-      startFloats();
-    }
+  if(_lbNo1Typed){
+    // Returning to panel — show full text, measure, spawn floats immediately
+    no1El.innerHTML=fullHtml;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const rects=captureRects(no1El, 14);
+      if(others.length) _startFloats(rects);
+    }));
   } else {
-    startFloats();
-  }
-
-  if(!others.length) return;
-
-  function startFloats(){
-  if(window.innerWidth<640) return;
-  const activeQuotePlayers=new Set();
-  const FADE_IN=5000, FADE_OUT=5000;
-  const PAD=10;
-
-  // Re-measure after typewriter has finished
-  const no1R=no1El.getBoundingClientRect();
-  const zR=zone.getBoundingClientRect();
-  const zW=zR.width, zH=zR.height;
-  // Margin extension: how far into the page margins floaters can go
-  const MARGIN=120;
-  const areaX=-MARGIN, areaW=zW+MARGIN*2;
-
-  // Get per-line text rects — iterate text nodes only to avoid duplicate parent rects
-  const textRects=[];
-  function collectTextRects(node){
-    if(node.nodeType===Node.TEXT_NODE){
-      const r=document.createRange();
-      r.selectNodeContents(node);
-      [...r.getClientRects()].forEach(rect=>{
-        if(rect.width>1) textRects.push({
-          x:rect.left-zR.left-PAD, y:rect.top-zR.top-PAD, w:rect.width+PAD*2, h:rect.height+PAD*2
+    // First load — render full text invisibly to measure, THEN typewrite, THEN spawn floats
+    _lbNo1Typed=true;
+    _lbTyping=true;
+    no1El.style.visibility='hidden';
+    no1El.innerHTML=fullHtml;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const rects=captureRects(no1El, 14);
+      no1El.style.visibility='';
+      typewrite(no1El, top.quote, top.name.toUpperCase()+' · #1', ()=>{
+        _lbTyping=false;
+        requestAnimationFrame(()=>{
+          const finalRects=captureRects(no1El, 14);
+          if(others.length) _startFloats(finalRects);
         });
       });
-      node.childNodes.forEach(collectTextRects);
-    }
-  }
-  collectTextRects(no1El);
-
-  // Live list of currently placed rects
-  const placedRects=[];
-
-  function overlaps(a,b){
-    return !(a.x+a.w+PAD<=b.x || b.x+b.w+PAD<=a.x || a.y+a.h+PAD<=b.y || b.y+b.h+PAD<=a.y);
+    }));
   }
 
-  function findPos(elW,elH){
-    for(let i=0;i<200;i++){
-      const x=areaX+Math.random()*(areaW-elW);
-      const y=Math.random()*(zH-elH);
-      const r={x,y,w:elW,h:elH};
-      if(textRects.some(tr=>overlaps(r,tr))) continue;
-      if(placedRects.some(p=>overlaps(r,p))) continue;
-      return r;
-    }
-    return null;
-  }
+  function _startFloats(no1Rects){
+    if(window.innerWidth<640) return;
 
-  // Shared queue across all chains — prevents duplicate quotes
-  let quoteQueue=[];
-  function refillQueue(){quoteQueue=[...others].sort(()=>Math.random()-.5);}
-  refillQueue();
+    const zR=zone.getBoundingClientRect();
+    const zW=zR.width, zH=zR.height;
+    const MARGIN=100;
+    const FADE_MS=5000;
 
-  function nextQuote(){
-    if(!quoteQueue.length) refillQueue();
-    const idx=quoteQueue.findIndex(p=>!activeQuotePlayers.has(p.firestoreId));
-    if(idx===-1){const t=setTimeout(nextQuote,500);_lbFloatTimers.push(t);return;}
-    const p=quoteQueue.splice(idx,1)[0];
-    activeQuotePlayers.add(p.firestoreId);
+    zone.querySelectorAll('.lb-debug-rect').forEach(el=>el.remove());
+    no1Rects.forEach((r,i)=>_lbDebugRect(zone, r, '#E5B25D', i===0?'no1':''));
 
-    const rank=vis.indexOf(p)+1;
-    const maxRem=0.85,minRem=0.52;
-    const frac=Math.max(0,Math.min(1,(rank-2)/(total-2||1)));
-    const fs=(maxRem-frac*(maxRem-minRem)).toFixed(2);
+    const placedRects=[...no1Rects];
+    const active=new Set();
 
-    // Measure off-screen first
-    const el=document.createElement('div');
-    el.className='lb-float-quote';
-    el.style.cssText=`visibility:hidden;position:absolute;font-size:${fs}rem;white-space:nowrap;`;
-    el.textContent='"'+p.quote+'" — '+p.name;
-    zone.appendChild(el);
-    const elW=el.offsetWidth, elH=el.offsetHeight;
-
-    const pos=findPos(elW,elH);
-    if(!pos){
-      el.remove();
-      activeQuotePlayers.delete(p.firestoreId);
-      const t=setTimeout(nextQuote,600);_lbFloatTimers.push(t);return;
+    function findPos(elW, elH){
+      const minX=-MARGIN, maxX=zW+MARGIN-elW;
+      const minY=0,       maxY=zH-elH;
+      if(maxX<minX||maxY<minY) return null;
+      for(let i=0;i<600;i++){
+        const x=minX+Math.random()*(maxX-minX);
+        const y=minY+Math.random()*(maxY-minY);
+        const r={x,y,w:elW,h:elH};
+        if(!placedRects.some(p=>overlaps(r,p))) return r;
+      }
+      return null;
     }
 
-    placedRects.push(pos);
-    el.style.cssText=`position:absolute;font-size:${fs}rem;white-space:nowrap;opacity:0;left:${pos.x}px;top:${pos.y}px;transition:opacity ${FADE_IN}ms ease;`;
-    el.className='lb-float-quote';
+    let queue=[];
+    function refill(){queue=[...others].filter(p=>!active.has(p.firestoreId)).sort(()=>Math.random()-.5);}
+    refill();
 
-    requestAnimationFrame(()=>{requestAnimationFrame(()=>{el.style.opacity='0.45';});});
+    function nextQuote(){
+      if(!queue.length) refill();
+      const idx=queue.findIndex(p=>!active.has(p.firestoreId));
+      if(idx===-1){_lbFloatTimers.push(setTimeout(nextQuote,500));return;}
+      const p=queue.splice(idx,1)[0];
+      active.add(p.firestoreId);
 
-    const t1=setTimeout(()=>{
-      el.style.transition=`opacity ${FADE_OUT}ms ease`;
-      el.style.opacity='0';
-      const t2=setTimeout(()=>{
-        el.remove();
-        placedRects.splice(placedRects.indexOf(pos),1);
-        activeQuotePlayers.delete(p.firestoreId);
-        nextQuote();
-      },FADE_OUT);
-      _lbFloatTimers.push(t2);
-    },FADE_IN);
-    _lbFloatTimers.push(t1);
+      const rank=vis.indexOf(p)+1;
+      const frac=Math.max(0,Math.min(1,(rank-2)/(total-2||1)));
+      const fs=(0.85-frac*0.33).toFixed(2);
+
+      // Measure true size using getBoundingClientRect after appending off-screen
+      const probe=document.createElement('div');
+      probe.className='lb-float-quote';
+      probe.style.cssText=`position:fixed;font-size:${fs}rem;white-space:nowrap;visibility:hidden;left:-9999px;top:-9999px;`;
+      document.body.appendChild(probe);
+      probe.textContent='"'+p.quote+'" — '+p.name;
+      const pr=probe.getBoundingClientRect();
+      const elW=pr.width, elH=pr.height;
+      document.body.removeChild(probe);
+
+      const pos=findPos(elW, elH);
+      if(!pos){
+        active.delete(p.firestoreId);
+        _lbFloatTimers.push(setTimeout(nextQuote,600));
+        return;
+      }
+
+      const floatEl=document.createElement('div');
+      floatEl.className='lb-float-quote';
+      floatEl.style.cssText=`position:absolute;font-size:${fs}rem;white-space:nowrap;opacity:0;left:${pos.x}px;top:${pos.y}px;transition:opacity ${FADE_MS}ms ease;`;
+      floatEl.textContent='"'+p.quote+'" — '+p.name;
+      zone.appendChild(floatEl);
+
+      placedRects.push(pos);
+      // Debug box exactly matches the placed element dimensions
+      const dbg=_lbDebugRect(zone, pos, '#7ec8a0', p.name.slice(0,8));
+
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ floatEl.style.opacity='0.45'; }));
+
+      _lbFloatTimers.push(setTimeout(()=>{
+        floatEl.style.transition=`opacity ${FADE_MS}ms ease`;
+        floatEl.style.opacity='0';
+        if(dbg){dbg.style.transition=`opacity ${FADE_MS}ms ease`;dbg.style.opacity='0';}
+        _lbFloatTimers.push(setTimeout(()=>{
+          floatEl.remove();
+          if(dbg) dbg.remove();
+          const i=placedRects.indexOf(pos);
+          if(i!==-1) placedRects.splice(i,1);
+          active.delete(p.firestoreId);
+          nextQuote();
+        }, FADE_MS));
+      }, FADE_MS));
+    }
+
+    const chains=Math.min(4,others.length);
+    for(let i=0;i<chains;i++){
+      _lbFloatTimers.push(setTimeout(nextQuote, i*(FADE_MS*2/chains)));
+    }
   }
-
-  // Stagger chain starts across the full fade cycle
-  const chains=Math.min(4,others.length);
-  const stagger=(FADE_IN+FADE_OUT)/chains;
-  for(let i=0;i<chains;i++){
-    const t=setTimeout(nextQuote,stagger*i);
-    _lbFloatTimers.push(t);
-  }
-
-  } // end startFloats
 }
 
 // ── LEADERBOARD ──────────────────────────────────────────────────────────────
@@ -1564,9 +1551,18 @@ function _lbUpdateStats(el, p){
   const lEl=el.querySelector('.record-badge .l'); if(lEl) lEl.textContent=p.losses+'L';
   // no1 timer
   const no1=el.querySelector('.no1-timer');
-  if(no1){
-    const isNo1=el.dataset.isNo1==='1';
-    if(isNo1) no1.dataset.since=p.no1Since||Date.now();
+  if(no1){ const isNo1=el.dataset.isNo1==='1'; if(isNo1) no1.dataset.since=p.no1Since||Date.now(); }
+  // streak tag — update or create/remove as needed
+  const pname=el.querySelector('.pname-cell');
+  if(pname){
+    const existing=pname.querySelector('.streak-tag');
+    const{cs:pCs}=pStats(p.firestoreId);
+    if(pCs>=3){
+      const col=pCs>=5?'var(--win)':'var(--accent)';
+      const html=`<span class="streak-tag" style="font-family:'DM Mono',monospace;font-size:.55rem;color:${col};border:1px solid ${col};padding:.1rem .3rem;opacity:.85">${pCs}W</span>`;
+      if(existing) existing.outerHTML=html;
+      else pname.insertAdjacentHTML('beforeend',html);
+    } else if(existing){ existing.remove(); }
   }
 }
 
@@ -1576,7 +1572,7 @@ function _lbCreateEl(p, idx){
   const lastS=seasons.length?seasons[seasons.length-1]:null;
   const sBadge=lastS?(()=>{const rk=lastS.rank,cls=rk===1?'rank1':rk===2?'rank2':rk===3?'rank3':'rankN',emoji=rk===1?'🥇':rk===2?'🥈':rk===3?'🥉':'';return`<span class="s-badge ${cls}" title="Last season: ${esc(lastS.seasonName||'Season '+lastS.seasonNum)}" style="font-size:.6rem;padding:.12rem .35rem">${emoji}${emoji?'':('#'+rk)}</span>`})():'';
   const{cs:pCs}=pStats(p.firestoreId);
-  const streakTag=pCs>=3?`<span style="font-family:'DM Mono',monospace;font-size:.55rem;color:${pCs>=5?'var(--win)':'var(--accent)'};border:1px solid ${pCs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;opacity:.85">${pCs}W</span>`:'';
+  const streakTag=pCs>=3?`<span class="streak-tag" style="font-family:'DM Mono',monospace;font-size:.55rem;color:${pCs>=5?'var(--win)':'var(--accent)'};border:1px solid ${pCs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;opacity:.85">${pCs}W</span>`:'';
   const isNo1=idx===0;
   const no1Tag=isNo1?`<span class="no1-timer" data-since="${p.no1Since||Date.now()}">👑 0s</span>`:'';
 
@@ -1610,6 +1606,7 @@ function _lbPulseSignal(){
 }
 
 function renderLeaderboard(){
+  _rdClearCache();
   const sorted=[...players].sort((a,b)=>b.rating-a.rating);
   document.getElementById('lb-loading').style.display='none';
   if(!sorted.length){document.getElementById('lb-table').style.display='none';document.getElementById('lb-empty').style.display='block';return;}
@@ -1711,17 +1708,17 @@ function renderLeaderboard(){
 function _lbUpdateHiddenNote(hiddenCount){
   let hn=document.getElementById('lb-hidden-note');
   if(hiddenCount>0){
-    if(!hn){hn=document.createElement('div');hn.id='lb-hidden-note';hn.className='empty';document.getElementById('panel-leaderboard').appendChild(hn);}
+    if(!hn){hn=document.createElement('div');hn.id='lb-hidden-note';hn.className='empty';document.getElementById('lb-table').appendChild(hn);}
     hn.style.display='block';
     hn.textContent=`${hiddenCount} hidden (RD>100)`;
-    hn.style.marginTop=(Object.keys(_lbEls).length*LB_ROW_H)+'px';
+    hn.style.marginTop='.75rem';
   } else {
     if(hn) hn.style.display='none';
   }
 }
 
-// getLiveRD: for now just returns p.rd — will be replaced when new decay formula is implemented
-function getLiveRD(p){ return p.rd; }
+// getLiveRD: compute RD live from the asymptotic formula with rdBaseX and rdBaseTime
+function getLiveRD(p){ return _computeRDLive(p); }
 
 
 
@@ -1732,9 +1729,11 @@ window.addPlayer=async function(){
   if(players.find(p=>p.name.toLowerCase()===name.toLowerCase())){showMsg('player-msg','Already exists.',true);return;}
   const btn=document.getElementById('add-player-btn');btn.disabled=true;
   try{
+    const _anchor = _rdAnchor(120, 1500);
     await addDoc(collection(db,'players'),{
       name, rating:1500, rd:120,
-      wins:0, losses:0, lastDecayAt:Date.now(), createdAt:serverTimestamp()
+      rdBaseX: _anchor.rdBaseX, rdBaseTime: _anchor.rdBaseTime,
+      wins:0, losses:0, createdAt:serverTimestamp()
     });
     document.getElementById('player-name').value='';
     showMsg('player-msg',name+' added!');
@@ -1766,12 +1765,12 @@ function makeCard(p){
   }
   const immuneBadge=p.decayImmune?'<span class="pc-tag" style="background:rgba(201,160,220,.15);color:var(--admin);border-color:rgba(201,160,220,.4)">DECAY IMMUNE</span>':'';
   const adminButtons=isAdmin?`<div style="display:flex;gap:.5rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--border)" onclick="event.stopPropagation()"><button class="btn-admin" style="font-size:.55rem;padding:.3rem .7rem" onclick="openEditPlayer('${p.firestoreId}')">Edit Stats</button><button class="btn-danger" style="font-size:.55rem;padding:.3rem .7rem" onclick="adminRemovePlayer('${p.firestoreId}','${esc(p.name)}')">Delete</button></div>`:'';
-  return`<div class="player-card" onclick="window.openProfile('${p.firestoreId}')">
+  return`<div class="player-card" data-id="${p.firestoreId}" onclick="window.openProfile('${p.firestoreId}')">
     <div class="pc-header">${av}<div class="pc-name-block"><div class="pc-name">${escCap(p.name)}</div>${rdH?'<span class="pc-tag">HIDDEN</span>':''}${immuneBadge}</div></div>
     ${badgesHtml}
     <div class="pc-stats">
       <div class="pc-stat"><span class="pc-stat-l">Rating</span><span class="pc-stat-v" style="color:var(--accent)">${r2(p.rating)}</span></div>
-      <div class="pc-stat"><span class="pc-stat-l">RD</span><span class="pc-stat-v" style="color:${rdC}">±${r2(p.rd)}</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">RD</span><span class="pc-stat-v" data-rd-val style="color:${rdC}">±${r2(p.rd)}</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Record</span><span class="pc-stat-v">${p.wins}W–${p.losses}L</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Win%</span><span class="pc-stat-v" style="color:${wc}">${wr}%</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Streak</span><span class="pc-stat-v" style="color:${sc}">${cs>0?cs+'W':'—'}</span></div>
@@ -1812,7 +1811,7 @@ window.showSeasonData=function(sel,dataId){
 function pStats(fid){
   const ids=new Set(players.map(x=>x.firestoreId));
   const pm=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)&&(m.p1id===fid||m.p2id===fid)).sort((a,b)=>toTs(a)-toTs(b));
-  let ls=0,cs=0,cur=0;pm.forEach(m=>{const w=m.p1id===fid?m.score===1:m.score===0;w?(cur++,ls=Math.max(ls,cur)):cur=0;});cs=cur;
+  let ls=0,cs=0,cur=0;pm.forEach(m=>{const w=m.winnerId===fid;w?(cur++,ls=Math.max(ls,cur)):cur=0;});cs=cur;
   let la=0;
   const all=[...matches].filter(m=>ids.has(m.p1id)&&ids.has(m.p2id)).sort((a,b)=>toTs(a)-toTs(b));
   if(all.length&&players.length>=2){
@@ -1823,7 +1822,6 @@ function pStats(fid){
       if(!seen.has(m.p1id)){rs[m.p1id]=m.p1oldRating;seen.add(m.p1id);}
       if(!seen.has(m.p2id)){rs[m.p2id]=m.p2oldRating;seen.add(m.p2id);}
     });
-    const periodMs=decayMs();
     const top=()=>{
       let best=null,bestR=-Infinity;
       for(const[id,r] of Object.entries(rs)){if(rds[id]<=100&&r>bestR){bestR=r;best=id;}}
@@ -1832,22 +1830,6 @@ function pStats(fid){
     let a1=null,lastTs=null;
     all.forEach(m=>{
       const ts=toTs(m);
-      if(lastTs!==null&&periodMs>0){
-        const periods=Math.floor((ts-lastTs)/periodMs);
-        if(periods>0){
-          const wasFidTop=top()===fid;
-          for(const id of Object.keys(rds)){
-            let phi=rds[id]/SCALE;
-            const phiMax=RD_MAX/SCALE;
-
-            for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
-            rds[id]=Math.min(phi*SCALE,RD_MAX);
-          }
-          if(wasFidTop&&top()!==fid){
-            if(a1!==null){la=Math.max(la,lastTs+periods*periodMs-a1);a1=null;}
-          }
-        }
-      }
       const pt=top();
       rs[m.p1id]=m.p1newRating;rs[m.p2id]=m.p2newRating;
       const p1LiveRd=players.find(x=>x.firestoreId===m.p1id)?.rd;
@@ -1869,6 +1851,7 @@ function toTs(m){return m.date?.toDate?m.date.toDate().getTime():new Date(m.date
 const r2=v=>Number(v).toFixed(2);
 function fmtDur(ms){if(ms<=0)return'—';const d=Math.floor(ms/864e5),h=Math.floor((ms%864e5)/36e5),m2=Math.floor((ms%36e5)/6e4),s=Math.floor((ms%6e4)/1e3);if(d>0)return d+'d '+h+'h '+m2+'m '+s+'s';if(h>0)return h+'h '+m2+'m '+s+'s';return m2+'m '+s+'s';}
 function tickNo1Timers(){
+  if(!document.getElementById('panel-leaderboard')?.classList.contains('active')) return;
   const now=Date.now();
   document.querySelectorAll('.no1-timer[data-since]').forEach(el=>{
     const since=parseInt(el.dataset.since);
@@ -1890,6 +1873,63 @@ function tickNo1Timers(){
 }
 setInterval(tickNo1Timers,1000);
 
+// ── LIVE RD TICK ─────────────────────────────────────────────────────────────
+const _rdWasHidden = {};
+const _rdLbRowCache = {}; // firestoreId -> lb-row element
+const _rdLbRdValCache = {}; // firestoreId -> .rd-val element
+
+function _rdClearCache(){ 
+  for(const k in _rdLbRowCache) delete _rdLbRowCache[k];
+  for(const k in _rdLbRdValCache) delete _rdLbRdValCache[k];
+}
+
+let _rdTickCount=0;
+function tickLiveRD(){
+  _rdTickCount++;
+  let needsLbRender=false;
+  const lbVisible=document.getElementById('panel-leaderboard')?.classList.contains('active');
+  const playersVisible=document.getElementById('panel-players')?.classList.contains('active');
+
+  players.forEach(p=>{
+    if(!p.rdBaseX&&p.rdBaseX!==0) return;
+    const liveRd=_computeRDLive(p);
+    const isHidden=liveRd>100;
+    if(isHidden&&_rdWasHidden[p.firestoreId]===false) needsLbRender=true;
+    _rdWasHidden[p.firestoreId]=isHidden;
+
+    const rdStr='±'+r2(liveRd);
+
+    // Leaderboard RD — update every second (needed to catch players falling off)
+    if(lbVisible){
+      let rdv=_rdLbRdValCache[p.firestoreId];
+      if(!rdv){
+        const row=document.querySelector(`.lb-row[data-id="${p.firestoreId}"]`);
+        rdv=row?.querySelector('.rd-val')||null;
+        _rdLbRdValCache[p.firestoreId]=rdv;
+      }
+      if(rdv){ rdv.textContent=rdStr; rdv.style.color=liveRd>=95?'var(--loss)':''; }
+    }
+
+    // Player cards — only every 60s, only when that panel is visible
+    if(playersVisible&&(_rdTickCount%60===0)){
+      document.querySelectorAll(`.player-card[data-id="${p.firestoreId}"] [data-rd-val]`).forEach(val=>{
+        val.textContent=rdStr;
+        val.style.color=liveRd>100?'var(--loss)':liveRd>80?'var(--accent)':'var(--win)';
+      });
+    }
+  });
+
+  if(needsLbRender) renderLeaderboard();
+}
+setInterval(tickLiveRD,1000);
+
+// Chart redraws every 60s while modal is open (dot positions change slowly)
+let _rdChartDirty = false;
+setInterval(()=>{
+  const overlay = document.getElementById('rd-modal-overlay');
+  if(overlay && overlay.classList.contains('open')) drawRDDecayChart({});
+}, 60000);
+
 // ── SEASON LOGIC ─────────────────────────────────────────────────────────────
 let seasonConfig={name:'',deadline:null,seasonNum:1};
 
@@ -1901,7 +1941,13 @@ onSnapshot(doc(db,'config','season'),snap=>{
   updateSeasonCountdown();
   if(isAdmin)populateSeasonAdmin();
 });
-setInterval(updateSeasonCountdown,1000);
+let _seasonTickCount=0;
+setInterval(()=>{
+  _seasonTickCount++;
+  const urgent=seasonConfig.deadline&&(new Date(seasonConfig.deadline).getTime()-Date.now())<86400000;
+  // Under 1 day: update every second. Otherwise every 60s is enough (shows days+hours only)
+  if(urgent||_seasonTickCount%60===0) updateSeasonCountdown();
+},1000);
 
 function updateSeasonCountdown(){
   const el=document.getElementById('season-countdown');
@@ -2008,9 +2054,10 @@ window.triggerSeasonReset=async function(){
         rating:p.rating,rd:p.rd,
         wins:p.wins,losses:p.losses,endedAt,longestWinStreak:ls
       };
+      const _sa=_rdAnchor(120,1500);
       return updateDoc(doc(db,'players',pid),{
-        rating:1500,rd:120,wins:0,losses:0,lastDecayAt:Date.now(),
-        seasons:[...existing,entry]
+        rating:1500,rd:120,rdBaseX:_sa.rdBaseX,rdBaseTime:_sa.rdBaseTime,
+        wins:0,losses:0,seasons:[...existing,entry]
       });
     }));
 
@@ -2273,13 +2320,11 @@ window.restoreSeason=async function(){
     // 5. Restore each player's stats from the season entry and remove that season from history
     await Promise.all(playerSeasonData.map(({player,entry})=>{
       const newSeasons=(player.seasons||[]).filter(x=>x.seasonNum!==sNum);
+      const _ua=_rdAnchor(entry.rd,entry.rating);
       return updateDoc(doc(db,'players',player.firestoreId),{
         rating:entry.rating,
-        rd:entry.rd,
-        wins:entry.wins,
-        losses:entry.losses,
-        lastDecayAt:Date.now(),
-        seasons:newSeasons,
+        rd:entry.rd,rdBaseX:_ua.rdBaseX,rdBaseTime:_ua.rdBaseTime,
+        wins:entry.wins,losses:entry.losses,seasons:newSeasons,
       });
     }));
 
@@ -2407,7 +2452,10 @@ window.fixMatchSides=async function(){
   }
 };
 
+let _matchFormLocked=null;
 function lockMatchForm(locked){
+  if(_matchFormLocked===locked) return; // no change
+  _matchFormLocked=locked;
   const btn=document.getElementById('submit-match-btn');
   const panel=document.getElementById('panel-matches');
   if(!btn||!panel)return;
@@ -2460,8 +2508,11 @@ window.submitMatch=async function(){
       });
       const topAfter=simP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
 
-      const wUpdate={rating:uw.rating,rd:uw.rd,wins:w.wins+1};
-      const lUpdate={rating:ul.rating,rd:ul.rd,losses:l.losses+1};
+      // Anchor the asymptotic RD curve at the post-match RD value, now.
+      const _wAnchor=_rdAnchor(uw.rd,uw.rating);
+      const _lAnchor=_rdAnchor(ul.rd,ul.rating);
+      const wUpdate={rating:uw.rating,rd:uw.rd,wins:w.wins+1,rdBaseX:_wAnchor.rdBaseX,rdBaseTime:_wAnchor.rdBaseTime};
+      const lUpdate={rating:ul.rating,rd:ul.rd,losses:l.losses+1,rdBaseX:_lAnchor.rdBaseX,rdBaseTime:_lAnchor.rdBaseTime};
 
       if(topBefore?.id!==topAfter?.id){
         if(topBefore){
@@ -2599,7 +2650,7 @@ window.renderHistory=function(){
     const a=item.data;
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':'ADMIN ACTION';
+    const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':a.type==='snapshot'?'SNAPSHOT':'ADMIN ACTION';
     return`<div class="admin-action-row">
       <span class="admin-action-badge">${typeLabel}</span>
       <span class="admin-action-desc">${esc(a.description||'')}</span>
@@ -2632,7 +2683,7 @@ function renderAdminActionsLog(){
   el.innerHTML=sorted.map(a=>{
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':'★ ADMIN';
+    const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':a.type==='snapshot'?'★ SNAPSHOT':'★ ADMIN';
     return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04)">
       <div class="admin-minfo">
         <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}<br>
@@ -2671,21 +2722,21 @@ window.adminRemoveMatch=async function(fid){
     const s1=playerStateFromHistory(matchesBefore,pid1);
     const s2=playerStateFromHistory(matchesBefore,pid2);
 
+    const _writePlayer=(pid,s)=>{
+      const a=_rdAnchor(s.rd,s.rating);
+      return updateDoc(doc(db,'players',pid),{
+        rating:s.rating,rd:s.rd,wins:s.wins,losses:s.losses,
+        rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime
+      });
+    };
+
     if(matchesAfter.length===0){
-      await Promise.all([
-        updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}),
-        updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}),
-      ]);
+      await Promise.all([_writePlayer(pid1,s1),_writePlayer(pid2,s2)]);
       alert('Match deleted. Ratings rewound to previous state.');
       return;
     }
 
-    const periodMs=decayMs();
-    const pmap={
-      [pid1]:{...s1,firestoreId:pid1},
-      [pid2]:{...s2,firestoreId:pid2},
-    };
-
+    const pmap={[pid1]:{...s1,firestoreId:pid1},[pid2]:{...s2,firestoreId:pid2}};
     const matchUpdates=[];
     const playerUpdates={};
 
@@ -2697,17 +2748,11 @@ window.adminRemoveMatch=async function(fid){
       const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
       const ourId=involvesP1?pid1:pid2;
       const ourState=pmap[ourId];
-
-      applyDecayToPlayer(ourState,ts,periodMs);
-
       const isWinner=(m.p1id===ourId);
       const oppRating=isWinner?m.p2oldRating:m.p1oldRating;
       const oppRD=isWinner?(m.p2newRD??120):(m.p1newRD??120);
 
-      const newState=g2Update(
-        {rating:ourState.rating, rd:ourState.rd},
-        [{rating:oppRating, rd:oppRD, s:isWinner?1:0}], ts
-      );
+      const newState=g2Update({rating:ourState.rating,rd:ourState.rd},[{rating:oppRating,rd:oppRD,s:isWinner?1:0}],ts);
       const oldRating=ourState.rating;
       const delta=Math.round((newState.rating-oldRating)*10)/10;
 
@@ -2715,12 +2760,12 @@ window.adminRemoveMatch=async function(fid){
       pmap[ourId].rd=newState.rd;
       if(isWinner)pmap[ourId].wins=(pmap[ourId].wins||0)+1;
       else pmap[ourId].losses=(pmap[ourId].losses||0)+1;
-      pmap[ourId].lastMatchAt=ts;
 
       if(m.p1id===ourId){
         matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
           p1delta:delta,p1oldRating:oldRating,p1newRating:newState.rating,p1newRD:newState.rd
         }));
+      } else {
         matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
           p2delta:delta,p2oldRating:oldRating,p2newRating:newState.rating,p2newRD:newState.rd
         }));
@@ -2728,13 +2773,9 @@ window.adminRemoveMatch=async function(fid){
       playerUpdates[ourId]=pmap[ourId];
     }
 
-    const writes=Object.values(playerUpdates).map(p=>
-      updateDoc(doc(db,'players',p.firestoreId),{
-        rating:p.rating,rd:p.rd,wins:p.wins||0,losses:p.losses||0,lastDecayAt:p.lastMatchAt||Date.now()
-      })
-    );
-    if(!playerUpdates[pid1])writes.push(updateDoc(doc(db,'players',pid1),{rating:s1.rating,rd:s1.rd,wins:s1.wins,losses:s1.losses,lastDecayAt:s1.lastMatchAt||Date.now()}));
-    if(!playerUpdates[pid2])writes.push(updateDoc(doc(db,'players',pid2),{rating:s2.rating,rd:s2.rd,wins:s2.wins,losses:s2.losses,lastDecayAt:s2.lastMatchAt||Date.now()}));
+    const writes=Object.values(playerUpdates).map(p=>_writePlayer(p.firestoreId,p));
+    if(!playerUpdates[pid1])writes.push(_writePlayer(pid1,s1));
+    if(!playerUpdates[pid2])writes.push(_writePlayer(pid2,s2));
 
     await Promise.all([...writes,...matchUpdates]);
     alert('Match deleted and ratings recalculated from that point forward.');
@@ -2743,7 +2784,7 @@ window.adminRemoveMatch=async function(fid){
 
 // ── REPAIR RATINGS ─────────────────────────────────────────────────────────
 window.repairAllRatings=async function(){
-  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings and RD? Admin stat edits and decay changes in the Action Log will be applied in chronological order. If a snapshot exists, only matches after the snapshot will be replayed.'))return;
+  if(!confirm('Replay all matches from scratch and rewrite every match record + player stats with correct ratings and RD? Admin stat edits in the Action Log will be applied in order. If a snapshot exists, only matches after it will be replayed.'))return;
   const btn=document.querySelector('[onclick="repairAllRatings()"]');
   if(btn){btn.disabled=true;btn.textContent='Repairing…';}
   try{
@@ -2752,79 +2793,37 @@ window.repairAllRatings=async function(){
     const actionsSnap=await getDocs(query(collection(db,'adminActions'),orderBy('date','asc')));
     const allAdminActions=actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
     const now=Date.now();
-    // Starting decay period from config (may change mid-timeline via decay_change actions)
-    let periodMs=decayMs();
 
-    // Find the most recent snapshot action — if one exists, we only need to replay
-    // events after it since the snapshot already encodes fully-computed state.
-    const allActionsSorted=[...actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}))];
-    let snapshotCutoffTs=0;
-    let snapshotState=null;
-    let snapshotNo1State=null;
+    // Find most recent snapshot — only replay after it
+    const allActionsSorted=[...allAdminActions];
+    let snapshotCutoffTs=0, snapshotState=null;
     for(let i=allActionsSorted.length-1;i>=0;i--){
       const a=allActionsSorted[i];
       if(a.type==='snapshot'){
         snapshotCutoffTs=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
         snapshotState=a.data?.players||{};
-        snapshotNo1State={};
-        for(const[pid,s]of Object.entries(snapshotState)){
-          snapshotNo1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
-        }
         break;
       }
     }
 
-    // Build state — either from snapshot (fast path) or from scratch (full replay)
+    // Build state from snapshot or from scratch
     const state={};
     const no1State={};
     if(snapshotState){
       for(const[pid,s]of Object.entries(snapshotState)){
-        state[pid]={
-          rating:s.rating??1500,rd:s.rd??120,wins:s.wins??0,losses:s.losses??0,
-          lastDecayAt:s.lastDecayAt??Math.floor(snapshotCutoffTs/periodMs)*periodMs,
-          decayImmune:!!s.decayImmune
-        };
+        state[pid]={rating:s.rating??1500,rd:Math.min(_RD_MAX_NEW-0.01,s.rd??120),wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune};
         no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
       }
     }
     const initPlayer=pid=>{
       if(!state[pid]){
         const liveP=players.find(x=>x.firestoreId===pid);
-        state[pid]={rating:1500,rd:120,wins:0,losses:0,lastDecayAt:null,decayImmune:!!(liveP?.decayImmune)};
+        state[pid]={rating:1500,rd:120,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune)};
       }
       if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
     };
 
-    // applyDecayToTs: bring a player's RD up to date with all period boundaries
-    // that have passed between their last processed boundary and the given timestamp.
-    // This exactly mirrors applyDecayLocally: it fires once per boundary crossing.
-    const applyDecayToTs=(s,ts)=>{
-      if(periodMs<=0||s.decayImmune)return;
-      // First time a player appears — set their baseline to the period boundary
-      // just before their first match, so the match itself uses RD=120 (no decay yet).
-      if(s.lastDecayAt===null){
-        s.lastDecayAt=Math.floor(ts/periodMs)*periodMs;
-        return;
-      }
-      const basePeriod=Math.floor(s.lastDecayAt/periodMs);
-      const tsPeriod=Math.floor(ts/periodMs);
-      const periods=tsPeriod-basePeriod;
-      if(periods<=0)return;
-
-      let phi=s.rd/SCALE;const phiMax=RD_MAX/SCALE;
-      const startPhi=phi;
-      for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
-      if(replayScaleMult>0){
-        const scale=Math.pow((1500/(s.rating||1500)),replayScaleMult);
-        phi=startPhi+(phi-startPhi)*scale;
-      }
-      s.rd=Math.min(phi*SCALE,RD_MAX);
-      // Advance lastDecayAt to the boundary just before this match
-      s.lastDecayAt=tsPeriod*periodMs;
-    };
-
-    // Merge matches and admin actions into a single sorted event timeline.
-    // If a snapshot exists, skip everything at or before its timestamp.
+    // Build sorted event timeline (skip events at/before snapshot)
     const events=[];
     allMatches.forEach(m=>{
       const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
@@ -2839,9 +2838,6 @@ window.repairAllRatings=async function(){
     events.sort((a,b)=>a._ts-b._ts);
 
     const matchWrites=[];
-    let replayScaleMult=DECAY_SCALE_MULTIPLIER;
-
-    // #1 tracking state — initialized above from snapshot if available
     const getTop=()=>{
       let top=null,topR=-Infinity;
       for(const[pid,s]of Object.entries(state)){
@@ -2853,37 +2849,15 @@ window.repairAllRatings=async function(){
     for(const evt of events){
       if(evt._type==='admin'){
         const a=evt.data;
-        if(a.type==='decay_change'){
-          const amt=a.data?.newAmount||4;
-          const unit=a.data?.newUnit||'hours';
-          if(unit==='minutes')periodMs=amt*6e4;
-          else if(unit==='hours')periodMs=amt*36e5;
-          else periodMs=amt*864e5;
-          for(const s of Object.values(state)){
-            if(s.lastDecayAt!==null)s.lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
-          }
-        } else if(a.type==='decay_scale_change'){
-          replayScaleMult=a.data?.newMult??0;
-        } else if(a.type==='snapshot'){
-          // Snapshot acts as a new starting point — reset state to snapshotted values
-          // and discard all prior history. Matches before this point are effectively frozen.
+        // decay_change and decay_scale_change are no-ops in replay:
+        // DECAY_SCALE_MULTIPLIER is a real-time formula parameter, not baked into stored RD.
+        if(a.type==='snapshot'){
           const snappedPlayers=a.data?.players||{};
-          // Clear state and reinitialize from snapshot
           for(const pid of Object.keys(state))delete state[pid];
           for(const pid of Object.keys(no1State))delete no1State[pid];
           for(const[pid,s]of Object.entries(snappedPlayers)){
-            state[pid]={
-              rating:s.rating??1500,
-              rd:s.rd??120,
-              wins:s.wins??0,
-              losses:s.losses??0,
-              lastDecayAt:s.lastDecayAt??Math.floor(evt._ts/periodMs)*periodMs,
-              decayImmune:!!s.decayImmune
-            };
-            no1State[pid]={
-              no1Since:s.no1Since??null,
-              longestNo1Ms:s.longestNo1Ms??0
-            };
+            state[pid]={rating:s.rating??1500,rd:Math.min(_RD_MAX_NEW-0.01,s.rd??120),wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune};
+            no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
           }
         } else if(a.type==='stat_edit'){
           const pid=a.data?.playerId;
@@ -2891,11 +2865,7 @@ window.repairAllRatings=async function(){
           initPlayer(pid);
           const after=a.data?.after||{};
           if(after.rating!=null)state[pid].rating=after.rating;
-          if(after.rd!=null){
-            state[pid].rd=after.rd;
-            // Reset decay boundary to now so future decay starts from the edited RD
-            state[pid].lastDecayAt=Math.floor(evt._ts/periodMs)*periodMs;
-          }
+          if(after.rd!=null)state[pid].rd=after.rd;
           if(after.wins!=null)state[pid].wins=after.wins;
           if(after.losses!=null)state[pid].losses=after.losses;
           if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
@@ -2906,43 +2876,22 @@ window.repairAllRatings=async function(){
       const m=evt.data;
       const pid1=m.p1id, pid2=m.p2id;
       initPlayer(pid1); initPlayer(pid2);
-      if(!no1State[pid1])no1State[pid1]={no1Since:null,longestNo1Ms:0};
-      if(!no1State[pid2])no1State[pid2]={no1Since:null,longestNo1Ms:0};
       const s1=state[pid1], s2=state[pid2];
-
-      // Apply all period-boundary decay ticks that occurred before this match,
-      // exactly as the live scheduler would have fired them.
-      applyDecayToTs(s1,evt._ts);
-      applyDecayToTs(s2,evt._ts);
-
       const topBefore=getTop();
 
-      // Recalculate both sides from current state
-      const u1=g2Update(
-        {rating:s1.rating,rd:s1.rd},
-        [{rating:s2.rating,rd:s2.rd,s:1}], evt._ts
-      );
-      const u2=g2Update(
-        {rating:s2.rating,rd:s2.rd},
-        [{rating:s1.rating,rd:s1.rd,s:0}], evt._ts
-      );
-
+      const u1=g2Update({rating:s1.rating,rd:s1.rd},[{rating:s2.rating,rd:s2.rd,s:1}],evt._ts);
+      const u2=g2Update({rating:s2.rating,rd:s2.rd},[{rating:s1.rating,rd:s1.rd,s:0}],evt._ts);
       const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
       const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
 
-      // Rewrite the match record with correct values
       matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
-        p1oldRating:s1.rating, p1newRating:u1.rating, p1newRD:u1.rd, p1delta,
-        p2oldRating:s2.rating, p2newRating:u2.rating, p2newRD:u2.rd, p2delta,
+        p1oldRating:s1.rating,p1newRating:u1.rating,p1newRD:u1.rd,p1delta,
+        p2oldRating:s2.rating,p2newRating:u2.rating,p2newRD:u2.rd,p2delta,
       }));
 
-      // Advance state — keep lastDecayAt (already set by applyDecayToTs above)
-      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd;
-      state[pid1].wins=s1.wins+1;
-      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd;
-      state[pid2].losses=s2.losses+1;
+      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].wins=s1.wins+1;
+      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].losses=s2.losses+1;
 
-      // Track #1 changes — mirrors live submitMatch logic
       const topAfter=getTop();
       if(topBefore!==topAfter){
         if(topBefore&&no1State[topBefore]?.no1Since!=null){
@@ -2957,49 +2906,35 @@ window.repairAllRatings=async function(){
       }
     }
 
-    // Write match records first
     await Promise.all(matchWrites);
 
-    // Apply decay from each player's last processed boundary to now, then write player docs.
+    // Write final player docs — anchor rdBaseX/rdBaseTime to now so live decay works immediately
     const playerWrites=[];
+    const currentTop=getTop();
     for(const p of players){
       const s=state[p.firestoreId];
       if(!s)continue;
-      let rd=s.rd;
-
-      if(!s.decayImmune&&s.lastDecayAt!==null&&periodMs>0){
-        const basePeriod=Math.floor(s.lastDecayAt/periodMs);
-        const nowPeriod=Math.floor(now/periodMs);
-        const periods=nowPeriod-basePeriod;
-        if(periods>0){
-          let phi=rd/SCALE;const phiMax=RD_MAX/SCALE;
-          for(let i=0;i<periods;i++){phi=Math.sqrt(phi*phi+0.0036);if(phi>=phiMax){phi=phiMax;break;}}
-          rd=Math.min(phi*SCALE,RD_MAX);
-        }
-      }
-      const nowPeriod=Math.floor(now/periodMs);
-      const lastDecayAt=nowPeriod*periodMs;
       const n1=no1State[p.firestoreId];
-      // If still #1 right now, close out their current streak to now
-      const currentTop=getTop();
       let longestNo1Ms=n1?.longestNo1Ms||0;
       let no1Since=n1?.no1Since??null;
       if(n1?.no1Since!=null&&p.firestoreId===currentTop){
         const dur=now-n1.no1Since;
         if(dur>longestNo1Ms)longestNo1Ms=dur;
       } else if(p.firestoreId===currentTop&&!no1Since){
-        no1Since=now; // edge case: they are #1 but no1Since was never set
+        no1Since=now;
       }
+      const anchor=_rdAnchor(s.rd,s.rating);
       playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
-        rating:s.rating,rd,wins:s.wins,losses:s.losses,lastDecayAt,
+        rating:s.rating,rd:s.rd,
+        rdBaseX:anchor.rdBaseX,rdBaseTime:anchor.rdBaseTime,
+        wins:s.wins,losses:s.losses,
         no1Since:p.firestoreId===currentTop?no1Since:null,
         longestNo1Ms
       }));
     }
 
     await Promise.all(playerWrites);
-    const adminApplied=allAdminActions.length;
-    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${playerWrites.length} player(s)${adminApplied?` · applied ${adminApplied} admin action(s)`:''}.`);
+    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${playerWrites.length} player(s).`);
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
@@ -3042,7 +2977,13 @@ window.submitEditPlayer=async function(){
     if(before.name!==name)changes.push(`name "${before.name}"→"${name}"`);
     if(before.decayImmune!==decayImmune)changes.push(`decay immunity ${before.decayImmune?'ON':'OFF'}→${decayImmune?'ON':'OFF'}`);
     const desc=`Edited ${name}: ${changes.length?changes.join(', '):'no changes'}`;
-    await updateDoc(doc(db,'players',fid),{name,rating,rd,wins,losses,decayImmune});
+    const _editFields={name,rating,rd,wins,losses,decayImmune};
+    if(rd !== p?.rd){
+      const _ea=_rdAnchor(rd,rating);
+      _editFields.rdBaseX=_ea.rdBaseX;
+      _editFields.rdBaseTime=_ea.rdBaseTime;
+    }
+    await updateDoc(doc(db,'players',fid),_editFields);
     await logAdminAction('stat_edit',desc,{playerId:fid,playerName:name,before,after});
     showMsg('edit-player-msg','Saved! Logged as admin action.');
     setTimeout(()=>document.getElementById('admin-edit-overlay').classList.remove('open'),1400);
@@ -3342,8 +3283,12 @@ function drawChart(points){
   const scrollW=PAD.left+PAD.right+(n>1?(n-1)*STEP:STEP);
   const W=Math.max(containerW, scrollW);
   const step=n>1?(W-PAD.left-PAD.right)/(n-1):0;
-  wrap.style.width=W+'px';wrap.style.height=H+'px';canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d'),cH=H-PAD.top-PAD.bottom;
+  const dpr=window.devicePixelRatio||1;
+  wrap.style.width=W+'px';wrap.style.height=H+'px';
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  const cH=H-PAD.top-PAD.bottom;
 
   const ratings=n?points.map(p=>p.rating):[1500];
   const minR=Math.min(...ratings),maxR=Math.max(...ratings),range=maxR-minR||50,rPad=range*.18,lo=minR-rPad,hi=maxR+rPad;
@@ -3368,6 +3313,7 @@ function drawChart(points){
   newOuter.appendChild(wrap);
 
   function redraw(hl){
+    ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W,H);
     for(let g=0;g<=4;g++){
       const y=PAD.top+(g/4)*cH;
@@ -3405,8 +3351,8 @@ function drawChart(points){
     else{const d=new Date(pt.date);const ds=pt.rating-points[idx-1].rating;const df=(ds>=0?'+':'')+r2(Math.abs(ds));const dt=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});html+=`<br><span style="color:${col}">${pt.won?'WIN':'LOSS'}</span> vs ${esc(pt.label)}<br><span style="color:${col}">${df} pts</span> · ${dt}`;}
     tip.innerHTML=html;tip.style.display='block';tip.style.left='-9999px';tip.style.top='-9999px';
     requestAnimationFrame(()=>{
-      const cr=canvas.getBoundingClientRect(),sx=cr.width/canvas.width;
-      const dx=cr.left+xOf(idx)*sx,dy=cr.top+yOf(pt.rating)*(cr.height/canvas.height);
+      const cr=canvas.getBoundingClientRect();
+      const dx=cr.left+xOf(idx),dy=cr.top+yOf(pt.rating);
       const tw=tip.offsetWidth,th=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
       let l=dx-tw/2,t=dy-th-10;
       if(l<8)l=8;if(l+tw>vw-8)l=vw-tw-8;if(t<8)t=dy+14;if(t+th>vh-8)t=dy-th-10;
@@ -3417,7 +3363,7 @@ function drawChart(points){
   redraw(-1);let hl=-1;
   requestAnimationFrame(()=>{newOuter.scrollLeft=newOuter.scrollWidth;});
   function near(cx){let b=-1,bd=Infinity;for(let i=0;i<n;i++){const d=Math.abs(xOf(i)-cx);if(d<bd){bd=d;b=i;}}return bd<34?b:-1;}
-  function onMove(e){const r=canvas.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,idx=near(cx*(canvas.width/r.width));if(idx!==hl){hl=idx;redraw(idx);if(idx>=0)showTip(idx);else tip.style.display='none';}}
+  function onMove(e){const r=canvas.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,idx=near(cx);if(idx!==hl){hl=idx;redraw(idx);if(idx>=0)showTip(idx);else tip.style.display='none';}}
   function onLeave(){hl=-1;redraw(-1);tip.style.display='none';}
   newOuter.addEventListener('mousemove',onMove);newOuter.addEventListener('mouseleave',onLeave);
   newOuter.addEventListener('touchmove',onMove,{passive:true});newOuter.addEventListener('touchend',onLeave);
@@ -3432,9 +3378,10 @@ window.showPanel=function(id,btn){
   document.getElementById('panel-'+id).classList.add('active');
   btn.classList.add('active');
   if(id!=='leaderboard'){
-    if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}
+    if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}_lbTyping=false;
     _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
+    document.querySelectorAll('.lb-debug-rect').forEach(el=>el.remove());
   }
   if(id==='leaderboard'&&_lbLastVis){_lbNo1Typed=true;requestAnimationFrame(()=>initLbQuoteZone(_lbLastVis));}
   if(id==='players')renderPlayersList();
@@ -3447,9 +3394,10 @@ window.showPanel=function(id,btn){
 // Kill floating quotes when the user switches away from the tab
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
-    if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}
+    if(_lbTypeTick){clearInterval(_lbTypeTick);_lbTypeTick=null;}_lbTyping=false;
     _lbFloatTimers.forEach(t=>clearTimeout(t));_lbFloatTimers=[];
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
+    document.querySelectorAll('.lb-debug-rect').forEach(el=>el.remove());
   } else {
     const activePanel=document.querySelector('.panel.active');
     if(activePanel&&activePanel.id==='panel-leaderboard'&&_lbLastVis){
@@ -4333,13 +4281,16 @@ window.takeSnapshot=async function(){
     const playerData={};
     players.forEach(p=>{
       if(!p.firestoreId)return;
+      const _snapRd=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,p.rd||120));
+      const _snapAnchor=_rdAnchor(_snapRd,p.rating);
       playerData[p.firestoreId]={
         name:p.name,
         rating:p.rating,
-        rd:p.rd,
+        rd:_snapRd,
+        rdBaseX:_snapAnchor.rdBaseX,
+        rdBaseTime:_snapAnchor.rdBaseTime,
         wins:p.wins||0,
         losses:p.losses||0,
-        lastDecayAt:p.lastDecayAt||Date.now(),
         decayImmune:!!p.decayImmune,
         no1Since:p.no1Since||null,
         longestNo1Ms:p.longestNo1Ms||0
@@ -4352,7 +4303,8 @@ window.takeSnapshot=async function(){
       players:playerData
     });
     // Also log as admin action so replay picks it up
-    await logAdminAction('snapshot',label,{snapshotId:snapRef.id,players:playerData});
+    const _snapSum=Object.values(playerData).sort((a,b)=>b.rating-a.rating).map(p=>`${p.name}: ${Math.round(p.rating)} (RD ${Math.round(p.rd)}, ${p.wins}W–${p.losses}L)`).join(' · ');
+    await logAdminAction('snapshot',`Snapshot "${label}" — ${Object.keys(playerData).length} player(s): ${_snapSum}`,{snapshotId:snapRef.id,players:playerData});
     document.getElementById('snapshot-label-input').value='';
     showMsg('snapshot-msg','Snapshot saved: "'+label+'"');
     renderSnapshotList();
@@ -4389,9 +4341,12 @@ window.restoreSnapshot=async function(snapId){
     const playerData=snapDoc.data().players||{};
     const writes=[];
     for(const[pid,s]of Object.entries(playerData)){
+      const _restoreRd=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd??120));
+      const _rsa=_rdAnchor(_restoreRd,s.rating??1500);
       writes.push(updateDoc(doc(db,'players',pid),{
-        rating:s.rating,rd:s.rd,wins:s.wins,losses:s.losses,
-        lastDecayAt:s.lastDecayAt||Date.now(),
+        rating:s.rating,rd:_restoreRd,
+        rdBaseX:_rsa.rdBaseX,rdBaseTime:_rsa.rdBaseTime,
+        wins:s.wins,losses:s.losses,
         no1Since:s.no1Since||null,
         longestNo1Ms:s.longestNo1Ms||0
       }));
@@ -4757,6 +4712,819 @@ function cap(s){return String(s).replace(/\b\w/g,c=>c.toUpperCase());}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escCap(s){return esc(cap(s));}
 function showMsg(id,text,isErr=false){const el=document.getElementById(id);el.textContent=text;el.className='msg'+(isErr?' err':'');el.style.display='block';if(!isErr)setTimeout(()=>{el.style.display='none';},3000);}
+
+// ── RD DECAY CHART ────────────────────────────────────────────────────────────
+const _RDP={top:34,right:20,bottom:40,left:46}; // padding
+// New RD decay formula (asymptotic curve with rating scaling)
+// y = -30240000 / (x + 336000) + 120
+// x = curve position in seconds, y = RD value
+// Min RD: 30, Max RD: 120
+// Each second: x increases by (1500 / current rating)
+const _RD_NUMERATOR = 30240000;
+const _RD_ASYMPTOTE_SHIFT = 336000;
+const _RD_ASYMPTOTE = 120;
+const _RD_MIN = 30;
+const _RD_MAX_NEW = 120;
+const _RD_LO = 30, _RD_HI = 120, _RD_PX_PER = 30, _RD_ANIM_DUR = 650;
+
+let _rdAnimReq=null, _rdAnimStart=null, _rdAnimFrom={};
+
+// ratingScale = (1500/rating)^DECAY_SCALE_MULTIPLIER
+// multiplier=0 → flat decay (scale=1); higher rating → slower decay
+function _rdRatingScale(rating){
+  const m = DECAY_SCALE_MULTIPLIER;
+  if(!m || m <= 0) return 1;
+  return Math.pow(1500 / Math.max(1, rating || 1500), m);
+}
+
+// Compute RD live from stored rdBaseX + rdBaseTime anchor.
+// rdBaseX is the curve x-position when the anchor was set (after a match or on player creation).
+// Elapsed real-world seconds are scaled by _rdRatingScale and added to advance x forward.
+function _rdBaseTimeMs(t){
+  // Firestore Timestamps have .toMillis(), plain numbers are already ms
+  if(!t) return Date.now();
+  if(typeof t === 'number') return t;
+  if(typeof t.toMillis === 'function') return t.toMillis();
+  if(typeof t.toDate === 'function') return t.toDate().getTime();
+  return Number(t) || Date.now();
+}
+function _computeRDLive(p){
+  if(p.rdBaseX == null) return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, p.rd || 120));
+  const elapsedSec = (Date.now() - _rdBaseTimeMs(p.rdBaseTime)) / 1000;
+  const xNow = p.rdBaseX + elapsedSec * _rdRatingScale(p.rating);
+  const rd = -_RD_NUMERATOR / (xNow + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
+  return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, rd));
+}
+
+// Inverse formula: solve for x given RD
+// x = -30240000 / (y - 120) - 336000
+function _rdToX(rd){
+  if(rd >= _RD_ASYMPTOTE) return Infinity; // At asymptote
+  const denominator = rd - _RD_ASYMPTOTE;
+  if(denominator === 0) return Infinity;
+  return -_RD_NUMERATOR / denominator - _RD_ASYMPTOTE_SHIFT;
+}
+
+// Compute rdBaseX for a player at their current rd, anchored to now.
+// This is stored in Firestore so _computeRDLive can track continuous decay from that point.
+function _rdAnchor(rd, rating){
+  // rdBaseX is the curve position at the time of the anchor.
+  // We use _rdToX(rd) which gives the x where the asymptotic curve equals rd.
+  return { rdBaseX: _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, rd))), rdBaseTime: Date.now() };
+}
+
+// Build chart points using live RD computation
+function _rdBuildPts(){
+  return players.map(p=>{
+    let rdBaseX = p.rdBaseX;
+    let rdBaseTime = p.rdBaseTime;
+    if(rdBaseX == null){
+      // Fallback for players created before rdBaseX was introduced:
+      // synthesize anchor from stored rd so the dot appears at the right spot.
+      rdBaseX = _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, p.rd || 120)));
+      rdBaseTime = Date.now();
+    }
+    return {
+      pid:p.firestoreId,
+      name:p.name,
+      photoURL:p.photoURL||null,
+      rd:_computeRDLive(p),
+      rating:p.rating||1500,
+      rdBaseX: rdBaseX,
+      rdBaseTime: rdBaseTime,
+      inactive:_rdInactivePeriods(p),
+      hidden:_computeRDLive(p)>100,
+      immune:!!p.decayImmune
+    };
+  });
+}
+
+function _rdInactivePeriods(p){
+  if(!p.rdBaseX && p.rdBaseX !== 0) return 0; // New formula, show 0
+  // For chart visualization: show as cumulative decay periods
+  return _rdToX(p.rd || 100) / 60; // Show as minutes for chart
+}
+
+// For the future trajectory projection on chart (how RD will decay)
+// Projects future decay assuming constant rating
+function _rdProjectFuture(rd, rating, secondsAhead){
+  const x0 = _rdToX(rd);
+  const xFuture = x0 + secondsAhead * _rdRatingScale(rating);
+  const rdFuture = -_RD_NUMERATOR / (xFuture + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
+  return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, rdFuture));
+}
+
+// Estimate seconds until rd reaches target
+function _rdSecondsToTarget(rd0, rating, target){
+  if(rd0 >= target) return 0;
+  const x0 = _rdToX(rd0);
+  const xTarget = _rdToX(target);
+  if(xTarget <= x0) return 0;
+  return (xTarget - x0) / _rdRatingScale(rating);
+}
+
+window.toggleRDDecay=function(){ openRDModal(); };
+
+window.openRDModal=function(){
+  const overlay=document.getElementById('rd-modal-overlay');
+  if(!overlay)return;
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  _rdChartDirty=false;
+  requestAnimationFrame(()=>drawRDDecayChart({},true));
+};
+
+window.closeRDModal=function(){
+  const overlay=document.getElementById('rd-modal-overlay');
+  if(!overlay)return;
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+};
+
+window.openRatingTrendModal=function(){
+  const overlay=document.getElementById('rating-trend-modal-overlay');
+  if(!overlay)return;
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('trend-timeframe').value='month';
+  // setTimeout ensures we're past the layout/paint cycle so flex height is resolved
+  setTimeout(()=>updateRatingTrendChart(), 50);
+};
+
+window.closeRatingTrendModal=function(){
+  const overlay=document.getElementById('rating-trend-modal-overlay');
+  if(!overlay)return;
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+  if(window._ratingTrendChart){window._ratingTrendChart.destroy();window._ratingTrendChart=null;}
+};
+
+// Generate a visually distinct color for each player by spreading hues evenly
+function _playerColor(idx,total){
+  const hue=Math.round((idx/Math.max(total,1))*360);
+  // Avoid muddy yellow-greens and stay vivid
+  const h=(hue+200)%360;
+  return `hsl(${h},72%,62%)`;
+}
+
+window._trendHoveredIdx=null;
+
+const _trendHoverPlugin={
+  id:'trendHover',
+  afterDatasetsDraw(chart){
+    const hi=window._trendHoveredIdx;
+    if(hi===null||hi===undefined)return;
+    const ds=chart.data.datasets[hi];
+    if(!ds)return;
+    const meta=chart.getDatasetMeta(hi);
+    if(!meta||!meta.data.length)return;
+    const ctx=chart.ctx;
+    ctx.save();
+    ctx.shadowColor=ds._baseColor;
+    ctx.shadowBlur=18;
+    ctx.strokeStyle=ds._baseColor;
+    ctx.lineWidth=3.5;
+    ctx.globalAlpha=1;
+    ctx.beginPath();
+    meta.data.forEach((pt,i)=>{
+      const{x,y}=pt.getProps(['x','y'],true);
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
+// Reorder datasets so hovered one draws last (on top), restore original order on null
+function _applyTrendHover(chart, hi){
+  chart.data.datasets.forEach((ds,di)=>{
+    if(hi===null){
+      ds.borderColor=ds._baseColor;
+      ds.borderWidth=2;
+    } else if(di===hi){
+      ds.borderColor=ds._baseColor;
+      ds.borderWidth=2.5;
+    } else {
+      ds.borderColor=ds._baseColor.replace('hsl','hsla').replace(')',',0.2)');
+      ds.borderWidth=2;
+    }
+  });
+  chart.update('none');
+}
+
+window.updateRatingTrendChart=function(){
+  const timeframe=document.getElementById('trend-timeframe')?.value||'month';
+  const now=Date.now();
+  let cutoff=0;
+  if(timeframe==='week')cutoff=now-7*24*60*60*1000;
+  else if(timeframe==='month')cutoff=now-30*24*60*60*1000;
+
+  // Collect eligible players first so we know total for color spread
+  const eligible=[];
+  players.forEach(p=>{
+    const pm=matches.filter(m=>{
+      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+      return ts>=cutoff&&(m.p1id===p.firestoreId||m.p2id===p.firestoreId);
+    });
+    if(pm.length)eligible.push({p,pm});
+  });
+
+  const datasets=[];
+  eligible.forEach(({p,pm},idx)=>{
+    const col=_playerColor(idx,eligible.length);
+    const sorted=pm.sort((a,b)=>{
+      const ta=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+      const tb=b.date?.toDate?b.date.toDate().getTime():new Date(b.date).getTime();
+      return ta-tb;
+    });
+    const pts=[];
+    const firstM=sorted[0];
+    const isP1=firstM.p1id===p.firestoreId;
+    const startR=isP1?(firstM.p1oldRating??firstM.p1newRating):(firstM.p2oldRating??firstM.p2newRating);
+    const firstTs=firstM.date?.toDate?firstM.date.toDate().getTime():new Date(firstM.date).getTime();
+    pts.push({x:firstTs,y:Math.round(startR)});
+    sorted.forEach(m=>{
+      const i1=m.p1id===p.firestoreId;
+      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+      pts.push({x:ts,y:Math.round(i1?m.p1newRating:m.p2newRating)});
+    });
+    pts.push({x:now,y:Math.round(p.rating)});
+    datasets.push({
+      label:p.name,data:pts,
+      _baseColor:col,
+      borderColor:col,
+      pointBorderColor:ctx=>{
+        const hi=window._trendHoveredIdx;
+        const c=datasets[ctx.datasetIndex]?._baseColor||col;
+        if(hi===null||ctx.datasetIndex===hi) return c;
+        return c.replace('hsl','hsla').replace(')',',0.2)');
+      },
+      pointBackgroundColor:()=>'transparent',
+      backgroundColor:col.replace('hsl','hsla').replace(')',',0.15)'),
+      borderWidth:2,pointRadius:3,pointHoverRadius:3,
+      pointStyle:'circle',
+      tension:0,fill:false
+    });
+  });
+
+  const canvas=document.getElementById('rating-trend-canvas');
+  if(!canvas)return;
+  if(window._ratingTrendChart){window._ratingTrendChart.destroy();window._ratingTrendChart=null;}
+  window._trendHoveredIdx=null;
+
+  if(!datasets.length){
+    const ctx2=canvas.getContext('2d');
+    ctx2.clearRect(0,0,canvas.width,canvas.height);
+    ctx2.fillStyle='#8a6a78';
+    ctx2.font='13px DM Mono,monospace';
+    ctx2.textAlign='center';
+    ctx2.textBaseline='middle';
+    ctx2.fillText('No matches in selected timeframe',canvas.offsetWidth/2||200,canvas.offsetHeight/2||100);
+    return;
+  }
+
+  window._ratingTrendChart=new Chart(canvas,{
+    type:'line',
+    data:{datasets},
+    plugins:[_trendHoverPlugin],
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{duration:300},
+      parsing:false,
+      scales:{
+        x:{
+          type:'linear',
+          ticks:{color:'#8a6a78',font:{family:'DM Mono,monospace',size:10},callback:v=>new Date(v).toLocaleDateString('en-US',{month:'short',day:'numeric'}),maxTicksLimit:7},
+          grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}
+        },
+        y:{
+          ticks:{color:'#8a6a78',font:{family:'DM Mono,monospace',size:11}},
+          grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}
+        }
+      },
+      plugins:{
+        legend:{
+          labels:{color:'#E1E2EF',font:{family:'DM Mono,monospace',size:11},boxWidth:12,padding:16},
+          onHover:(evt,item)=>{
+            const chart=window._ratingTrendChart;
+            if(!chart||window._trendHoveredIdx===item.datasetIndex)return;
+            window._trendLegendActive=true;
+            window._trendHoveredIdx=item.datasetIndex;
+            _applyTrendHover(chart,item.datasetIndex);
+          },
+          onLeave:()=>{
+            const chart=window._ratingTrendChart;
+            if(!chart)return;
+            window._trendLegendActive=false;
+            window._trendHoveredIdx=null;
+            _applyTrendHover(chart,null);
+          }
+        },
+        tooltip:{
+          backgroundColor:'#2a1520',borderColor:'#4a2a38',borderWidth:1,
+          titleColor:'#E1E2EF',bodyColor:'#8a6a78',
+          titleFont:{family:'DM Mono,monospace',size:11},bodyFont:{family:'DM Mono,monospace',size:11},
+          callbacks:{
+            title:items=>new Date(items[0].parsed.x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+            label:item=>`${item.dataset.label}: ${item.parsed.y}`
+          }
+        }
+      }
+    }
+  });
+
+  // Direct canvas mouse events for line proximity hover — no conflict with legend
+  canvas.onmousemove=e=>{
+    const chart=window._ratingTrendChart;
+    if(!chart||window._trendLegendActive)return;
+    const rect=canvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    let found=null, bestD=20;
+    chart.data.datasets.forEach((ds,di)=>{
+      chart.getDatasetMeta(di).data.forEach(pt=>{
+        const{x,y}=pt.getProps(['x','y'],true);
+        const d=Math.hypot(mx-x,my-y);
+        if(d<bestD){bestD=d;found=di;}
+      });
+    });
+    if(found!==window._trendHoveredIdx){
+      window._trendHoveredIdx=found;
+      _applyTrendHover(chart,found);
+    }
+  };
+  canvas.onmouseleave=()=>{
+    const chart=window._ratingTrendChart;
+    if(!chart||window._trendHoveredIdx===null)return;
+    window._trendHoveredIdx=null;
+    _applyTrendHover(chart,null);
+  };
+};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const rdOverlay=document.getElementById('rd-modal-overlay');
+    const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+    if(rdOverlay&&rdOverlay.classList.contains('open')){closeRDModal();e.stopPropagation();}
+    else if(trendOverlay&&trendOverlay.classList.contains('open')){closeRatingTrendModal();e.stopPropagation();}
+  }
+});
+
+// Compute pixels-per-second scale: RD=100 intersection sits 1rem from right
+// of the visible modal width. This scale is then used to size the full 100-day canvas.
+function _rdPixelsPerSec(){
+  const scroll = document.getElementById('rd-modal-scroll');
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  // visW is the scrollable area width; canvas has no left pad now (y-axis is DOM)
+  const visW = (scroll ? scroll.getBoundingClientRect().width : 0) || window.innerWidth * 0.9 || 600;
+  const cW = visW - _RDP.right; // only subtract right pad
+  const rd100x = _rdToX(100);
+  return (cW - rem) / rd100x;
+}
+
+// Cache of preloaded avatar images keyed by player firestoreId
+const _rdImgCache = {};
+function _rdPreloadAvatars(){
+  players.forEach(p=>{
+    if(!p.photoURL || _rdImgCache[p.firestoreId]) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = ()=>{
+      _rdImgCache[p.firestoreId] = img;
+      const overlay = document.getElementById('rd-modal-overlay');
+      if(overlay && overlay.classList.contains('open')) drawRDDecayChart({});
+    };
+    img.onerror = ()=>{ _rdImgCache[p.firestoreId] = null; };
+    img.src = p.photoURL;
+    _rdImgCache[p.firestoreId] = img; // store even if pending so we don't re-create
+  });
+}
+
+function drawRDDecayChart(hlPids, doScroll){
+  const outer = document.getElementById('rd-decay-outer');
+  if(!outer) return;
+  if(!players.length) return;
+  _rdPreloadAvatars();
+  const pts = _rdBuildPts();
+
+  const maxSec = 86400 * 100;
+  const pxPerSec = _rdPixelsPerSec();
+  // H excludes x-axis label area — _RDP.bottom holds that
+  const H = Math.round(window.innerHeight * 0.62);
+  const cW_css = Math.round(pxPerSec * maxSec);
+  const W = cW_css + _RDP.right;
+
+  const dpr = window.devicePixelRatio || 1;
+  let cv = document.getElementById('rd-decay-cv');
+  if(!cv){
+    cv = document.createElement('canvas');
+    cv.id = 'rd-decay-cv';
+    cv.style.cssText = 'display:block;cursor:crosshair;';
+    outer.appendChild(cv);
+    _rdInitHover(cv);
+  }
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(H * dpr);
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  _rdDraw(cv, pts, maxSec, hlPids || {}, dpr);
+
+  // Populate fixed y-axis DOM
+  _rdDrawYAxis(H);
+
+  // Only scroll on explicit open
+  if(doScroll){
+    requestAnimationFrame(()=>{
+      const scroll = document.getElementById('rd-modal-scroll');
+      if(scroll) scroll.scrollLeft = 0;
+    });
+  }
+}
+
+function _rdDrawYAxis(H){
+  const yAxis = document.getElementById('rd-modal-yaxis');
+  if(!yAxis) return;
+  yAxis.style.height = H + 'px';
+  const P = _RDP;
+  const cH = H - P.top - P.bottom;
+  yAxis.innerHTML = '';
+  for(let r = 30; r <= 120; r += 10){
+    const frac = 1 - (r - _RD_MIN) / (_RD_MAX_NEW - _RD_MIN);
+    const y = P.top + frac * cH;
+    const lbl = document.createElement('span');
+    lbl.textContent = r;
+    const isHundred = r === 100;
+    lbl.style.cssText = `position:absolute;right:4px;transform:translateY(-50%);top:${y}px;`
+      + `font-family:'DM Mono',monospace;font-size:9px;`
+      + `color:${isHundred ? 'var(--loss)' : 'var(--muted)'};`
+      + (isHundred ? 'font-weight:600;' : '');
+    yAxis.appendChild(lbl);
+  }
+  // RD label rotated
+  const lbl2 = document.createElement('span');
+  lbl2.textContent = 'RD';
+  lbl2.style.cssText = `position:absolute;left:0;right:0;top:50%;transform:translateY(-50%) rotate(-90deg);`
+    + `font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.08em;text-align:center;`;
+  yAxis.appendChild(lbl2);
+}
+
+function _rdDraw(cv,pts,maxSec,hl,dpr){
+  dpr=dpr||window.devicePixelRatio||1;
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=Math.round(cv.width/dpr),H=Math.round(cv.height/dpr);
+  // No left padding — y-axis is a fixed DOM element. Use a local pad with left=0.
+  const P={top:_RDP.top, right:_RDP.right, bottom:_RDP.bottom, left:0};
+  const cW=W-P.left-P.right, cH=H-P.top-P.bottom;
+  const g=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const ac=g('--accent'),ls=g('--loss'),mt=g('--muted'),bg=g('--surface'),bd=g('--border'),tx=g('--text'),a3=g('--accent3');
+
+  const px=sec=>P.left+(sec/maxSec)*cW;
+  const py=r=>P.top+(1-(r-_RD_MIN)/(_RD_MAX_NEW-_RD_MIN))*cH;
+
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Y gridlines (no labels — those are in the DOM y-axis)
+  for(let r=30;r<=120;r+=10){
+    ctx.strokeStyle=bd; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(0,py(r)); ctx.lineTo(cW,py(r)); ctx.stroke();
+  }
+
+  // X gridlines + labels (every 10 days; labels left-aligned to gridline so "0d" is visible at scroll-left)
+  const xStepSec = 86400*10;
+  for(let sec=0;sec<=maxSec;sec+=xStepSec){
+    ctx.strokeStyle=bd; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(px(sec),P.top); ctx.lineTo(px(sec),P.top+cH); ctx.stroke();
+    ctx.fillStyle=mt; ctx.font='10px DM Mono,monospace'; ctx.textAlign='left';
+    const days=Math.round(sec/86400);
+    ctx.fillText(days+'d', px(sec)+3, P.top+cH+13);
+  }
+
+  // Border
+  ctx.strokeStyle=bd; ctx.lineWidth=1.5; ctx.setLineDash([]);
+  ctx.strokeRect(0,P.top,cW,cH);
+
+  // RD=120 reference line
+  ctx.setLineDash([3,5]); ctx.strokeStyle=a3+'90'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,py(120)); ctx.lineTo(cW,py(120)); ctx.stroke();
+  ctx.setLineDash([]); ctx.fillStyle=a3; ctx.font='8px DM Mono,monospace'; ctx.textAlign='left';
+  ctx.fillText('RD 120',4,py(120)-3);
+
+  // RD=100 cutoff line
+  ctx.setLineDash([5,4]); ctx.strokeStyle=ls; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,py(100)); ctx.lineTo(cW,py(100)); ctx.stroke();
+  ctx.setLineDash([]); ctx.fillStyle=ls; ctx.font='8px DM Mono,monospace'; ctx.textAlign='left';
+  ctx.fillText('ranked cutoff',4,py(100)-3);
+
+  // Red tint zone: right of RD=100 intersection (player is purged territory)
+  const x100=_rdToX(100);
+  if(isFinite(x100)&&x100>=0&&x100<=maxSec){
+    const vx=px(x100);
+    ctx.fillStyle='rgba(217,83,79,.07)';
+    ctx.fillRect(vx, P.top, cW-vx, cH);
+
+    // Vertical dotted line at intersection
+    ctx.setLineDash([4,4]); ctx.strokeStyle=ls+'cc'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(vx,P.top); ctx.lineTo(vx,P.top+cH); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Label inside chart top
+    ctx.save();
+    ctx.font='bold 8px DM Mono,monospace'; ctx.fillStyle=ls; ctx.textAlign='left';
+    ctx.fillText('PURGE', vx+4, P.top+11);
+    ctx.fillText('LINE', vx+4, P.top+21);
+    ctx.restore();
+
+    // X-axis day label at intersection
+    const x100days = Math.round(x100/86400);
+    ctx.save();
+    ctx.font='bold 9px DM Mono,monospace'; ctx.fillStyle=ls; ctx.textAlign='left';
+    ctx.fillText(x100days+'d', vx+3, P.top+cH+13);
+    ctx.restore();
+  }
+
+  // Asymptotic curve
+  ctx.strokeStyle=ac; ctx.lineWidth=3; ctx.setLineDash([]);
+  ctx.beginPath(); let started=false;
+  for(let i=0;i<=800;i++){
+    const x=(i/800)*maxSec;
+    const rd=-_RD_NUMERATOR/(x+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
+    if(rd<_RD_MIN-5||rd>_RD_MAX_NEW+5){started=false;continue;}
+    if(!started){ctx.moveTo(px(x),py(rd));started=true;}
+    else ctx.lineTo(px(x),py(rd));
+  }
+  ctx.stroke();
+
+  // Player dots — circular avatar (photo or initial letter)
+  const R = 11; // avatar radius px
+  pts.forEach(p=>{
+    if(!p.rd||!p.rating||!p.name)return;
+    const clampedRD=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
+    const x=_rdToX(clampedRD);
+    if(!isFinite(x)||x<0||x>maxSec)return;
+    const screenX=px(x), screenY=py(clampedRD);
+    const col=p.hidden?ls:(p.immune?a3:ac);
+
+    // Highlight ring
+    if(hl[p.pid]){
+      ctx.beginPath();ctx.arc(screenX,screenY,R+4,0,Math.PI*2);
+      ctx.fillStyle=col+'33';ctx.fill();
+    }
+
+    // Colored border ring
+    ctx.beginPath();ctx.arc(screenX,screenY,R+1.5,0,Math.PI*2);
+    ctx.fillStyle=col;ctx.fill();
+
+    // Clip circle for avatar
+    ctx.save();
+    ctx.beginPath();ctx.arc(screenX,screenY,R,0,Math.PI*2);ctx.clip();
+
+    const img = p.photoURL ? _rdImgCache[p.pid] : null;
+    if(img && img.complete && img.naturalWidth){
+      ctx.drawImage(img, screenX-R, screenY-R, R*2, R*2);
+    } else {
+      // Fallback: solid color fill + initial letter
+      ctx.fillStyle=bg; ctx.fill();
+      ctx.fillStyle=col;
+      ctx.font=`bold ${R}px DM Mono,monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(p.name.charAt(0).toUpperCase(), screenX, screenY);
+    }
+    ctx.restore();
+  });
+
+  // X-axis label
+  ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('days since last match',cW/2,H-3);
+}
+
+function _rdFmtCountdown(sec){
+  // Format seconds as "Xd Yh Zm Ws" counting down, showing finest meaningful unit
+  if(sec <= 0) return '<span style="color:var(--loss)">now</span>';
+  const d=Math.floor(sec/86400), rem=sec%86400;
+  const h=Math.floor(rem/3600), rem2=rem%3600;
+  const m=Math.floor(rem2/60), s=Math.floor(rem2%60);
+  const col='var(--loss)';
+  if(d>0) return `<span style="color:${col}">${d}d ${h}h ${m}m ${s}s</span>`;
+  if(h>0) return `<span style="color:${col}">${h}h ${m}m ${s}s</span>`;
+  if(m>0) return `<span style="color:${col}">${m}m ${s}s</span>`;
+  return `<span style="color:${col}">${s}s</span>`;
+}
+
+// Global hover state for the RD chart tooltip — lives outside _rdInitHover
+// so the tick interval can always find the current hovered player even after
+// the canvas is re-created on resize.
+let _rdHoverPid    = null;
+let _rdHoverSX     = null;
+let _rdHoverSY     = null;
+let _rdHoverName   = null;
+let _rdHoverImmune = false;
+let _rdHoverSecAt  = null;   // secToFall at moment of hover
+let _rdHoverWallAt = null;   // wall clock at moment of hover
+let _rdHoverRd     = null;   // rd at moment of hover
+let _rdTipTick     = null;
+
+function _rdTipRender(){
+  const tip = document.getElementById('rd-tip');
+  if(!tip || _rdHoverPid == null) return;
+  // Countdown: subtract real elapsed seconds from the value measured at hover time
+  const elapsed = (Date.now() - _rdHoverWallAt) / 1000;
+  const secNow  = Math.max(0, _rdHoverSecAt - elapsed);
+  // RD: try live compute, fall back to hover snapshot
+  const liveP  = players.find(p=>p.firestoreId===_rdHoverPid);
+  const liveRd = liveP ? _computeRDLive(liveP) : _rdHoverRd;
+  const col     = liveRd > 100 ? 'var(--loss)' : (_rdHoverImmune ? 'var(--accent3)' : 'var(--accent)');
+  const rdLabel = liveRd > 100 ? 'HIDDEN' : liveRd <= 35 ? 'FRESH' : '';
+  const purgeStr = liveRd >= 100
+    ? '<span style="color:var(--loss)">PURGED</span>'
+    : 'Purged in: ' + _rdFmtCountdown(Math.round(secNow));
+  tip.innerHTML =
+    `<span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${col}">${esc(_rdHoverName)}</span>`
+    + (rdLabel ? `&nbsp;<span style="font-size:.58rem;color:var(--muted)">${rdLabel}</span>` : '')
+    + `<br><span style="color:${col}">RD ±${liveRd.toFixed(2)}</span>`
+    + `<br>${purgeStr}`;
+  tip.style.display = 'block';
+  if(_rdHoverSX != null){
+    const tw=tip.offsetWidth, th=tip.offsetHeight, vw=window.innerWidth;
+    let l=_rdHoverSX-tw/2, t=_rdHoverSY-th-12;
+    if(l<8) l=8; if(l+tw>vw-8) l=vw-tw-8;
+    t=Math.max(8,t);
+    tip.style.left=l+'px'; tip.style.top=t+'px';
+  }
+}
+
+function _rdInitHover(cv){
+  // Ensure tip element exists
+  let tip=document.getElementById('rd-tip');
+  if(!tip){
+    tip=document.createElement('div');
+    tip.id='rd-tip';
+    document.body.appendChild(tip);
+  }
+
+  // Start single global tick if not already running
+  if(!_rdTipTick){
+    _rdTipTick = setInterval(()=>{
+      if(_rdHoverPid) _rdTipRender();
+    }, 1000);
+  }
+
+  cv.addEventListener('mousemove',e=>{
+    const r   = cv.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = cv.width / dpr;
+    const cssH = cv.height / dpr;
+    const cW  = cssW - _RDP.right;
+    const cH  = cssH - _RDP.top - _RDP.bottom;
+    const mx  = (e.clientX - r.left) * (cssW / r.width);
+    const my  = (e.clientY - r.top)  * (cssH / r.height);
+    const maxSec = 86400 * 100;
+    const pxFn = sec => (sec / maxSec) * cW;
+    const pyFn = rd  => _RDP.top + (1-(rd-_RD_MIN)/(_RD_MAX_NEW-_RD_MIN))*cH;
+
+    const pts = _rdBuildPts();
+    let best=null, bestD=20;
+    pts.forEach(p=>{
+      if(!p.rd||!p.rating||!p.name) return;
+      const crd = Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
+      const x   = _rdToX(crd);
+      if(!isFinite(x)||x<0||x>maxSec) return;
+      const d = Math.hypot(mx-pxFn(x), my-pyFn(crd));
+      if(d<bestD){ best=p; bestD=d; }
+    });
+
+    if(best){
+      const crd2    = Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,best.rd));
+      const dotCssX = pxFn(_rdToX(crd2));
+      const dotCssY = pyFn(crd2);
+      // Capture everything needed for the countdown at this moment
+      const liveP2 = players.find(p=>p.firestoreId===best.pid);
+      const rd2    = liveP2 ? _computeRDLive(liveP2) : best.rd;
+      _rdHoverPid    = best.pid;
+      _rdHoverName   = best.name;
+      _rdHoverImmune = best.immune;
+      _rdHoverRd     = rd2;
+      _rdHoverSecAt  = _rdSecondsToTarget(rd2, best.rating||1500, 100);
+      _rdHoverWallAt = Date.now();
+      _rdHoverSX  = r.left + dotCssX*(r.width/cssW);
+      _rdHoverSY  = r.top  + dotCssY*(r.height/cssH);
+      tip.style.left='-9999px'; tip.style.top='-9999px';
+      _rdTipRender();
+    } else {
+      _rdHoverPid = null;
+      tip.style.display='none';
+    }
+  });
+
+  cv.addEventListener('mouseleave',()=>{
+    _rdHoverPid=null;
+    const tip=document.getElementById('rd-tip');
+    if(tip) tip.style.display='none';
+  });
+}
+
+function _rdAnimateOrDraw(prevMap){
+  try {
+    const sec=document.getElementById('rd-decay-section');
+    const outer=document.getElementById('rd-decay-outer');
+    if(!sec||!outer||!players.length){drawRDDecayChart({});return;}
+    sec.style.display='';
+    // Only animate if modal is open
+    const _modalOverlay=document.getElementById('rd-modal-overlay');
+    if(!_modalOverlay||!_modalOverlay.classList.contains('open')) return;
+    const newPts=_rdBuildPts();
+    if(!newPts.length)return;
+    
+    // Use same sizing as drawRDDecayChart: full 100 days at consistent scale
+    const maxSec = 86400 * 100;
+    const pxPerSec = _rdPixelsPerSec();
+    const H = Math.round(window.innerHeight * 0.62);
+    const W = Math.round(pxPerSec * maxSec) + _RDP.right;
+
+    const dpr=window.devicePixelRatio||1;
+    let cv=document.getElementById('rd-decay-cv');
+    if(!cv){drawRDDecayChart({});return;}
+    const Wp=Math.round(W*dpr),Hp=Math.round(H*dpr);
+    if(cv.width!==Wp||cv.height!==Hp){cv.width=Wp;cv.height=Hp;cv.style.width=W+'px';cv.style.height=H+'px';}
+    
+    // Check if any RD values changed significantly
+    const changed=newPts.filter(p=>prevMap[p.pid]&&Math.abs((prevMap[p.pid].rd||0)-p.rd)>0.1);
+    if(!changed.length){_rdDraw(cv,newPts,maxSec,{},dpr);return;}
+    
+    if(_rdAnimReq)cancelAnimationFrame(_rdAnimReq);
+    _rdAnimStart=performance.now();
+    const hlMap=Object.fromEntries(changed.map(p=>[p.pid,true]));
+    
+    function step(now){
+      try {
+        const t=Math.min(1,(now-_rdAnimStart)/_RD_ANIM_DUR);
+        const ease=1-Math.pow(1-t,3);
+        const animPts=newPts.map(p=>{
+          const from=prevMap[p.pid];
+          if(!from||Math.abs(from.rd-p.rd)<0.05)return p;
+          // Animate the rdBaseX value (curve position)
+          try {
+            const fromX = _rdToX(from.rd);
+            const toX = _rdToX(p.rd);
+            if(!isFinite(fromX) || !isFinite(toX)) return p;
+            const animX = fromX + (toX - fromX) * ease;
+            return{...p, rdBaseX: animX};
+          } catch(e) {
+            return p;
+          }
+        });
+        _rdDraw(cv,animPts,maxSec,hlMap,dpr);
+        if(t<1)_rdAnimReq=requestAnimationFrame(step);
+        else{_rdAnimReq=null;_rdDraw(cv,newPts,maxSec,{},dpr);}
+      } catch(e) {
+        console.warn('Error in animation step:', e);
+        _rdAnimReq=null;
+      }
+    }
+    _rdAnimReq=requestAnimationFrame(step);
+  } catch(e) {
+    console.error('Error in _rdAnimateOrDraw:', e);
+  }
+}
 </script>
+<div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
+  <div id="rd-modal-box">
+    <div id="rd-modal-header">
+      <div class="rd-modal-title-block">
+        <h3>RD Decay</h3>
+        <span class="rd-modal-sub">Activity &amp; ranked cutoff · 100 day view · scroll →</span>
+      </div>
+      <button class="m-close" onclick="closeRDModal()">ESC</button>
+    </div>
+    <div id="rd-modal-body">
+      <div id="rd-modal-chart-row">
+        <div id="rd-modal-yaxis"></div>
+        <div id="rd-modal-scroll">
+          <div id="rd-decay-outer" data-open="1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="rating-trend-modal-overlay" onclick="if(event.target===this)closeRatingTrendModal()">
+  <div id="rating-trend-modal-box">
+    <div id="rating-trend-modal-header">
+      <div class="rating-trend-title-block">
+        <h3>Rating Trends</h3>
+        <span class="rating-trend-modal-sub">All player rating trajectories</span>
+      </div>
+      <div style="display:flex;gap:.6rem;align-items:center;">
+        <select id="trend-timeframe" onchange="updateRatingTrendChart()" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.35rem .5rem;font-family:'DM Mono',monospace;font-size:.65rem;cursor:pointer;">
+          <option value="week">Last Week</option>
+          <option value="month">Last Month</option>
+          <option value="all">All Time</option>
+        </select>
+        <button class="m-close" onclick="closeRatingTrendModal()">ESC</button>
+      </div>
+    </div>
+    <div id="rating-trend-modal-body">
+      <canvas id="rating-trend-canvas" style="display:block;width:100%;height:100%;"></canvas>
+    </div>
+  </div>
+</div>
 </body>
 </html>
