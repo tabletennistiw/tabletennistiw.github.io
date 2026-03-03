@@ -62,8 +62,10 @@ main{padding:1.25rem;position:relative;z-index:1;width:100%;overflow-x:visible;}
 .lb-head-row span{white-space:nowrap;}
 .lb-h-rating,.lb-h-rd,.lb-h-wl{text-align:right;}
 @media(max-width:480px){
-  .lb-h-wl,.lb-col-wl{display:none;}
-  .lb-head-row,.lb-row{grid-template-columns:2.4rem 1fr 5.5rem 4.5rem;}
+  .lb-head-row,.lb-row{grid-template-columns:2.4rem 1fr 4.5rem 3.8rem 3rem;font-size:.56rem;}
+  .rating-val{font-size:1.1rem;}
+  .rd-val{font-size:.6rem;}
+  .record-badge{font-size:.52rem;}
 }
 
 .lb-row{
@@ -324,21 +326,31 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 #rd-modal-overlay.open{display:flex;}
 @media(min-width:600px){#rd-modal-overlay.open{align-items:center;padding:1.25rem;}}
 #rd-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1200px;
-  max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
-#rd-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);}
+  height:92vh;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-48px)}}
+@keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(48px)}}
+#rd-modal-box.slide-in-left{animation:slideInLeft .28s cubic-bezier(.4,0,.2,1) forwards;}
+#rd-modal-box.slide-in-right{animation:slideInRight .28s cubic-bezier(.4,0,.2,1) forwards;}
+#rating-trend-modal-box.slide-in-left{animation:slideInLeft .28s cubic-bezier(.4,0,.2,1) forwards;}
+#rating-trend-modal-box.slide-in-right{animation:slideInRight .28s cubic-bezier(.4,0,.2,1) forwards;}
+#rd-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);flex-wrap:wrap;}
 #rd-modal-header .rd-modal-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
 #rd-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
 #rd-modal-header .rd-modal-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
 #rd-modal-header .m-close{background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;cursor:pointer;padding:.3rem .55rem;line-height:1;font-family:'DM Mono',monospace;letter-spacing:.06em;transition:all .15s;}
 #rd-modal-header .m-close:hover{border-color:var(--text);color:var(--text);}
-#rd-modal-body{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
-#rd-modal-chart-row{display:flex;flex:1;min-height:0;overflow:hidden;}
-#rd-modal-yaxis{width:46px;flex-shrink:0;position:relative;border-right:1px solid var(--border);background:var(--bg);overflow:hidden;}
-#rd-modal-scroll{overflow-x:auto;overflow-y:hidden;flex:1;-webkit-overflow-scrolling:touch;}
-#rd-modal-scroll::-webkit-scrollbar{height:4px;}
-#rd-modal-scroll::-webkit-scrollbar-track{background:var(--bg);}
-#rd-modal-scroll::-webkit-scrollbar-thumb{background:var(--border);}
-#rd-modal-scroll canvas{display:block;cursor:crosshair;}
+#rd-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;background:var(--bg);display:flex;align-items:stretch;position:relative;}
+#rd-decay-canvas{display:block;flex:1;min-height:0;min-width:0;cursor:crosshair;}
+.rd-legend{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap;}
+.rd-legend-item{display:flex;align-items:center;gap:.35rem;font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+.rd-legend-swatch{width:20px;height:2.5px;border-radius:2px;flex-shrink:0;}
+.rd-legend-swatch.dashed{background:none!important;border-top:2px dashed var(--accent3);}
+.chart-nav-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.0);border:none;color:rgba(255,255,255,.12);font-size:1.8rem;cursor:pointer;padding:.5rem .6rem;z-index:10;transition:color .2s,background .2s;line-height:1;user-select:none;}
+.chart-nav-btn:hover{color:var(--accent);background:rgba(0,0,0,.18);}
+.chart-nav-btn.nav-right{right:0;}
+.chart-nav-btn.nav-left{left:0;}
 .lb-rd-btn,.lb-rating-btn{background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;padding:.1rem .35rem;font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.04em;line-height:1.4;vertical-align:middle;transition:color .15s,border-color .15s,background .15s;margin-left:.35rem;}
 .lb-rd-btn:hover,.lb-rating-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(229,178,93,.08);}
 #rating-trend-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;}
@@ -350,7 +362,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 #rating-trend-modal-header .rating-trend-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
 #rating-trend-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
 #rating-trend-modal-header .rating-trend-modal-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
-#rating-trend-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;background:var(--bg);}
+#rating-trend-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;background:var(--bg);display:flex;align-items:center;position:relative;}
 
 /* PROFILE MATCHES */
 .pm-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.65rem;
@@ -1304,7 +1316,7 @@ window.addEventListener('resize',()=>{
     document.querySelectorAll('.lb-float-quote').forEach(el=>el.remove());
   }
   const _rdOv=document.getElementById('rd-modal-overlay');
-  if(_rdOv&&_rdOv.classList.contains('open')) drawRDDecayChart({},true);
+  if(_rdOv&&_rdOv.classList.contains('open')) drawRDDecayChart({});
 });
 
 function initLbQuoteZone(vis){
@@ -1742,7 +1754,8 @@ window.addPlayer=async function(){
 function makeCard(p){
   const wr=(p.wins+p.losses)>0?Math.round(p.wins/(p.wins+p.losses)*100):0;
   const wc=wr>=60?'var(--win)':wr>=40?'var(--text)':'var(--loss)';
-  const rdH=p.rd>100,rdC=rdH?'var(--loss)':p.rd>80?'var(--accent)':'var(--win)';
+  const liveRd=_computeRDLive(p);
+  const rdH=liveRd>100,rdC=rdH?'var(--loss)':liveRd>80?'var(--accent)':'var(--win)';
   const{ls,cs,la}=pStats(p.firestoreId),sc=cs>=5?'var(--win)':cs>=3?'var(--accent)':'var(--text)';
   const av=p.photoURL?`<img class="pc-avatar" src="${esc(p.photoURL)}" alt="">`:`<div class="pc-av-ph">${esc(p.name.charAt(0).toUpperCase())}</div>`;
   const seasons=p.seasons||[];
@@ -1768,7 +1781,7 @@ function makeCard(p){
     ${badgesHtml}
     <div class="pc-stats">
       <div class="pc-stat"><span class="pc-stat-l">Rating</span><span class="pc-stat-v" style="color:var(--accent)">${r2(p.rating)}</span></div>
-      <div class="pc-stat"><span class="pc-stat-l">RD</span><span class="pc-stat-v" data-rd-val style="color:${rdC}">±${r2(p.rd)}</span></div>
+      <div class="pc-stat"><span class="pc-stat-l">RD</span><span class="pc-stat-v" data-rd-val style="color:${rdC}">±${r2(liveRd)}</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Record</span><span class="pc-stat-v">${p.wins}W–${p.losses}L</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Win%</span><span class="pc-stat-v" style="color:${wc}">${wr}%</span></div>
       <div class="pc-stat"><span class="pc-stat-l">Streak</span><span class="pc-stat-v" style="color:${sc}">${cs>0?cs+'W':'—'}</span></div>
@@ -1892,7 +1905,9 @@ function tickLiveRD(){
     if(!p.rdBaseX&&p.rdBaseX!==0) return;
     const liveRd=_computeRDLive(p);
     const isHidden=liveRd>100;
-    if(isHidden&&_rdWasHidden[p.firestoreId]===false) needsLbRender=true;
+    const wasHidden=_rdWasHidden[p.firestoreId];
+    if(isHidden&&wasHidden===false) needsLbRender=true;  // player just left leaderboard
+    if(!isHidden&&wasHidden===true) needsLbRender=true;  // player just joined leaderboard
     _rdWasHidden[p.firestoreId]=isHidden;
 
     const rdStr='±'+r2(liveRd);
@@ -1908,11 +1923,29 @@ function tickLiveRD(){
       if(rdv){ rdv.textContent=rdStr; rdv.style.color=liveRd>=95?'var(--loss)':''; }
     }
 
-    // Player cards — only every 60s, only when that panel is visible
-    if(playersVisible&&(_rdTickCount%60===0)){
-      document.querySelectorAll(`.player-card[data-id="${p.firestoreId}"] [data-rd-val]`).forEach(val=>{
-        val.textContent=rdStr;
-        val.style.color=liveRd>100?'var(--loss)':liveRd>80?'var(--accent)':'var(--win)';
+    // Player cards — update every second when panel is visible, same as leaderboard
+    if(playersVisible){
+      document.querySelectorAll(`.player-card[data-id="${p.firestoreId}"]`).forEach(card=>{
+        // Update the RD value span
+        card.querySelectorAll('[data-rd-val]').forEach(val=>{
+          val.textContent=rdStr;
+          val.style.color=liveRd>100?'var(--loss)':liveRd>80?'var(--accent)':'var(--win)';
+        });
+        // Sync the HIDDEN tag in the card header
+        const nameBlock=card.querySelector('.pc-name-block');
+        if(nameBlock){
+          const existing=nameBlock.querySelector('.pc-tag:not([style*="admin"])');
+          if(liveRd>100){
+            if(!existing){
+              const tag=document.createElement('span');
+              tag.className='pc-tag';
+              tag.textContent='HIDDEN';
+              nameBlock.appendChild(tag);
+            }
+          } else {
+            if(existing&&existing.textContent==='HIDDEN') existing.remove();
+          }
+        }
       });
     }
   });
@@ -4713,7 +4746,7 @@ function escCap(s){return esc(cap(s));}
 function showMsg(id,text,isErr=false){const el=document.getElementById(id);el.textContent=text;el.className='msg'+(isErr?' err':'');el.style.display='block';if(!isErr)setTimeout(()=>{el.style.display='none';},3000);}
 
 // ── RD DECAY CHART ────────────────────────────────────────────────────────────
-const _RDP={top:34,right:20,bottom:40,left:46}; // padding
+const _RDP={top:14,right:8,bottom:24,left:40}; // matches rating chart exactly
 // New RD decay formula (asymptotic curve with rating scaling)
 // y = -30240000 / (x + 336000) + 120
 // x = curve position in seconds, y = RD value
@@ -4830,7 +4863,11 @@ window.openRDModal=function(){
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
   _rdChartDirty=false;
-  requestAnimationFrame(()=>drawRDDecayChart({},true));
+  requestAnimationFrame(()=>{
+    const cv=document.getElementById('rd-decay-canvas');
+    if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
+    drawRDDecayChart({});
+  });
 };
 
 window.closeRDModal=function(){
@@ -4839,6 +4876,10 @@ window.closeRDModal=function(){
   overlay.classList.remove('open');
   document.body.style.overflow='';
 };
+window.addEventListener('resize',()=>{
+  const overlay=document.getElementById('rd-modal-overlay');
+  if(overlay&&overlay.classList.contains('open')) drawRDDecayChart({});
+});
 
 window.openRatingTrendModal=function(){
   const overlay=document.getElementById('rating-trend-modal-overlay');
@@ -4856,6 +4897,20 @@ window.closeRatingTrendModal=function(){
   overlay.classList.remove('open');
   document.body.style.overflow='';
   if(window._ratingTrendChart){window._ratingTrendChart.destroy();window._ratingTrendChart=null;}
+};
+
+window.trendSelectAll=function(){
+  const chart=window._ratingTrendChart;
+  if(!chart)return;
+  chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=false;});
+  chart.update();
+};
+
+window.trendDeselectAll=function(){
+  const chart=window._ratingTrendChart;
+  if(!chart)return;
+  chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=true;});
+  chart.update();
 };
 
 // Generate a visually distinct color for each player by spreading hues evenly
@@ -5004,10 +5059,37 @@ window.updateRatingTrendChart=function(){
       },
       plugins:{
         legend:{
-          labels:{color:'#E1E2EF',font:{family:'DM Mono,monospace',size:11},boxWidth:12,padding:16},
+          labels:{
+            color:'#E1E2EF',font:{family:'DM Mono,monospace',size:11},
+            boxWidth:12,padding:16,
+            usePointStyle:false,
+            generateLabels(chart){
+              return chart.data.datasets.map((ds,i)=>{
+                const meta=chart.getDatasetMeta(i);
+                const hidden=meta.hidden;
+                return {
+                  text:ds.label,
+                  fillStyle:hidden?'transparent':ds._baseColor,
+                  strokeStyle:ds._baseColor,
+                  lineWidth:2,
+                  hidden,
+                  index:i,
+                  datasetIndex:i,
+                  fontColor:hidden?'#8a6a78':'#E1E2EF',
+                };
+              });
+            }
+          },
+          onClick(e,item,legend){
+            const chart=legend.chart;
+            const meta=chart.getDatasetMeta(item.datasetIndex);
+            meta.hidden=!meta.hidden;
+            chart.update();
+          },
           onHover:(evt,item)=>{
             const chart=window._ratingTrendChart;
             if(!chart||window._trendHoveredIdx===item.datasetIndex)return;
+            if(chart.getDatasetMeta(item.datasetIndex).hidden)return;
             window._trendLegendActive=true;
             window._trendHoveredIdx=item.datasetIndex;
             _applyTrendHover(chart,item.datasetIndex);
@@ -5024,9 +5106,13 @@ window.updateRatingTrendChart=function(){
           backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),borderColor:getComputedStyle(document.documentElement).getPropertyValue('--border').trim(),borderWidth:1,
           titleColor:'#E1E2EF',bodyColor:'#8a6a78',
           titleFont:{family:'DM Mono,monospace',size:11},bodyFont:{family:'DM Mono,monospace',size:11},
+          usePointStyle:true,
+          boxWidth:8,
+          filter:item=>!window._ratingTrendChart?.getDatasetMeta(item.datasetIndex)?.hidden,
           callbacks:{
             title:items=>new Date(items[0].parsed.x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
-            label:item=>`${item.dataset.label}: ${item.parsed.y}`
+            label:item=>`${item.dataset.label}: ${item.parsed.y}`,
+            labelColor:item=>({borderColor:item.dataset._baseColor,backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()}),
           }
         }
       }
@@ -5041,6 +5127,7 @@ window.updateRatingTrendChart=function(){
     const mx=e.clientX-rect.left, my=e.clientY-rect.top;
     let found=null, bestD=20;
     chart.data.datasets.forEach((ds,di)=>{
+      if(chart.getDatasetMeta(di).hidden)return;
       chart.getDatasetMeta(di).data.forEach(pt=>{
         const{x,y}=pt.getProps(['x','y'],true);
         const d=Math.hypot(mx-x,my-y);
@@ -5059,12 +5146,59 @@ window.updateRatingTrendChart=function(){
     _applyTrendHover(chart,null);
   };
 };
+
+window._switchToRD=function _switchToRD(){
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const rdOverlay=document.getElementById('rd-modal-overlay');
+  const rdBox=document.getElementById('rd-modal-box');
+  const trendBox=document.getElementById('rating-trend-modal-box');
+  // Open RD with transparent backdrop so it doesn't darken on top
+  rdOverlay.style.background='transparent';
+  openRDModal();
+  rdBox.style.cssText='opacity:0;transform:translateX(-60px);transition:none;';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    rdBox.style.cssText='opacity:1;transform:translateX(0);transition:opacity .25s ease-out,transform .25s ease-out;';
+    trendBox.style.cssText='opacity:0;transform:translateX(60px);transition:opacity .2s ease-in,transform .2s ease-in;';
+    setTimeout(()=>{
+      rdOverlay.style.background='';
+      rdBox.style.cssText='';
+      trendBox.style.cssText='';
+      closeRatingTrendModal();
+    },240);
+  }));
+}
+window._switchToTrend=function _switchToTrend(){
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const rdBox=document.getElementById('rd-modal-box');
+  const trendBox=document.getElementById('rating-trend-modal-box');
+  // Open trend with transparent backdrop
+  trendOverlay.style.background='transparent';
+  openRatingTrendModal();
+  trendBox.style.cssText='opacity:0;transform:translateX(60px);transition:none;';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    trendBox.style.cssText='opacity:1;transform:translateX(0);transition:opacity .25s ease-out,transform .25s ease-out;';
+    rdBox.style.cssText='opacity:0;transform:translateX(-60px);transition:opacity .2s ease-in,transform .2s ease-in;';
+    setTimeout(()=>{
+      trendOverlay.style.background='';
+      trendBox.style.cssText='';
+      rdBox.style.cssText='';
+      closeRDModal();
+    },240);
+  }));
+}
+
 document.addEventListener('keydown',e=>{
+  const rdOverlay=document.getElementById('rd-modal-overlay');
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const rdOpen=rdOverlay&&rdOverlay.classList.contains('open');
+  const trendOpen=trendOverlay&&trendOverlay.classList.contains('open');
   if(e.key==='Escape'){
-    const rdOverlay=document.getElementById('rd-modal-overlay');
-    const trendOverlay=document.getElementById('rating-trend-modal-overlay');
-    if(rdOverlay&&rdOverlay.classList.contains('open')){closeRDModal();e.stopPropagation();}
-    else if(trendOverlay&&trendOverlay.classList.contains('open')){closeRatingTrendModal();e.stopPropagation();}
+    if(rdOpen){closeRDModal();e.stopPropagation();}
+    else if(trendOpen){closeRatingTrendModal();e.stopPropagation();}
+  } else if(e.key==='ArrowRight'&&trendOpen){
+    _switchToRD();
+  } else if(e.key==='ArrowLeft'&&rdOpen){
+    _switchToTrend();
   }
 });
 
@@ -5098,202 +5232,170 @@ function _rdPreloadAvatars(){
   });
 }
 
-function drawRDDecayChart(hlPids, doScroll){
-  const outer = document.getElementById('rd-decay-outer');
-  if(!outer) return;
-  if(!players.length) return;
+function drawRDDecayChart(hlPids){
+  const cv = document.getElementById('rd-decay-canvas');
+  if(!cv||!players.length) return;
   _rdPreloadAvatars();
   const pts = _rdBuildPts();
-
-  const maxSec = 86400 * 100;
-  const pxPerSec = _rdPixelsPerSec();
-  // H excludes x-axis label area — _RDP.bottom holds that
-  const H = Math.round(window.innerHeight * 0.62);
-  const cW_css = Math.round(pxPerSec * maxSec);
-  const W = cW_css + _RDP.right;
-
-  const dpr = window.devicePixelRatio || 1;
-  let cv = document.getElementById('rd-decay-cv');
-  if(!cv){
-    cv = document.createElement('canvas');
-    cv.id = 'rd-decay-cv';
-    cv.style.cssText = 'display:block;cursor:crosshair;';
-    outer.appendChild(cv);
-    _rdInitHover(cv);
-  }
-  cv.width = Math.round(W * dpr);
-  cv.height = Math.round(H * dpr);
-  cv.style.width = W + 'px';
-  cv.style.height = H + 'px';
-  _rdDraw(cv, pts, maxSec, hlPids || {}, dpr);
-
-  // Populate fixed y-axis DOM
-  _rdDrawYAxis(H);
-
-  // Only scroll on explicit open
-  if(doScroll){
-    requestAnimationFrame(()=>{
-      const scroll = document.getElementById('rd-modal-scroll');
-      if(scroll) scroll.scrollLeft = 0;
-    });
-  }
+  const dpr = window.devicePixelRatio||1;
+  const W = cv.offsetWidth||cv.parentElement.offsetWidth||600;
+  const H = cv.offsetHeight||cv.parentElement.offsetHeight||400;
+  cv.width = Math.round(W*dpr);
+  cv.height = Math.round(H*dpr);
+  cv.style.width = W+'px';
+  cv.style.height = H+'px';
+  _rdDraw(cv, pts, hlPids||{}, dpr);
 }
 
-function _rdDrawYAxis(H){
-  const yAxis = document.getElementById('rd-modal-yaxis');
-  if(!yAxis) return;
-  yAxis.style.height = H + 'px';
-  const P = _RDP;
-  const cH = H - P.top - P.bottom;
-  yAxis.innerHTML = '';
-  for(let r = 30; r <= 120; r += 10){
-    const frac = 1 - (r - _RD_MIN) / (_RD_MAX_NEW - _RD_MIN);
-    const y = P.top + frac * cH;
-    const lbl = document.createElement('span');
-    lbl.textContent = r;
-    const isHundred = r === 100;
-    lbl.style.cssText = `position:absolute;right:4px;transform:translateY(-50%);top:${y}px;`
-      + `font-family:'DM Mono',monospace;font-size:9px;`
-      + `color:${isHundred ? 'var(--loss)' : 'var(--muted)'};`
-      + (isHundred ? 'font-weight:600;' : '');
-    yAxis.appendChild(lbl);
-  }
-  // RD label rotated
-  const lbl2 = document.createElement('span');
-  lbl2.textContent = 'RD';
-  lbl2.style.cssText = `position:absolute;left:0;right:0;top:50%;transform:translateY(-50%) rotate(-90deg);`
-    + `font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.08em;text-align:center;`;
-  yAxis.appendChild(lbl2);
-}
+function _rdDrawYAxis(H){ /* no-op — axis now drawn inside canvas */ }
 
-function _rdDraw(cv,pts,maxSec,hl,dpr){
+function _rdDraw(cv,pts,hl,dpr){
   dpr=dpr||window.devicePixelRatio||1;
   const ctx=cv.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  const W=Math.round(cv.width/dpr),H=Math.round(cv.height/dpr);
-  // No left padding — y-axis is a fixed DOM element. Use a local pad with left=0.
-  const P={top:_RDP.top, right:_RDP.right, bottom:_RDP.bottom, left:0};
+  const W=Math.round(cv.width/dpr), H=Math.round(cv.height/dpr);
+  const P={top:16,right:28,bottom:36,left:42}; // extra right padding so "day 60" label fits
   const cW=W-P.left-P.right, cH=H-P.top-P.bottom;
+  const maxSec=86400*60; // 60 day view
+
   const g=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const ac=g('--accent'),ls=g('--loss'),mt=g('--muted'),bg=g('--bg'),bd=g('--border'),tx=g('--text'),a3=g('--accent3');
+  const ac=g('--accent'),ls=g('--loss'),mt=g('--muted'),bg=g('--bg'),bd=g('--border'),a3=g('--accent3');
 
   const px=sec=>P.left+(sec/maxSec)*cW;
   const py=r=>P.top+(1-(r-_RD_MIN)/(_RD_MAX_NEW-_RD_MIN))*cH;
 
+  // Background
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-  // Y gridlines (no labels — those are in the DOM y-axis)
-  for(let r=30;r<=120;r+=10){
+  // Y axis gridlines + labels (RD values)
+  const yTicks=[30,60,90,100,120];
+  yTicks.forEach(r=>{
+    const y=py(r);
+    const isCutoff=r===100;
+    // gridline extends from label area all the way across
+    ctx.strokeStyle=isCutoff?ls+'80':bd;
+    ctx.lineWidth=isCutoff?1.5:1;
+    ctx.setLineDash(isCutoff?[4,4]:[]);
+    ctx.beginPath(); ctx.moveTo(P.left-6,y); ctx.lineTo(P.left+cW,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=isCutoff?ls:mt;
+    ctx.font=`${isCutoff?'bold ':''} 10px DM Mono,monospace`;
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(r, P.left-9, y);
+  });
+
+  // Y axis border line
+  ctx.strokeStyle=bd; ctx.lineWidth=1; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(P.left,P.top); ctx.lineTo(P.left,P.top+cH); ctx.stroke();
+
+  // Y axis label
+  ctx.save();
+  ctx.translate(11, P.top+cH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle=mt; ctx.font='10px DM Mono,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('RD',0,0);
+  ctx.restore();
+
+  // X axis gridlines + labels (days)
+  const xDayTicks=[0,10,20,30,40,50,60];
+  xDayTicks.forEach(d=>{
+    const x=px(d*86400);
     ctx.strokeStyle=bd; ctx.lineWidth=1; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(0,py(r)); ctx.lineTo(cW,py(r)); ctx.stroke();
-  }
+    ctx.beginPath(); ctx.moveTo(x,P.top); ctx.lineTo(x,P.top+cH+6); ctx.stroke();
+    ctx.fillStyle=mt; ctx.font='10px DM Mono,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(`day ${d}`, x, P.top+cH+9);
+  });
 
-  // X gridlines + labels (every 10 days; labels left-aligned to gridline so "0d" is visible at scroll-left)
-  const xStepSec = 86400*10;
-  for(let sec=0;sec<=maxSec;sec+=xStepSec){
-    ctx.strokeStyle=bd; ctx.lineWidth=1; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(px(sec),P.top); ctx.lineTo(px(sec),P.top+cH); ctx.stroke();
-    ctx.fillStyle=mt; ctx.font='10px DM Mono,monospace'; ctx.textAlign='left';
-    const days=Math.round(sec/86400);
-    ctx.fillText(days+'d', px(sec)+3, P.top+cH+13);
-  }
+  // X axis border line
+  ctx.strokeStyle=bd; ctx.lineWidth=1; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(P.left,P.top+cH); ctx.lineTo(P.left+cW,P.top+cH); ctx.stroke();
 
-  // Border
-  ctx.strokeStyle=bd; ctx.lineWidth=1.5; ctx.setLineDash([]);
-  ctx.strokeRect(0,P.top,cW,cH);
+  // X axis label
+  ctx.fillStyle=mt; ctx.font='10px DM Mono,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText('days inactive', P.left+cW/2, H-2);
 
-  // RD=120 reference line
-  ctx.setLineDash([3,5]); ctx.strokeStyle=a3+'90'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(0,py(120)); ctx.lineTo(cW,py(120)); ctx.stroke();
-  ctx.setLineDash([]); ctx.fillStyle=a3; ctx.font='8px DM Mono,monospace'; ctx.textAlign='left';
-  ctx.fillText('RD 120',4,py(120)-3);
-
-  // RD=100 cutoff line
-  ctx.setLineDash([5,4]); ctx.strokeStyle=ls; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(0,py(100)); ctx.lineTo(cW,py(100)); ctx.stroke();
-  ctx.setLineDash([]); ctx.fillStyle=ls; ctx.font='8px DM Mono,monospace'; ctx.textAlign='left';
-  ctx.fillText('ranked cutoff',4,py(100)-3);
-
-  // Red tint zone: right of RD=100 intersection (player is purged territory)
+  // Red tint zone past RD=100
   const x100=_rdToX(100);
   if(isFinite(x100)&&x100>=0&&x100<=maxSec){
     const vx=px(x100);
     ctx.fillStyle='rgba(217,83,79,.07)';
-    ctx.fillRect(vx, P.top, cW-vx, cH);
-
-    // Vertical dotted line at intersection
+    ctx.fillRect(vx,P.top,P.left+cW-vx,cH);
     ctx.setLineDash([4,4]); ctx.strokeStyle=ls+'cc'; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(vx,P.top); ctx.lineTo(vx,P.top+cH); ctx.stroke();
     ctx.setLineDash([]);
-
-    // Label inside chart top
-    ctx.save();
-    ctx.font='bold 8px DM Mono,monospace'; ctx.fillStyle=ls; ctx.textAlign='left';
-    ctx.fillText('PURGE', vx+4, P.top+11);
-    ctx.fillText('LINE', vx+4, P.top+21);
-    ctx.restore();
-
-    // X-axis day label at intersection
-    const x100days = Math.round(x100/86400);
-    ctx.save();
-    ctx.font='bold 9px DM Mono,monospace'; ctx.fillStyle=ls; ctx.textAlign='left';
-    ctx.fillText(x100days+'d', vx+3, P.top+cH+13);
-    ctx.restore();
+    ctx.font='bold 8px DM Mono,monospace'; ctx.fillStyle=ls;
+    ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText('PURGE', vx+4, P.top+4);
   }
 
-  // Asymptotic curve
-  ctx.strokeStyle=ac; ctx.lineWidth=3; ctx.setLineDash([]);
-  ctx.beginPath(); let started=false;
-  for(let i=0;i<=800;i++){
-    const x=(i/800)*maxSec;
+  // Clip to plot area for curves and dots
+  ctx.save();
+  ctx.beginPath(); ctx.rect(P.left,P.top,cW,cH); ctx.clip();
+
+  // RD=120 asymptote dashed line
+  ctx.setLineDash([3,5]); ctx.strokeStyle=a3+'70'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(P.left-6,py(_RD_MAX_NEW)); ctx.lineTo(P.left+cW,py(_RD_MAX_NEW)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Glicko-1 curve — calibrated same RD=100 intercept, stops when it hits RD_MAX
+  const _G_RD0=_RD_MIN, _G_PERIOD_SEC=4*3600;
+  const _G_x100=_rdToX(100), _G_t100=_G_x100/_G_PERIOD_SEC;
+  const _G_c2=(100**2-_G_RD0**2)/_G_t100;
+  ctx.strokeStyle=a3; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+  ctx.beginPath(); let gS=false;
+  for(let i=0;i<=600;i++){
+    const x=(i/600)*maxSec;
+    const grd=Math.sqrt(_G_RD0**2+_G_c2*(x/_G_PERIOD_SEC));
+    if(grd>=_RD_MAX_NEW) break; // stop before hitting the ceiling — no clamping
+    const sy=py(grd);
+    if(!gS){ctx.moveTo(px(x),sy);gS=true;}else ctx.lineTo(px(x),sy);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Custom asymptotic curve
+  ctx.strokeStyle=ac; ctx.lineWidth=2.5; ctx.setLineDash([]);
+  ctx.beginPath(); let cS=false;
+  for(let i=0;i<=600;i++){
+    const x=(i/600)*maxSec;
     const rd=-_RD_NUMERATOR/(x+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
-    if(rd<_RD_MIN-5||rd>_RD_MAX_NEW+5){started=false;continue;}
-    if(!started){ctx.moveTo(px(x),py(rd));started=true;}
-    else ctx.lineTo(px(x),py(rd));
+    if(rd<_RD_MIN-5||rd>_RD_MAX_NEW+5){cS=false;continue;}
+    if(!cS){ctx.moveTo(px(x),py(rd));cS=true;}else ctx.lineTo(px(x),py(rd));
   }
   ctx.stroke();
 
-  // Player dots — circular avatar (photo or initial letter)
-  const R = 11; // avatar radius px
+  // Player dots
+  const R=11;
   pts.forEach(p=>{
     if(!p.rd||!p.rating||!p.name)return;
     const clampedRD=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
     const x=_rdToX(clampedRD);
     if(!isFinite(x)||x<0||x>maxSec)return;
-    const screenX=px(x), screenY=py(clampedRD);
+    const sX=px(x), sY=py(clampedRD);
     const col=p.hidden?ls:(p.immune?a3:ac);
-
-    // Highlight ring
     if(hl[p.pid]){
-      ctx.beginPath();ctx.arc(screenX,screenY,R+4,0,Math.PI*2);
+      ctx.beginPath();ctx.arc(sX,sY,R+4,0,Math.PI*2);
       ctx.fillStyle=col+'33';ctx.fill();
     }
-
-    // Colored border ring
-    ctx.beginPath();ctx.arc(screenX,screenY,R+1.5,0,Math.PI*2);
+    ctx.beginPath();ctx.arc(sX,sY,R+1.5,0,Math.PI*2);
     ctx.fillStyle=col;ctx.fill();
-
-    // Clip circle for avatar
     ctx.save();
-    ctx.beginPath();ctx.arc(screenX,screenY,R,0,Math.PI*2);ctx.clip();
-
-    const img = p.photoURL ? _rdImgCache[p.pid] : null;
-    if(img && img.complete && img.naturalWidth){
-      ctx.drawImage(img, screenX-R, screenY-R, R*2, R*2);
+    ctx.beginPath();ctx.arc(sX,sY,R,0,Math.PI*2);ctx.clip();
+    const img=p.photoURL?_rdImgCache[p.pid]:null;
+    if(img&&img.complete&&img.naturalWidth){
+      ctx.drawImage(img,sX-R,sY-R,R*2,R*2);
     } else {
-      // Fallback: solid color fill + initial letter
-      ctx.fillStyle=bg; ctx.fill();
+      ctx.fillStyle=bg;ctx.fill();
       ctx.fillStyle=col;
       ctx.font=`bold ${R}px DM Mono,monospace`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(p.name.charAt(0).toUpperCase(), screenX, screenY);
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(p.name.charAt(0).toUpperCase(),sX,sY);
     }
-    ctx.restore();
+    ctx.restore(); // restore per-dot clip
   });
-
-  // X-axis label
-  ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';
-  ctx.fillText('days since last match',cW/2,H-3);
+  ctx.restore(); // restore plot area clip
 }
 
 function _rdFmtCountdown(sec){
@@ -5352,65 +5454,47 @@ function _rdTipRender(){
 }
 
 function _rdInitHover(cv){
-  // Ensure tip element exists
   let tip=document.getElementById('rd-tip');
-  if(!tip){
-    tip=document.createElement('div');
-    tip.id='rd-tip';
-    document.body.appendChild(tip);
-  }
+  if(!tip){ tip=document.createElement('div'); tip.id='rd-tip'; document.body.appendChild(tip); }
+  if(!_rdTipTick){ _rdTipTick=setInterval(()=>{ if(_rdHoverPid) _rdTipRender(); },1000); }
 
-  // Start single global tick if not already running
-  if(!_rdTipTick){
-    _rdTipTick = setInterval(()=>{
-      if(_rdHoverPid) _rdTipRender();
-    }, 1000);
-  }
+  const P={top:16,right:28,bottom:36,left:42};
+  const maxSec=86400*60;
 
   cv.addEventListener('mousemove',e=>{
-    const r   = cv.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const cssW = cv.width / dpr;
-    const cssH = cv.height / dpr;
-    const cW  = cssW - _RDP.right;
-    const cH  = cssH - _RDP.top - _RDP.bottom;
-    const mx  = (e.clientX - r.left) * (cssW / r.width);
-    const my  = (e.clientY - r.top)  * (cssH / r.height);
-    const maxSec = 86400 * 100;
-    const pxFn = sec => (sec / maxSec) * cW;
-    const pyFn = rd  => _RDP.top + (1-(rd-_RD_MIN)/(_RD_MAX_NEW-_RD_MIN))*cH;
+    const r=cv.getBoundingClientRect();
+    const dpr=window.devicePixelRatio||1;
+    const cssW=cv.width/dpr, cssH=cv.height/dpr;
+    const cW=cssW-P.left-P.right, cH=cssH-P.top-P.bottom;
+    const mx=(e.clientX-r.left)*(cssW/r.width);
+    const my=(e.clientY-r.top)*(cssH/r.height);
+    const pxFn=sec=>P.left+(sec/maxSec)*cW;
+    const pyFn=rd=>P.top+(1-(rd-_RD_MIN)/(_RD_MAX_NEW-_RD_MIN))*cH;
 
-    const pts = _rdBuildPts();
+    const pts=_rdBuildPts();
     let best=null, bestD=20;
     pts.forEach(p=>{
       if(!p.rd||!p.rating||!p.name) return;
-      const crd = Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
-      const x   = _rdToX(crd);
+      const crd=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
+      const x=_rdToX(crd);
       if(!isFinite(x)||x<0||x>maxSec) return;
-      const d = Math.hypot(mx-pxFn(x), my-pyFn(crd));
+      const d=Math.hypot(mx-pxFn(x),my-pyFn(crd));
       if(d<bestD){ best=p; bestD=d; }
     });
 
     if(best){
-      const crd2    = Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,best.rd));
-      const dotCssX = pxFn(_rdToX(crd2));
-      const dotCssY = pyFn(crd2);
-      // Capture everything needed for the countdown at this moment
-      const liveP2 = players.find(p=>p.firestoreId===best.pid);
-      const rd2    = liveP2 ? _computeRDLive(liveP2) : best.rd;
-      _rdHoverPid    = best.pid;
-      _rdHoverName   = best.name;
-      _rdHoverImmune = best.immune;
-      _rdHoverRd     = rd2;
-      _rdHoverSecAt  = _rdSecondsToTarget(rd2, best.rating||1500, 100);
-      _rdHoverWallAt = Date.now();
-      _rdHoverSX  = r.left + dotCssX*(r.width/cssW);
-      _rdHoverSY  = r.top  + dotCssY*(r.height/cssH);
+      const crd2=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,best.rd));
+      const liveP2=players.find(p=>p.firestoreId===best.pid);
+      const rd2=liveP2?_computeRDLive(liveP2):best.rd;
+      _rdHoverPid=best.pid; _rdHoverName=best.name; _rdHoverImmune=best.immune;
+      _rdHoverRd=rd2; _rdHoverSecAt=_rdSecondsToTarget(rd2,best.rating||1500,100);
+      _rdHoverWallAt=Date.now();
+      _rdHoverSX=r.left+pxFn(_rdToX(crd2))*(r.width/cssW);
+      _rdHoverSY=r.top+pyFn(crd2)*(r.height/cssH);
       tip.style.left='-9999px'; tip.style.top='-9999px';
       _rdTipRender();
     } else {
-      _rdHoverPid = null;
-      tip.style.display='none';
+      _rdHoverPid=null; tip.style.display='none';
     }
   });
 
@@ -5423,66 +5507,42 @@ function _rdInitHover(cv){
 
 function _rdAnimateOrDraw(prevMap){
   try {
-    const sec=document.getElementById('rd-decay-section');
-    const outer=document.getElementById('rd-decay-outer');
-    if(!sec||!outer||!players.length){drawRDDecayChart({});return;}
-    sec.style.display='';
-    // Only animate if modal is open
     const _modalOverlay=document.getElementById('rd-modal-overlay');
     if(!_modalOverlay||!_modalOverlay.classList.contains('open')) return;
     const newPts=_rdBuildPts();
-    if(!newPts.length)return;
-    
-    // Use same sizing as drawRDDecayChart: full 100 days at consistent scale
-    const maxSec = 86400 * 100;
-    const pxPerSec = _rdPixelsPerSec();
-    const H = Math.round(window.innerHeight * 0.62);
-    const W = Math.round(pxPerSec * maxSec) + _RDP.right;
+    if(!newPts.length){ drawRDDecayChart({}); return; }
 
+    const cv=document.getElementById('rd-decay-canvas');
+    if(!cv){ drawRDDecayChart({}); return; }
     const dpr=window.devicePixelRatio||1;
-    let cv=document.getElementById('rd-decay-cv');
-    if(!cv){drawRDDecayChart({});return;}
-    const Wp=Math.round(W*dpr),Hp=Math.round(H*dpr);
-    if(cv.width!==Wp||cv.height!==Hp){cv.width=Wp;cv.height=Hp;cv.style.width=W+'px';cv.style.height=H+'px';}
-    
-    // Check if any RD values changed significantly
+
     const changed=newPts.filter(p=>prevMap[p.pid]&&Math.abs((prevMap[p.pid].rd||0)-p.rd)>0.1);
-    if(!changed.length){_rdDraw(cv,newPts,maxSec,{},dpr);return;}
-    
-    if(_rdAnimReq)cancelAnimationFrame(_rdAnimReq);
+    if(!changed.length){ _rdDraw(cv,newPts,{},dpr); return; }
+
+    if(_rdAnimReq) cancelAnimationFrame(_rdAnimReq);
     _rdAnimStart=performance.now();
     const hlMap=Object.fromEntries(changed.map(p=>[p.pid,true]));
-    
+
     function step(now){
       try {
         const t=Math.min(1,(now-_rdAnimStart)/_RD_ANIM_DUR);
         const ease=1-Math.pow(1-t,3);
         const animPts=newPts.map(p=>{
           const from=prevMap[p.pid];
-          if(!from||Math.abs(from.rd-p.rd)<0.05)return p;
-          // Animate the rdBaseX value (curve position)
+          if(!from||Math.abs(from.rd-p.rd)<0.05) return p;
           try {
-            const fromX = _rdToX(from.rd);
-            const toX = _rdToX(p.rd);
-            if(!isFinite(fromX) || !isFinite(toX)) return p;
-            const animX = fromX + (toX - fromX) * ease;
-            return{...p, rdBaseX: animX};
-          } catch(e) {
-            return p;
-          }
+            const fromX=_rdToX(from.rd), toX=_rdToX(p.rd);
+            if(!isFinite(fromX)||!isFinite(toX)) return p;
+            return {...p, rdBaseX: fromX+(toX-fromX)*ease};
+          } catch(e){ return p; }
         });
-        _rdDraw(cv,animPts,maxSec,hlMap,dpr);
-        if(t<1)_rdAnimReq=requestAnimationFrame(step);
-        else{_rdAnimReq=null;_rdDraw(cv,newPts,maxSec,{},dpr);}
-      } catch(e) {
-        console.warn('Error in animation step:', e);
-        _rdAnimReq=null;
-      }
+        _rdDraw(cv,animPts,hlMap,dpr);
+        if(t<1) _rdAnimReq=requestAnimationFrame(step);
+        else { _rdAnimReq=null; _rdDraw(cv,newPts,{},dpr); }
+      } catch(e){ console.warn('RD anim error:',e); _rdAnimReq=null; }
     }
     _rdAnimReq=requestAnimationFrame(step);
-  } catch(e) {
-    console.error('Error in _rdAnimateOrDraw:', e);
-  }
+  } catch(e){ console.error('_rdAnimateOrDraw error:',e); }
 }
 </script>
 <div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
@@ -5490,17 +5550,17 @@ function _rdAnimateOrDraw(prevMap){
     <div id="rd-modal-header">
       <div class="rd-modal-title-block">
         <h3>RD Decay</h3>
-        <span class="rd-modal-sub">Activity &amp; ranked cutoff · 100 day view · scroll →</span>
+        <span class="rd-modal-sub">Activity &amp; ranked cutoff · 100 day view</span>
+      </div>
+      <div class="rd-legend">
+        <div class="rd-legend-item"><div class="rd-legend-swatch" style="background:var(--accent)"></div>Custom (asymptotic)</div>
+        <div class="rd-legend-item"><div class="rd-legend-swatch dashed"></div>Glicko-1 standard</div>
       </div>
       <button class="m-close" onclick="closeRDModal()">ESC</button>
     </div>
     <div id="rd-modal-body">
-      <div id="rd-modal-chart-row">
-        <div id="rd-modal-yaxis"></div>
-        <div id="rd-modal-scroll">
-          <div id="rd-decay-outer" data-open="1"></div>
-        </div>
-      </div>
+      <canvas id="rd-decay-canvas"></canvas>
+      <button class="chart-nav-btn nav-left" onclick="_switchToTrend()" title="Rating Trends">‹</button>
     </div>
   </div>
 </div>
@@ -5512,6 +5572,8 @@ function _rdAnimateOrDraw(prevMap){
         <span class="rating-trend-modal-sub">All player rating trajectories</span>
       </div>
       <div style="display:flex;gap:.6rem;align-items:center;">
+        <button onclick="trendSelectAll()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">All</button>
+        <button onclick="trendDeselectAll()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">None</button>
         <select id="trend-timeframe" onchange="updateRatingTrendChart()" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.35rem .5rem;font-family:'DM Mono',monospace;font-size:.65rem;cursor:pointer;">
           <option value="week">Last Week</option>
           <option value="month">Last Month</option>
@@ -5521,7 +5583,8 @@ function _rdAnimateOrDraw(prevMap){
       </div>
     </div>
     <div id="rating-trend-modal-body">
-      <canvas id="rating-trend-canvas" style="display:block;width:100%;height:100%;"></canvas>
+      <button class="chart-nav-btn nav-right" onclick="_switchToRD()" title="RD Decay">›</button>
+      <canvas id="rating-trend-canvas" style="display:block;width:100%;flex:1;min-height:0;"></canvas>
     </div>
   </div>
 </div>
