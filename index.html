@@ -5208,44 +5208,62 @@ window.updateRatingTrendChart=function(){
 };
 
 window._switchToRD=function _switchToRD(){
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
   const trendBox=document.getElementById('rating-trend-modal-box');
   const rdOverlay=document.getElementById('rd-modal-overlay');
   const rdBox=document.getElementById('rd-modal-box');
-  const DUR=280;
-  trendBox.style.animation=`slideToLeft ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
+  const DUR=300;
+  // incoming rdOverlay is transparent — trendOverlay already provides the dark backdrop
   rdOverlay.style.background='transparent';
+  rdOverlay.style.zIndex='501';
+  rdBox.style.transition='none';
+  rdBox.style.transform='translateX(100vw)';
   rdOverlay.classList.add('open');
-  rdOverlay.style.overflow='hidden';
-  rdBox.style.animation=`slideFromRight ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
-  setTimeout(()=>{
-    closeRatingTrendModal();
-    trendBox.style.animation='';
-    rdOverlay.style.background='';
-    rdOverlay.style.overflow='';
-    rdBox.style.animation='';
-    const cv=document.getElementById('rd-decay-canvas');
-    if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
-    drawRDDecayChart({});
-  },DUR+16);
+  const cv=document.getElementById('rd-decay-canvas');
+  if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
+  drawRDDecayChart({});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    trendBox.style.transition=`transform ${DUR}ms cubic-bezier(.4,0,.2,1)`;
+    rdBox.style.transition=`transform ${DUR}ms cubic-bezier(.4,0,.2,1)`;
+    trendBox.style.transform='translateX(-100vw)';
+    rdBox.style.transform='translateX(0)';
+    setTimeout(()=>{
+      trendOverlay.classList.remove('open');
+      rdOverlay.style.zIndex='';
+      rdOverlay.style.background='';
+      trendBox.style.transition='';
+      trendBox.style.transform='';
+      rdBox.style.transition='';
+    },DUR+20);
+  }));
 };
 window._switchToTrend=function _switchToTrend(){
+  const rdOverlay=document.getElementById('rd-modal-overlay');
   const rdBox=document.getElementById('rd-modal-box');
   const trendOverlay=document.getElementById('rating-trend-modal-overlay');
   const trendBox=document.getElementById('rating-trend-modal-box');
-  const DUR=280;
-  rdBox.style.animation=`slideToRight ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
+  const DUR=300;
+  // incoming trendOverlay is transparent — rdOverlay already provides the dark backdrop
   trendOverlay.style.background='transparent';
+  trendOverlay.style.zIndex='501';
+  trendBox.style.transition='none';
+  trendBox.style.transform='translateX(-100vw)';
   trendOverlay.classList.add('open');
-  trendOverlay.style.overflow='hidden';
-  if(!window._ratingTrendChart) updateRatingTrendChart();
-  trendBox.style.animation=`slideFromLeft ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
-  setTimeout(()=>{
-    closeRDModal();
-    rdBox.style.animation='';
-    trendOverlay.style.background='';
-    trendOverlay.style.overflow='';
-    trendBox.style.animation='';
-  },DUR+16);
+  updateRatingTrendChart();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    rdBox.style.transition=`transform ${DUR}ms cubic-bezier(.4,0,.2,1)`;
+    trendBox.style.transition=`transform ${DUR}ms cubic-bezier(.4,0,.2,1)`;
+    rdBox.style.transform='translateX(100vw)';
+    trendBox.style.transform='translateX(0)';
+    setTimeout(()=>{
+      rdOverlay.classList.remove('open');
+      trendOverlay.style.zIndex='';
+      trendOverlay.style.background='';
+      rdBox.style.transition='';
+      rdBox.style.transform='';
+      trendBox.style.transition='';
+    },DUR+20);
+  }));
 }
 
 document.addEventListener('keydown',e=>{
