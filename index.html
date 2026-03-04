@@ -327,10 +327,10 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 @media(min-width:600px){#rd-modal-overlay.open{align-items:center;padding:1.25rem;}}
 #rd-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1200px;
   height:92vh;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
-@keyframes slideFromRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
-@keyframes slideFromLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}
-@keyframes slideToLeft{from{transform:translateX(0)}to{transform:translateX(-100%)}}
-@keyframes slideToRight{from{transform:translateX(0)}to{transform:translateX(100%)}}
+@keyframes slideFromRight{from{transform:translateX(100vw)}to{transform:translateX(0)}}
+@keyframes slideFromLeft{from{transform:translateX(-100vw)}to{transform:translateX(0)}}
+@keyframes slideToLeft{from{transform:translateX(0)}to{transform:translateX(-100vw)}}
+@keyframes slideToRight{from{transform:translateX(0)}to{transform:translateX(100vw)}}
 #rd-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);flex-wrap:wrap;}
 #rd-modal-header .rd-modal-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
 #rd-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
@@ -4885,38 +4885,17 @@ function _rdSecondsToTarget(rd0, rating, target){
 
 window.toggleRDDecay=function(){ openRDModal(); };
 
-function _prerenderBothCharts(){
-  // Pre-render RD chart (offscreen-safe — canvas is in the DOM even when overlay is hidden)
-  const cv=document.getElementById('rd-decay-canvas');
-  if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
-  drawRDDecayChart({});
-  // Pre-render trend chart — needs overlay visible to measure height,
-  // so briefly make it display:flex but invisible, render, then hide again
-  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
-  const rdOverlay=document.getElementById('rd-modal-overlay');
-  const trendAlreadyOpen=trendOverlay.classList.contains('open');
-  const rdAlreadyOpen=rdOverlay.classList.contains('open');
-  if(!trendAlreadyOpen){
-    trendOverlay.style.visibility='hidden';
-    trendOverlay.classList.add('open');
-  }
-  if(!window._ratingTrendChart){
-    document.getElementById('trend-timeframe').value='month';
-    updateRatingTrendChart();
-  }
-  if(!trendAlreadyOpen){
-    trendOverlay.classList.remove('open');
-    trendOverlay.style.visibility='';
-  }
-}
-
 window.openRDModal=function(){
   const overlay=document.getElementById('rd-modal-overlay');
   if(!overlay)return;
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
   _rdChartDirty=false;
-  _prerenderBothCharts();
+  requestAnimationFrame(()=>{
+    const cv=document.getElementById('rd-decay-canvas');
+    if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
+    drawRDDecayChart({});
+  });
 };
 
 window.openRatingTrendModal=function(){
@@ -4924,7 +4903,10 @@ window.openRatingTrendModal=function(){
   if(!overlay)return;
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
-  _prerenderBothCharts();
+  if(!window._ratingTrendChart){
+    document.getElementById('trend-timeframe').value='month';
+  }
+  setTimeout(()=>updateRatingTrendChart(), 50);
 };
 
 window.closeRatingTrendModal=function(){
@@ -4932,7 +4914,7 @@ window.closeRatingTrendModal=function(){
   if(!overlay)return;
   overlay.classList.remove('open');
   document.body.style.overflow='';
-  if(window._ratingTrendChart){window._ratingTrendChart.destroy();window._ratingTrendChart=null;}
+  // Don't destroy chart — keep it alive so switching back is instant
 };
 
 window.trendSelectAll=function(){
@@ -5202,13 +5184,14 @@ window._switchToRD=function _switchToRD(){
   const trendBox=document.getElementById('rating-trend-modal-box');
   const rdOverlay=document.getElementById('rd-modal-overlay');
   const rdBox=document.getElementById('rd-modal-box');
-  const DUR=300;
-  // Slide trend box out to the left
+  const DUR=280;
   trendBox.style.animation=`slideToLeft ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
-  // Open RD overlay (invisible behind) then slide it in from right
   rdOverlay.style.background='transparent';
   rdOverlay.classList.add('open');
   rdOverlay.style.overflow='hidden';
+  const cv=document.getElementById('rd-decay-canvas');
+  if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
+  drawRDDecayChart({});
   rdBox.style.animation=`slideFromRight ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
   setTimeout(()=>{
     closeRatingTrendModal();
@@ -5216,19 +5199,18 @@ window._switchToRD=function _switchToRD(){
     rdOverlay.style.background='';
     rdOverlay.style.overflow='';
     rdBox.style.animation='';
-  },DUR);
+  },DUR+16);
 };
 window._switchToTrend=function _switchToTrend(){
   const rdBox=document.getElementById('rd-modal-box');
   const trendOverlay=document.getElementById('rating-trend-modal-overlay');
   const trendBox=document.getElementById('rating-trend-modal-box');
-  const DUR=300;
-  // Slide RD box out to the right
+  const DUR=280;
   rdBox.style.animation=`slideToRight ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
-  // Open trend overlay behind and slide it in from left
   trendOverlay.style.background='transparent';
   trendOverlay.classList.add('open');
   trendOverlay.style.overflow='hidden';
+  updateRatingTrendChart();
   trendBox.style.animation=`slideFromLeft ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
   setTimeout(()=>{
     closeRDModal();
@@ -5236,7 +5218,7 @@ window._switchToTrend=function _switchToTrend(){
     trendOverlay.style.background='';
     trendOverlay.style.overflow='';
     trendBox.style.animation='';
-  },DUR);
+  },DUR+16);
 }
 
 document.addEventListener('keydown',e=>{
