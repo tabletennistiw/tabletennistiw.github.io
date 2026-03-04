@@ -322,19 +322,15 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   z-index:9999;display:none;line-height:1.6;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.5);}
 
 /* RD DECAY MODAL */
-#rd-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;}
+#rd-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;overflow:hidden;}
 #rd-modal-overlay.open{display:flex;}
 @media(min-width:600px){#rd-modal-overlay.open{align-items:center;padding:1.25rem;}}
 #rd-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1200px;
   height:92vh;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
-@keyframes slideInLeft{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-48px)}}
-@keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(48px)}}
-#rd-modal-box.slide-in-left{animation:slideInLeft .28s cubic-bezier(.4,0,.2,1) forwards;}
-#rd-modal-box.slide-in-right{animation:slideInRight .28s cubic-bezier(.4,0,.2,1) forwards;}
-#rating-trend-modal-box.slide-in-left{animation:slideInLeft .28s cubic-bezier(.4,0,.2,1) forwards;}
-#rating-trend-modal-box.slide-in-right{animation:slideInRight .28s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes slideFromRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes slideFromLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+@keyframes slideToLeft{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@keyframes slideToRight{from{transform:translateX(0)}to{transform:translateX(100%)}}
 #rd-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);flex-wrap:wrap;}
 #rd-modal-header .rd-modal-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
 #rd-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
@@ -351,12 +347,12 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .chart-nav-btn:hover{color:var(--accent);background:rgba(0,0,0,.18);}
 .chart-nav-btn.nav-right{right:0;}
 .chart-nav-btn.nav-left{left:0;}
-.lb-rd-btn,.lb-rating-btn{background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;padding:.1rem .35rem;font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.04em;line-height:1.4;vertical-align:middle;transition:color .15s,border-color .15s,background .15s;margin-left:.35rem;}
+.lb-rd-btn,.lb-rating-btn{background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;padding:.1rem .35rem;font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.04em;line-height:1.4;vertical-align:middle;transition:color .15s,border-color .15s,background .15s;text-transform:uppercase;}
 .lb-rd-btn:hover,.lb-rating-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(229,178,93,.08);}
-#rating-trend-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;}
+#rating-trend-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;overflow:hidden;}
 #rating-trend-modal-overlay.open{display:flex;}
 @media(min-width:600px){#rating-trend-modal-overlay.open{align-items:center;padding:1.25rem;}}
-#rating-trend-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1400px;
+#rating-trend-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1200px;
   height:92vh;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
 #rating-trend-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;justify-content:space-between;background:var(--surface);}
 #rating-trend-modal-header .rating-trend-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
@@ -533,8 +529,8 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       <div class="lb-head-row">
         <span class="lb-h-rank">#</span>
         <span class="lb-h-player">Player</span>
-        <span class="lb-h-rating">Rating<button class="lb-rating-btn" onclick="openRatingTrendModal()" title="Rating Trends">TRENDS</button></span>
-        <span class="lb-h-rd">RD<button class="lb-rd-btn" onclick="openRDModal()" title="RD Decay Chart">CHART</button></span>
+        <span class="lb-h-rating"><button class="lb-rating-btn" onclick="openRatingTrendModal()" title="Rating Trends">Rating</button></span>
+        <span class="lb-h-rd"><button class="lb-rd-btn" onclick="openRDModal()" title="RD Decay Chart">RD</button></span>
         <span class="lb-h-wl">W–L</span>
       </div>
       <div id="lb-list" style="position:relative;width:100%"></div>
@@ -2985,10 +2981,11 @@ window.repairAllRatings=async function(){
       } else if(p.firestoreId===currentTop&&!no1Since){
         no1Since=now;
       }
-      const anchor=_rdAnchor(s.rd,s.rating);
+      // Use the anchor from replay state (rdBaseTime = last match timestamp) so live decay
+      // correctly continues from the last match forward, not reset to now.
       playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
         rating:s.rating,rd:s.rd,
-        rdBaseX:anchor.rdBaseX,rdBaseTime:anchor.rdBaseTime,
+        rdBaseX:s.rdBaseX,rdBaseTime:s.rdBaseTime,
         wins:s.wins,losses:s.losses,
         no1Since:p.firestoreId===currentTop?no1Since:null,
         longestNo1Ms
@@ -4944,6 +4941,21 @@ window.trendDeselectAll=function(){
   chart.update();
 };
 
+window.trendToggleAll=function(){
+  const chart=window._ratingTrendChart;
+  if(!chart)return;
+  const anyVisible=chart.data.datasets.some((_,i)=>!chart.getDatasetMeta(i).hidden);
+  if(anyVisible){
+    chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=true;});
+  } else {
+    chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=false;});
+  }
+  const btn=document.getElementById('trend-toggle-btn');
+  const nowAnyVisible=chart.data.datasets.some((_,i)=>!chart.getDatasetMeta(i).hidden);
+  if(btn) btn.textContent=nowAnyVisible?'None':'All';
+  chart.update();
+};
+
 // Generate a visually distinct color for each player by spreading hues evenly
 function _playerColor(idx,total){
   const hue=Math.round((idx/Math.max(total,1))*360);
@@ -5179,43 +5191,49 @@ window.updateRatingTrendChart=function(){
 };
 
 window._switchToRD=function _switchToRD(){
-  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const trendBox=document.getElementById('rating-trend-modal-box');
   const rdOverlay=document.getElementById('rd-modal-overlay');
   const rdBox=document.getElementById('rd-modal-box');
-  const trendBox=document.getElementById('rating-trend-modal-box');
-  // Open RD with transparent backdrop so it doesn't darken on top
+  const DUR=300;
+  // Slide trend box out to the left
+  trendBox.style.animation=`slideToLeft ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
+  // Open RD overlay (invisible behind) then slide it in from right
   rdOverlay.style.background='transparent';
-  openRDModal();
-  rdBox.style.cssText='opacity:0;transform:translateX(-60px);transition:none;';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    rdBox.style.cssText='opacity:1;transform:translateX(0);transition:opacity .25s ease-out,transform .25s ease-out;';
-    trendBox.style.cssText='opacity:0;transform:translateX(60px);transition:opacity .2s ease-in,transform .2s ease-in;';
-    setTimeout(()=>{
-      rdOverlay.style.background='';
-      rdBox.style.cssText='';
-      trendBox.style.cssText='';
-      closeRatingTrendModal();
-    },240);
-  }));
-}
+  rdOverlay.classList.add('open');
+  rdOverlay.style.overflow='hidden';
+  rdBox.style.animation=`slideFromRight ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
+  setTimeout(()=>{
+    closeRatingTrendModal();
+    trendBox.style.animation='';
+    rdOverlay.style.background='';
+    rdOverlay.style.overflow='';
+    rdBox.style.animation='';
+    // trigger chart draw now that modal is visible
+    drawRDDecayChart({});
+    const cv=document.getElementById('rd-decay-canvas');
+    if(cv&&!cv._hoverInit){_rdInitHover(cv);cv._hoverInit=true;}
+  },DUR);
+};
 window._switchToTrend=function _switchToTrend(){
-  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
   const rdBox=document.getElementById('rd-modal-box');
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
   const trendBox=document.getElementById('rating-trend-modal-box');
-  // Open trend with transparent backdrop
+  const DUR=300;
+  // Slide RD box out to the right
+  rdBox.style.animation=`slideToRight ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
+  // Open trend overlay behind and slide it in from left
   trendOverlay.style.background='transparent';
-  openRatingTrendModal();
-  trendBox.style.cssText='opacity:0;transform:translateX(60px);transition:none;';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    trendBox.style.cssText='opacity:1;transform:translateX(0);transition:opacity .25s ease-out,transform .25s ease-out;';
-    rdBox.style.cssText='opacity:0;transform:translateX(-60px);transition:opacity .2s ease-in,transform .2s ease-in;';
-    setTimeout(()=>{
-      trendOverlay.style.background='';
-      trendBox.style.cssText='';
-      rdBox.style.cssText='';
-      closeRDModal();
-    },240);
-  }));
+  trendOverlay.classList.add('open');
+  trendOverlay.style.overflow='hidden';
+  trendBox.style.animation=`slideFromLeft ${DUR}ms cubic-bezier(.4,0,.2,1) forwards`;
+  setTimeout(()=>{
+    closeRDModal();
+    rdBox.style.animation='';
+    trendOverlay.style.background='';
+    trendOverlay.style.overflow='';
+    trendBox.style.animation='';
+    updateRatingTrendChart();
+  },DUR);
 }
 
 document.addEventListener('keydown',e=>{
@@ -5269,8 +5287,11 @@ function drawRDDecayChart(hlPids){
   _rdPreloadAvatars();
   const pts = _rdBuildPts();
   const dpr = window.devicePixelRatio||1;
-  const W = cv.offsetWidth||cv.parentElement.offsetWidth||600;
-  const H = cv.offsetHeight||cv.parentElement.offsetHeight||400;
+  const scroller = document.getElementById('rd-canvas-scroll');
+  const visW = scroller ? scroller.clientWidth : (cv.parentElement.offsetWidth||600);
+  const H = scroller ? scroller.clientHeight : (cv.parentElement.offsetHeight||400);
+  // Stretch canvas so day 0–20 fills the visible width; full 60-day chart = 3× wider
+  const W = Math.round(visW * (60/20));
   cv.width = Math.round(W*dpr);
   cv.height = Math.round(H*dpr);
   cv.style.width = W+'px';
@@ -5357,9 +5378,15 @@ function _rdDraw(cv,pts,hl,dpr){
     ctx.setLineDash([4,4]); ctx.strokeStyle=ls+'cc'; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(vx,P.top); ctx.lineTo(vx,P.top+cH); ctx.stroke();
     ctx.setLineDash([]);
+    // Top label
     ctx.font='bold 8px DM Mono,monospace'; ctx.fillStyle=ls;
     ctx.textAlign='left'; ctx.textBaseline='top';
     ctx.fillText('PURGE', vx+4, P.top+4);
+    // X-axis label showing the day
+    const purgeDay=Math.round(x100/86400);
+    ctx.font='bold 9px DM Mono,monospace'; ctx.fillStyle=ls;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(`day ${purgeDay}`, vx, P.top+cH+9);
   }
 
   // Clip to plot area for curves and dots
@@ -5590,8 +5617,10 @@ function _rdAnimateOrDraw(prevMap){
       <button class="m-close" onclick="closeRDModal()">ESC</button>
     </div>
     <div id="rd-modal-body">
-      <canvas id="rd-decay-canvas"></canvas>
-      <button class="chart-nav-btn nav-left" onclick="_switchToTrend()" title="Rating Trends">‹</button>
+      <div id="rd-canvas-scroll" style="flex:1;overflow-x:auto;overflow-y:hidden;position:relative;min-width:0;">
+        <canvas id="rd-decay-canvas" style="display:block;height:100%;cursor:crosshair;"></canvas>
+      </div>
+      <button class="chart-nav-btn nav-left" onclick="_switchToTrend()" title="Rating Trends" style="position:absolute;left:.75rem;">‹</button>
     </div>
   </div>
 </div>
@@ -5603,8 +5632,7 @@ function _rdAnimateOrDraw(prevMap){
         <span class="rating-trend-modal-sub">All player rating trajectories</span>
       </div>
       <div style="display:flex;gap:.6rem;align-items:center;">
-        <button onclick="trendSelectAll()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">All</button>
-        <button onclick="trendDeselectAll()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">None</button>
+        <button id="trend-toggle-btn" onclick="trendToggleAll()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">All</button>
         <select id="trend-timeframe" onchange="updateRatingTrendChart()" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.35rem .5rem;font-family:'DM Mono',monospace;font-size:.65rem;cursor:pointer;">
           <option value="week">Last Week</option>
           <option value="month">Last Month</option>
