@@ -4885,38 +4885,46 @@ function _rdSecondsToTarget(rd0, rating, target){
 
 window.toggleRDDecay=function(){ openRDModal(); };
 
+function _prerenderBothCharts(){
+  // Pre-render RD chart (offscreen-safe — canvas is in the DOM even when overlay is hidden)
+  const cv=document.getElementById('rd-decay-canvas');
+  if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
+  drawRDDecayChart({});
+  // Pre-render trend chart — needs overlay visible to measure height,
+  // so briefly make it display:flex but invisible, render, then hide again
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const rdOverlay=document.getElementById('rd-modal-overlay');
+  const trendAlreadyOpen=trendOverlay.classList.contains('open');
+  const rdAlreadyOpen=rdOverlay.classList.contains('open');
+  if(!trendAlreadyOpen){
+    trendOverlay.style.visibility='hidden';
+    trendOverlay.classList.add('open');
+  }
+  if(!window._ratingTrendChart){
+    document.getElementById('trend-timeframe').value='month';
+    updateRatingTrendChart();
+  }
+  if(!trendAlreadyOpen){
+    trendOverlay.classList.remove('open');
+    trendOverlay.style.visibility='';
+  }
+}
+
 window.openRDModal=function(){
   const overlay=document.getElementById('rd-modal-overlay');
   if(!overlay)return;
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
   _rdChartDirty=false;
-  requestAnimationFrame(()=>{
-    const cv=document.getElementById('rd-decay-canvas');
-    if(cv&&!cv._hoverInit){ _rdInitHover(cv); cv._hoverInit=true; }
-    drawRDDecayChart({});
-  });
+  _prerenderBothCharts();
 };
-
-window.closeRDModal=function(){
-  const overlay=document.getElementById('rd-modal-overlay');
-  if(!overlay)return;
-  overlay.classList.remove('open');
-  document.body.style.overflow='';
-};
-window.addEventListener('resize',()=>{
-  const overlay=document.getElementById('rd-modal-overlay');
-  if(overlay&&overlay.classList.contains('open')) drawRDDecayChart({});
-});
 
 window.openRatingTrendModal=function(){
   const overlay=document.getElementById('rating-trend-modal-overlay');
   if(!overlay)return;
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
-  document.getElementById('trend-timeframe').value='month';
-  // setTimeout ensures we're past the layout/paint cycle so flex height is resolved
-  setTimeout(()=>updateRatingTrendChart(), 50);
+  _prerenderBothCharts();
 };
 
 window.closeRatingTrendModal=function(){
@@ -5208,10 +5216,6 @@ window._switchToRD=function _switchToRD(){
     rdOverlay.style.background='';
     rdOverlay.style.overflow='';
     rdBox.style.animation='';
-    // trigger chart draw now that modal is visible
-    drawRDDecayChart({});
-    const cv=document.getElementById('rd-decay-canvas');
-    if(cv&&!cv._hoverInit){_rdInitHover(cv);cv._hoverInit=true;}
   },DUR);
 };
 window._switchToTrend=function _switchToTrend(){
@@ -5232,7 +5236,6 @@ window._switchToTrend=function _switchToTrend(){
     trendOverlay.style.background='';
     trendOverlay.style.overflow='';
     trendBox.style.animation='';
-    updateRatingTrendChart();
   },DUR);
 }
 
