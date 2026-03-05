@@ -551,7 +551,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <button class="btn" id="add-player-btn" onclick="addPlayer()">Add Player</button>
           <div class="msg" id="player-msg"></div>
           <p style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:.65rem;line-height:1.7">
-            New players start at <span style="color:var(--accent)">1500</span> · RD <span style="color:var(--accent)">120</span> · σ <span style="color:var(--accent)">0.06</span>.<br>
+            New players start at <span style="color:var(--accent)">1500</span> · RD <span style="color:var(--accent)">120</span>.<br>
             Tap any player card to add a profile photo &amp; quote.
           </p>
         </div>
@@ -1028,6 +1028,23 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   </div>
 </div>
 
+<div class="am-overlay" id="edit-action-date-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="am-box">
+    <h2 style="font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;color:var(--admin)">Edit Action Date</h2>
+    <p style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Change the timestamp of this admin action. This affects where it appears in the replay timeline when <strong style="color:var(--text)">Repair All Ratings</strong> is run.</p>
+    <input type="hidden" id="edit-action-fid">
+    <div class="field">
+      <label>New Date &amp; Time</label>
+      <input type="datetime-local" id="edit-action-datetime">
+    </div>
+    <div style="display:flex;gap:.65rem">
+      <button class="btn-admin" onclick="submitEditActionDate()">Save Date</button>
+      <button class="btn-ghost" onclick="document.getElementById('edit-action-date-overlay').classList.remove('open')">Cancel</button>
+    </div>
+    <div class="msg" id="edit-action-date-msg" style="margin-top:.65rem"></div>
+  </div>
+</div>
+
 <script type="module">
 // ── FIREBASE ─────────────────────────────────────────────────────────────────
 const FIREBASE_CONFIG = {
@@ -1039,7 +1056,7 @@ const FIREBASE_CONFIG = {
   appId:"1:902138155809:web:0860c66b77d07746952460"
 };
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction,Timestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG);
 const db=getFirestore(app);
 
@@ -1172,6 +1189,8 @@ onSnapshot(query(collection(db,'players'),orderBy('rating','desc')),snap=>{
   const _prevRDMap=Object.fromEntries(players.map(p=>[p.firestoreId,{pid:p.firestoreId,name:p.name,rd:p.rd,inactive:_rdInactivePeriods(p),hidden:p.rd>100,immune:!!p.decayImmune}]));
   players=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
   renderLeaderboard();renderPlayersList();renderMatchSelects();updateDecayStatus();
+  // Re-render open profile so RD/rating stay in sync after a match or edit
+  if(curProfileId){const _pOv=document.getElementById('profile-overlay');if(_pOv&&_pOv.classList.contains('open')){const _lp=players.find(x=>x.firestoreId===curProfileId);if(_lp){const _psEl=document.getElementById('profile-stats');if(_psEl){const _lrd=getLiveRD(_lp);const _rdEl=_psEl.querySelector('.m-stat .m-stat-v[data-live-rd]');if(_rdEl){_rdEl.textContent='±'+r2(_lrd);}}}}}
   _rdAnimateOrDraw(_prevRDMap);
   if(isAdmin){renderAdminPanel();simPopulateDropdowns();populateRestoreSeasonDropdown();}
   _dataReady.players=true;_onDataReady();
@@ -1950,6 +1969,22 @@ function tickLiveRD(){
   });
 
   if(needsLbRender) renderLeaderboard();
+
+  // Profile modal — tick the RD value live every second while open
+  if(curProfileId){
+    const _pOv=document.getElementById('profile-overlay');
+    if(_pOv&&_pOv.classList.contains('open')){
+      const _lp=players.find(x=>x.firestoreId===curProfileId);
+      if(_lp){
+        const _lrd=getLiveRD(_lp);
+        const _rdEl=document.querySelector('#profile-stats [data-live-rd]');
+        if(_rdEl){
+          _rdEl.textContent='±'+r2(_lrd);
+          _rdEl.style.color=_lrd>100?'var(--loss)':_lrd>80?'var(--accent)':'';
+        }
+      }
+    }
+  }
 }
 setInterval(tickLiveRD,1000);
 
@@ -2697,11 +2732,12 @@ window.renderHistory=function(){
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':a.type==='snapshot'?'SNAPSHOT':'ADMIN ACTION';
+    const isoVal=ts.toISOString().slice(0,16);
     return`<div class="admin-action-row">
       <span class="admin-action-badge">${typeLabel}</span>
       <span class="admin-action-desc">${esc(a.description||'')}</span>
       <span class="admin-action-time">${ds} · ${ti}</span>
-      ${isAdmin?'<button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem;flex-shrink:0;margin-left:auto" onclick="deleteAdminAction(\''+a.firestoreId+'\')" >Delete</button>':''}
+      ${isAdmin?`<span style="display:inline-flex;gap:.3rem;margin-left:auto;flex-shrink:0"><button class="btn-admin" style="font-size:.5rem;padding:.2rem .5rem" onclick="openEditActionDate('${a.firestoreId}','${isoVal}')">Edit Date</button><button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button></span>`:''}
     </div>`;
   }).join('');
 };
@@ -2730,15 +2766,37 @@ function renderAdminActionsLog(){
     const ts=a.date?.toDate?a.date.toDate():new Date(a.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':a.type==='snapshot'?'★ SNAPSHOT':'★ ADMIN';
+    const isoVal2=ts.toISOString().slice(0,16);
     return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04)">
       <div class="admin-minfo">
         <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}<br>
         <span style="font-size:.58rem">${ds}</span>
       </div>
-      <button class="btn-danger" style="font-size:.54rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button>
+      <span style="display:inline-flex;gap:.4rem;flex-shrink:0"><button class="btn-admin" style="font-size:.54rem" onclick="openEditActionDate('${a.firestoreId}','${isoVal2}')">Edit Date</button><button class="btn-danger" style="font-size:.54rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button></span>
     </div>`;
   }).join('');
 }
+
+window.openEditActionDate=function(fid,isoVal){
+  document.getElementById('edit-action-fid').value=fid;
+  document.getElementById('edit-action-datetime').value=isoVal;
+  document.getElementById('edit-action-date-msg').style.display='none';
+  document.getElementById('edit-action-date-overlay').classList.add('open');
+};
+
+window.submitEditActionDate=async function(){
+  const fid=document.getElementById('edit-action-fid').value;
+  const val=document.getElementById('edit-action-datetime').value;
+  const msg=document.getElementById('edit-action-date-msg');
+  if(!fid||!val){msg.textContent='Missing date.';msg.className='msg err';msg.style.display='block';return;}
+  const newDate=new Date(val);
+  if(isNaN(newDate.getTime())){msg.textContent='Invalid date.';msg.className='msg err';msg.style.display='block';return;}
+  try{
+    await updateDoc(doc(db,'adminActions',fid),{date:Timestamp.fromDate(newDate)});
+    msg.textContent='Date updated.';msg.className='msg';msg.style.display='block';
+    setTimeout(()=>document.getElementById('edit-action-date-overlay').classList.remove('open'),900);
+  }catch(e){msg.textContent='Error: '+e.message;msg.className='msg err';msg.style.display='block';}
+};
 
 window.deleteAdminAction=async function(fid){
   if(!confirm('Delete this admin action from the log? It will no longer be replayed during Repair All Ratings.'))return;
@@ -2753,78 +2811,172 @@ window.adminRemovePlayer=async function(fid,name){
 };
 
 window.adminRemoveMatch=async function(fid){
-  if(!confirm('Delete this match and recalculate all affected ratings?'))return;
+  if(!confirm('Delete this match and recalculate all ratings from the last snapshot?'))return;
   try{
+    // 1. Delete the match first
+    await deleteDoc(doc(db,'matches',fid));
+
+    // 2. Run the exact same repair engine as repairAllRatings so results are always identical
     const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
     const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-    const deletedIdx=allMatches.findIndex(m=>m.firestoreId===fid);
-    if(deletedIdx===-1){alert('Match not found.');return;}
-    const deletedMatch=allMatches[deletedIdx];
-    await deleteDoc(doc(db,'matches',fid));
-    const matchesBefore=allMatches.slice(0,deletedIdx);
-    const matchesAfter=allMatches.slice(deletedIdx+1);
+    const actionsSnap=await getDocs(query(collection(db,'adminActions'),orderBy('date','asc')));
+    const allAdminActions=actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    const now=Date.now();
 
-    const pid1=deletedMatch.p1id, pid2=deletedMatch.p2id;
-    const s1=playerStateFromHistory(matchesBefore,pid1);
-    const s2=playerStateFromHistory(matchesBefore,pid2);
+    // Find most recent snapshot
+    let snapshotCutoffTs=0, snapshotState=null;
+    for(let i=allAdminActions.length-1;i>=0;i--){
+      const a=allAdminActions[i];
+      if(a.type==='snapshot'){
+        snapshotCutoffTs=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+        snapshotState=a.data?.players||{};
+        break;
+      }
+    }
 
-    const _writePlayer=(pid,s)=>{
-      const a=_rdAnchor(s.rd,s.rating);
-      return updateDoc(doc(db,'players',pid),{
-        rating:s.rating,rd:s.rd,wins:s.wins,losses:s.losses,
-        rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime
-      });
+    // Build state — same logic as repairAllRatings
+    const state={};
+    const no1State={};
+    const _stateAnchor=(pid,rd,rating,ts)=>{
+      const a=_rdAnchor(rd,rating);
+      state[pid].rdBaseX=a.rdBaseX;
+      state[pid].rdBaseTime=ts;
+    };
+    const _stateLiveRD=(pid,ts)=>{
+      const s=state[pid];
+      if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,(s.rd!=null?s.rd:120)));
+      const elapsedSec=(ts-s.rdBaseTime)/1000;
+      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*_rdRatingScale(s.rating||1500);
+      const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
+      return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
     };
 
-    if(matchesAfter.length===0){
-      await Promise.all([_writePlayer(pid1,s1),_writePlayer(pid2,s2)]);
-      alert('Match deleted. Ratings rewound to previous state.');
-      return;
-    }
-
-    const pmap={[pid1]:{...s1,firestoreId:pid1},[pid2]:{...s2,firestoreId:pid2}};
-    const matchUpdates=[];
-    const playerUpdates={};
-
-    for(const m of matchesAfter){
-      const involvesP1=m.p1id===pid1||m.p2id===pid1;
-      const involvesP2=m.p1id===pid2||m.p2id===pid2;
-      if(!involvesP1&&!involvesP2)continue;
-
-      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
-      const ourId=involvesP1?pid1:pid2;
-      const ourState=pmap[ourId];
-      const isWinner=(m.p1id===ourId);
-      const oppRating=isWinner?m.p2oldRating:m.p1oldRating;
-      const oppRD=isWinner?(m.p2newRD??120):(m.p1newRD??120);
-
-      const newState=g2Update({rating:ourState.rating,rd:ourState.rd},[{rating:oppRating,rd:oppRD,s:isWinner?1:0}],ts);
-      const oldRating=ourState.rating;
-      const delta=Math.round((newState.rating-oldRating)*10)/10;
-
-      pmap[ourId].rating=newState.rating;
-      pmap[ourId].rd=newState.rd;
-      if(isWinner)pmap[ourId].wins=(pmap[ourId].wins||0)+1;
-      else pmap[ourId].losses=(pmap[ourId].losses||0)+1;
-
-      if(m.p1id===ourId){
-        matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
-          p1delta:delta,p1oldRating:oldRating,p1newRating:newState.rating,p1newRD:newState.rd
-        }));
-      } else {
-        matchUpdates.push(updateDoc(doc(db,'matches',m.firestoreId),{
-          p2delta:delta,p2oldRating:oldRating,p2newRating:newState.rating,p2newRD:newState.rd
-        }));
+    if(snapshotState){
+      for(const[pid,s]of Object.entries(snapshotState)){
+        const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
+        const a=_rdAnchor(rd,s.rating??1500);
+        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:snapshotCutoffTs||now};
+        no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
       }
-      playerUpdates[ourId]=pmap[ourId];
+    }
+    const initPlayer=(pid,ts)=>{
+      if(!state[pid]){
+        const liveP=players.find(x=>x.firestoreId===pid);
+        const rd=120,rating=1500;
+        const a=_rdAnchor(rd,rating);
+        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:ts||now};
+      }
+      if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
+    };
+
+    const events=[];
+    allMatches.forEach(m=>{
+      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
+      if(ts<=snapshotCutoffTs)return;
+      events.push({_type:'match',_ts:ts,data:m});
+    });
+    allAdminActions.forEach(a=>{
+      const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+      if(ts<=snapshotCutoffTs)return;
+      events.push({_type:'admin',_ts:ts,data:a});
+    });
+    events.sort((a,b)=>a._ts-b._ts);
+
+    const matchWrites=[];
+    const getTop=(ts)=>{
+      let top=null,topR=-Infinity;
+      for(const[pid,s]of Object.entries(state)){
+        const lrd=_stateLiveRD(pid,ts);
+        if(lrd<=100&&s.rating>topR){topR=s.rating;top=pid;}
+      }
+      return top;
+    };
+
+    for(const evt of events){
+      if(evt._type==='admin'){
+        const a=evt.data;
+        if(a.type==='snapshot'){
+          const snappedPlayers=a.data?.players||{};
+          for(const pid of Object.keys(state))delete state[pid];
+          for(const pid of Object.keys(no1State))delete no1State[pid];
+          for(const[pid,s]of Object.entries(snappedPlayers)){
+            const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
+            const a2=_rdAnchor(rd,s.rating??1500);
+            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:evt._ts};
+            no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
+          }
+        } else if(a.type==='stat_edit'){
+          const pid=a.data?.playerId;
+          if(!pid)continue;
+          initPlayer(pid,evt._ts);
+          const after=a.data?.after||{};
+          if(after.rating!=null)state[pid].rating=after.rating;
+          if(after.rd!=null){state[pid].rd=after.rd;_stateAnchor(pid,after.rd,state[pid].rating,evt._ts);}
+          if(after.wins!=null)state[pid].wins=after.wins;
+          if(after.losses!=null)state[pid].losses=after.losses;
+          if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
+        }
+        continue;
+      }
+      const m=evt.data;
+      const pid1=m.p1id,pid2=m.p2id;
+      initPlayer(pid1,evt._ts);initPlayer(pid2,evt._ts);
+      const s1=state[pid1],s2=state[pid2];
+      const rd1=_stateLiveRD(pid1,evt._ts);
+      const rd2=_stateLiveRD(pid2,evt._ts);
+      const topBefore=getTop(evt._ts);
+      const u1=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
+      const u2=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
+      const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
+      const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
+      matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
+        p1oldRating:s1.rating,p1newRating:u1.rating,p1oldRD:rd1,p1newRD:u1.rd,p1delta,
+        p2oldRating:s2.rating,p2newRating:u2.rating,p2oldRD:rd2,p2newRD:u2.rd,p2delta,
+      }));
+      state[pid1].rating=u1.rating;state[pid1].rd=u1.rd;state[pid1].wins=s1.wins+1;
+      state[pid2].rating=u2.rating;state[pid2].rd=u2.rd;state[pid2].losses=s2.losses+1;
+      _stateAnchor(pid1,u1.rd,u1.rating,evt._ts);
+      _stateAnchor(pid2,u2.rd,u2.rating,evt._ts);
+      const topAfter=getTop(evt._ts);
+      if(topBefore!==topAfter){
+        if(topBefore&&no1State[topBefore]?.no1Since!=null){
+          const dur=evt._ts-no1State[topBefore].no1Since;
+          if(dur>no1State[topBefore].longestNo1Ms)no1State[topBefore].longestNo1Ms=dur;
+          no1State[topBefore].no1Since=null;
+        }
+        if(topAfter){
+          if(!no1State[topAfter])no1State[topAfter]={no1Since:null,longestNo1Ms:0};
+          if(no1State[topAfter].no1Since==null)no1State[topAfter].no1Since=evt._ts;
+        }
+      }
     }
 
-    const writes=Object.values(playerUpdates).map(p=>_writePlayer(p.firestoreId,p));
-    if(!playerUpdates[pid1])writes.push(_writePlayer(pid1,s1));
-    if(!playerUpdates[pid2])writes.push(_writePlayer(pid2,s2));
+    await Promise.all(matchWrites);
 
-    await Promise.all([...writes,...matchUpdates]);
-    alert('Match deleted and ratings recalculated from that point forward.');
+    const playerWrites=[];
+    const currentTop=getTop(now);
+    for(const p of players){
+      const s=state[p.firestoreId];
+      if(!s)continue;
+      const n1=no1State[p.firestoreId];
+      let longestNo1Ms=n1?.longestNo1Ms||0;
+      let no1Since=n1?.no1Since??null;
+      if(n1?.no1Since!=null&&p.firestoreId===currentTop){
+        const dur=now-n1.no1Since;
+        if(dur>longestNo1Ms)longestNo1Ms=dur;
+      } else if(p.firestoreId===currentTop&&!no1Since){
+        no1Since=now;
+      }
+      playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
+        rating:s.rating,rd:s.rd,
+        rdBaseX:s.rdBaseX,rdBaseTime:s.rdBaseTime,
+        wins:s.wins,losses:s.losses,
+        no1Since:p.firestoreId===currentTop?no1Since:null,
+        longestNo1Ms
+      }));
+    }
+    await Promise.all(playerWrites);
+    alert('Match deleted and all ratings recalculated from last snapshot.');
   }catch(e){alert('Error: '+e.message);console.error(e);}
 };
 
@@ -2862,7 +3014,7 @@ window.repairAllRatings=async function(){
     };
     const _stateLiveRD=(pid,ts)=>{
       const s=state[pid];
-      if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,s.rd||120));
+      if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,(s.rd!=null?s.rd:120)));
       const elapsedSec=(ts-s.rdBaseTime)/1000;
       const xNow=s.rdBaseX+Math.max(0,elapsedSec)*_rdRatingScale(s.rating||1500);
       const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
@@ -3236,7 +3388,7 @@ window.openProfile=async function(fid){
       :fmtDur(_record||la)+"<span class=\"no1-timer\" style=\"visibility:hidden;pointer-events:none\">\xf0\x9f\x91\x91 0s</span>";
     document.getElementById('profile-stats').innerHTML=`
     <div class="m-stat"><span class="m-stat-l">Rating</span><span class="m-stat-v">${r2(liveP.rating)}</span></div>
-    <div class="m-stat"><span class="m-stat-l">RD</span><span class="m-stat-v neutral">±${r2(getLiveRD(liveP))}</span></div>
+    <div class="m-stat"><span class="m-stat-l">RD</span><span class="m-stat-v neutral" data-live-rd>±${r2(getLiveRD(liveP))}</span></div>
     <div class="m-stat"><span class="m-stat-l">Record</span><span class="m-stat-v neutral">${liveP.wins}W–${liveP.losses}L</span></div>
     <div class="m-stat"><span class="m-stat-l">Win%</span><span class="m-stat-v ${wc}">${wr}%</span></div>
     <div class="m-stat"><span class="m-stat-l">Best Streak</span><span class="m-stat-v neutral" style="display:inline-flex;align-items:center;gap:.3rem">${ls>0?ls+'W':'—'}${cs>0?`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:${cs>=5?'var(--win)':'var(--accent)'};border:1px solid ${cs>=5?'var(--win)':'var(--accent)'};padding:.1rem .3rem;line-height:1">${cs}W</span>`:''}</span></div>
@@ -3344,7 +3496,7 @@ window.saveQuoteModal=async function(){
 };
 
 window.closeProfile=function(e){if(e.target===document.getElementById('profile-overlay'))document.getElementById('profile-overlay').classList.remove('open');};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay','admin-login-overlay','admin-edit-overlay','crop-overlay'].forEach(id=>document.getElementById(id).classList.remove('open'));}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){['profile-overlay','admin-login-overlay','admin-edit-overlay','crop-overlay','edit-action-date-overlay'].forEach(id=>document.getElementById(id).classList.remove('open'));}});
 
 // ── CHART ────────────────────────────────────────────────────────────────────
 function drawChart(points){
@@ -4826,9 +4978,9 @@ function _rdBaseTimeMs(t){
   return Number(t) || Date.now();
 }
 function _computeRDLive(p){
-  if(p.rdBaseX == null) return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, p.rd || 120));
+  if(p.rdBaseX == null) return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, (p.rd != null ? p.rd : 120)));
   const elapsedSec = (Date.now() - _rdBaseTimeMs(p.rdBaseTime)) / 1000;
-  const xNow = p.rdBaseX + elapsedSec * _rdRatingScale(p.rating);
+  const xNow = p.rdBaseX + Math.max(0, elapsedSec) * _rdRatingScale(p.rating);
   const rd = -_RD_NUMERATOR / (xNow + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
   return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, rd));
 }
