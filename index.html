@@ -1688,6 +1688,24 @@ function renderLeaderboard(){
     if(_lbEls[p.firestoreId]) _lbUpdateRank(_lbEls[p.firestoreId],i);
   });
 
+  // Sync #1 crown on staying rows (isNo1 dataset never updated in diff path)
+  vis.forEach((p,i)=>{
+    const el=_lbEls[p.firestoreId];
+    if(!el||!staying.includes(p.firestoreId))return;
+    const wasNo1=el.dataset.isNo1==='1';
+    const isNo1=i===0;
+    if(wasNo1===isNo1)return;
+    el.dataset.isNo1=isNo1?'1':'0';
+    const pname=el.querySelector('.pname-cell');
+    if(!pname)return;
+    const existing=pname.querySelector('.no1-timer');
+    if(isNo1&&!existing){
+      pname.insertAdjacentHTML('beforeend',`<span class="no1-timer" data-since="${p.no1Since||Date.now()}">👑 0s</span>`);
+    }else if(!isNo1&&existing){
+      existing.remove();
+    }
+  });
+
   // Exit animations
   exiting.forEach(id=>{
     const el=_lbEls[id];
@@ -2579,8 +2597,8 @@ window.submitMatch=async function(){
       const topAfter=simP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
 
       // Anchor the asymptotic RD curve at the post-match RD value, now.
-      _wAnchor=_rdAnchor(uw.rd,uw.rating);
-      _lAnchor=_rdAnchor(ul.rd,ul.rating);
+      _wAnchor=_rdAnchor(uw.rd,uw.rating,now);
+      _lAnchor=_rdAnchor(ul.rd,ul.rating,now);
       const wUpdate={rating:uw.rating,rd:uw.rd,wins:w.wins+1,rdBaseX:_wAnchor.rdBaseX,rdBaseTime:_wAnchor.rdBaseTime};
       const lUpdate={rating:ul.rating,rd:ul.rd,losses:l.losses+1,rdBaseX:_lAnchor.rdBaseX,rdBaseTime:_lAnchor.rdBaseTime};
 
@@ -2733,11 +2751,13 @@ window.renderHistory=function(){
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':a.type==='snapshot'?'SNAPSHOT':'ADMIN ACTION';
     const isoVal=ts.toISOString().slice(0,16);
-    return`<div class="admin-action-row">
-      <span class="admin-action-badge">${typeLabel}</span>
-      <span class="admin-action-desc">${esc(a.description||'')}</span>
-      <span class="admin-action-time">${ds} · ${ti}</span>
-      ${isAdmin?`<span style="display:inline-flex;gap:.3rem;margin-left:auto;flex-shrink:0"><button class="btn-admin" style="font-size:.5rem;padding:.2rem .5rem" onclick="openEditActionDate('${a.firestoreId}','${isoVal}')">Edit Date</button><button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button></span>`:''}
+    const snapPlayers=a.type==='snapshot'&&a.data?.players?Object.values(a.data.players).sort((x,y)=>y.rating-x.rating):'';
+    const snapDropdown=snapPlayers?`<details style="margin-top:.4rem;width:100%"><summary style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.3rem">▶ ${snapPlayers.length} players</summary><div style="margin-top:.4rem;display:flex;flex-direction:column;gap:.18rem">${snapPlayers.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--text);display:flex;gap:.5rem"><span style="color:var(--accent);min-width:3.5rem">${Math.round(p.rating)}</span><span style="color:var(--muted);min-width:3rem">±${Math.round(p.rd)} RD</span><span>${esc(p.name)}</span><span style="color:var(--muted)">${p.wins}W–${p.losses}L</span></span>`).join('')}</div></details>`:'';
+    return`<div class="admin-action-row" style="flex-wrap:wrap">
+      <span class="admin-action-badge" style="align-self:flex-start">${typeLabel}</span>
+      <span class="admin-action-desc" style="flex:1;min-width:0">${esc(a.description||'')}${snapDropdown}</span>
+      <span class="admin-action-time" style="align-self:flex-start">${ds} · ${ti}</span>
+      ${isAdmin?`<span style="display:inline-flex;gap:.3rem;flex-shrink:0;align-self:flex-start"><button class="btn-admin" style="font-size:.5rem;padding:.2rem .5rem" onclick="openEditActionDate('${a.firestoreId}','${isoVal}')">Edit Date</button><button class="btn-danger" style="font-size:.5rem;padding:.2rem .5rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button></span>`:''}
     </div>`;
   }).join('');
 };
@@ -2767,9 +2787,11 @@ function renderAdminActionsLog(){
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':a.type==='snapshot'?'★ SNAPSHOT':'★ ADMIN';
     const isoVal2=ts.toISOString().slice(0,16);
-    return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04)">
-      <div class="admin-minfo">
-        <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}<br>
+    const snapP2=a.type==='snapshot'&&a.data?.players?Object.values(a.data.players).sort((x,y)=>y.rating-x.rating):null;
+    const snapDrop2=snapP2?`<details style="margin-top:.35rem"><summary style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.3rem">▶ ${snapP2.length} players</summary><div style="margin-top:.35rem;display:flex;flex-direction:column;gap:.18rem">${snapP2.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.58rem;display:flex;gap:.5rem"><span style="color:var(--accent);min-width:3.5rem">${Math.round(p.rating)}</span><span style="color:var(--muted);min-width:3rem">±${Math.round(p.rd)} RD</span><span style="color:var(--text)">${esc(p.name)}</span><span style="color:var(--muted)">${p.wins}W–${p.losses}L</span></span>`).join('')}</div></details>`:'';
+    return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04);flex-wrap:wrap;align-items:flex-start">
+      <div class="admin-minfo" style="flex:1;min-width:0">
+        <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}${snapDrop2}<br>
         <span style="font-size:.58rem">${ds}</span>
       </div>
       <span style="display:inline-flex;gap:.4rem;flex-shrink:0"><button class="btn-admin" style="font-size:.54rem" onclick="openEditActionDate('${a.firestoreId}','${isoVal2}')">Edit Date</button><button class="btn-danger" style="font-size:.54rem" onclick="deleteAdminAction('${a.firestoreId}')">Delete</button></span>
@@ -2837,6 +2859,18 @@ window.adminRemoveMatch=async function(fid){
     // Build state — same logic as repairAllRatings
     const state={};
     const no1State={};
+
+    // Find multiplier active at snapshot cutoff (last decay_scale_change at or before it)
+    let replayMult=DECAY_SCALE_MULTIPLIER;
+    {
+      let bestTs=-Infinity;
+      for(const a of allAdminActions){
+        if(a.type!=='decay_scale_change')continue;
+        const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+        if(ts<=snapshotCutoffTs&&ts>bestTs){bestTs=ts;replayMult=a.data?.newMult??replayMult;}
+      }
+    }
+
     const _stateAnchor=(pid,rd,rating,ts)=>{
       const a=_rdAnchor(rd,rating);
       state[pid].rdBaseX=a.rdBaseX;
@@ -2846,7 +2880,9 @@ window.adminRemoveMatch=async function(fid){
       const s=state[pid];
       if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,(s.rd!=null?s.rd:120)));
       const elapsedSec=(ts-s.rdBaseTime)/1000;
-      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*_rdRatingScale(s.rating||1500);
+      const m=replayMult;
+      const scale=(m&&m>0)?Math.pow(1500/Math.max(1,s.rating||1500),m):1;
+      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*scale;
       const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
       return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
     };
@@ -2915,6 +2951,8 @@ window.adminRemoveMatch=async function(fid){
           if(after.wins!=null)state[pid].wins=after.wins;
           if(after.losses!=null)state[pid].losses=after.losses;
           if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
+        } else if(a.type==='decay_scale_change'){
+          if(a.data?.newMult!=null) replayMult=a.data.newMult;
         }
         continue;
       }
@@ -3007,6 +3045,18 @@ window.repairAllRatings=async function(){
     // Build state from snapshot or from scratch
     const state={};
     const no1State={};
+
+    // Find multiplier active at snapshot cutoff (last decay_scale_change at or before it)
+    let replayMult=DECAY_SCALE_MULTIPLIER;
+    {
+      let bestTs=-Infinity;
+      for(const a of allAdminActions){
+        if(a.type!=='decay_scale_change')continue;
+        const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
+        if(ts<=snapshotCutoffTs&&ts>bestTs){bestTs=ts;replayMult=a.data?.newMult??replayMult;}
+      }
+    }
+
     const _stateAnchor=(pid,rd,rating,ts)=>{
       const a=_rdAnchor(rd,rating);
       state[pid].rdBaseX=a.rdBaseX;
@@ -3016,7 +3066,9 @@ window.repairAllRatings=async function(){
       const s=state[pid];
       if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,(s.rd!=null?s.rd:120)));
       const elapsedSec=(ts-s.rdBaseTime)/1000;
-      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*_rdRatingScale(s.rating||1500);
+      const m=replayMult;
+      const scale=(m&&m>0)?Math.pow(1500/Math.max(1,s.rating||1500),m):1;
+      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*scale;
       const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
       return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
     };
@@ -3065,9 +3117,9 @@ window.repairAllRatings=async function(){
     for(const evt of events){
       if(evt._type==='admin'){
         const a=evt.data;
-        // decay_change and decay_scale_change are no-ops in replay:
-        // DECAY_SCALE_MULTIPLIER is a real-time formula parameter, not baked into stored RD.
-        if(a.type==='snapshot'){
+        if(a.type==='decay_scale_change'){
+          if(a.data?.newMult!=null) replayMult=a.data.newMult;
+        } else if(a.type==='snapshot'){
           const snappedPlayers=a.data?.players||{};
           for(const pid of Object.keys(state))delete state[pid];
           for(const pid of Object.keys(no1State))delete no1State[pid];
@@ -3165,7 +3217,6 @@ window.repairAllRatings=async function(){
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
-    DECAY_SCALE_MULTIPLIER=parseFloat(document.getElementById('decay-scale-mult')?.value)||0;
     if(btn){btn.disabled=false;btn.textContent='🔧 Repair All Ratings From Match History';}
   }
 };
@@ -4532,8 +4583,7 @@ window.takeSnapshot=async function(){
       players:playerData
     });
     // Also log as admin action so replay picks it up
-    const _snapSum=Object.values(playerData).sort((a,b)=>b.rating-a.rating).map(p=>`${p.name}: ${Math.round(p.rating)} (RD ${Math.round(p.rd)}, ${p.wins}W–${p.losses}L)`).join(' · ');
-    await logAdminAction('snapshot',`Snapshot "${label}" — ${Object.keys(playerData).length} player(s): ${_snapSum}`,{snapshotId:snapRef.id,players:playerData});
+    await logAdminAction('snapshot',`Snapshot "${label}"`,{snapshotId:snapRef.id,players:playerData});
     document.getElementById('snapshot-label-input').value='';
     showMsg('snapshot-msg','Snapshot saved: "'+label+'"');
     renderSnapshotList();
@@ -4996,10 +5046,11 @@ function _rdToX(rd){
 
 // Compute rdBaseX for a player at their current rd, anchored to now.
 // This is stored in Firestore so _computeRDLive can track continuous decay from that point.
-function _rdAnchor(rd, rating){
+function _rdAnchor(rd, rating, ts){
   // rdBaseX is the curve position at the time of the anchor.
   // We use _rdToX(rd) which gives the x where the asymptotic curve equals rd.
-  return { rdBaseX: _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, rd))), rdBaseTime: Date.now() };
+  // ts should be the match/event timestamp so live and repair paths agree exactly.
+  return { rdBaseX: _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, rd))), rdBaseTime: ts||Date.now() };
 }
 
 // Build chart points using live RD computation
