@@ -1909,10 +1909,11 @@ function tickNo1Timers(){
     else if(m>0)label=m+'m '+s+'s';
     else label=s+'s';
     el.textContent='👑 '+label;
-    // Always sync the main span with the live timer when it exists next to the tag
+    // Only sync the main span when the live stint has become the new record
     const main=el.previousElementSibling;
     if(main&&main.classList.contains('no1-record-main')){
-      main.textContent=label;
+      const record=parseInt(el.dataset.record)||0;
+      if(ms>record) main.textContent=label;
     }
   });
 }
@@ -2997,13 +2998,19 @@ window.adminRemoveMatch=async function(fid){
       const s=state[p.firestoreId];
       if(!s)continue;
       const n1=no1State[p.firestoreId];
-      let longestNo1Ms=n1?.longestNo1Ms||0;
+      // Always take the best known longestNo1Ms: max of replay state vs live Firestore
+      let longestNo1Ms=Math.max(n1?.longestNo1Ms||0, p.longestNo1Ms||0);
       let no1Since=n1?.no1Since??null;
       if(n1?.no1Since!=null&&p.firestoreId===currentTop){
         const dur=now-n1.no1Since;
         if(dur>longestNo1Ms)longestNo1Ms=dur;
       } else if(p.firestoreId===currentTop&&!no1Since){
-        no1Since=now;
+        // Replay lost the no1Since anchor (snapshot predated tracking) —
+        // rescue it from live Firestore rather than resetting to now
+        no1Since=p.no1Since||now;
+        // Compute duration from rescued anchor and fold it into longestNo1Ms
+        const dur=now-no1Since;
+        if(dur>longestNo1Ms)longestNo1Ms=dur;
       }
       playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
         rating:s.rating,rd:s.rd,
@@ -3193,13 +3200,19 @@ window.repairAllRatings=async function(){
       const s=state[p.firestoreId];
       if(!s)continue;
       const n1=no1State[p.firestoreId];
-      let longestNo1Ms=n1?.longestNo1Ms||0;
+      // Always take the best known longestNo1Ms: max of replay state vs live Firestore
+      let longestNo1Ms=Math.max(n1?.longestNo1Ms||0, p.longestNo1Ms||0);
       let no1Since=n1?.no1Since??null;
       if(n1?.no1Since!=null&&p.firestoreId===currentTop){
         const dur=now-n1.no1Since;
         if(dur>longestNo1Ms)longestNo1Ms=dur;
       } else if(p.firestoreId===currentTop&&!no1Since){
-        no1Since=now;
+        // Replay lost the no1Since anchor (snapshot predated tracking) —
+        // rescue it from live Firestore rather than resetting to now
+        no1Since=p.no1Since||now;
+        // Compute duration from rescued anchor and fold it into longestNo1Ms
+        const dur=now-no1Since;
+        if(dur>longestNo1Ms)longestNo1Ms=dur;
       }
       // Use the anchor from replay state (rdBaseTime = last match timestamp) so live decay
       // correctly continues from the last match forward, not reset to now.
@@ -3435,7 +3448,7 @@ window.openProfile=async function(fid){
     var _no1Prefix=_record?fmtDur(_record)+String.fromCharCode(32):"";
     var _no1Attr=_record?" data-record=\""+_record+"\"":"";
     var no1Html=isTop
-      ?"<span class=\"no1-record-main\">"+fmtDur(_liveMs||0)+"</span> <span class=\"no1-timer counting\" data-since=\""+_no1Since+"\" data-record=\""+(String(_record||la||0))+"\">👑 —</span>"
+      ?"<span class=\"no1-record-main\">"+fmtDur(Math.max(_record,_liveMs)||0)+"</span> <span class=\"no1-timer counting\" data-since=\""+_no1Since+"\" data-record=\""+(String(_record||la||0))+"\">👑 —</span>"
       :fmtDur(_record||la)+"<span class=\"no1-timer\" style=\"visibility:hidden;pointer-events:none\">\xf0\x9f\x91\x91 0s</span>";
     document.getElementById('profile-stats').innerHTML=`
     <div class="m-stat"><span class="m-stat-l">Rating</span><span class="m-stat-v">${r2(liveP.rating)}</span></div>
