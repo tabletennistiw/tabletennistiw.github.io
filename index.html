@@ -1056,7 +1056,7 @@ const FIREBASE_CONFIG = {
   appId:"1:902138155809:web:0860c66b77d07746952460"
 };
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction,Timestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction,writeBatch,Timestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG);
 const db=getFirestore(app);
 
@@ -1934,22 +1934,18 @@ function tickLiveRD(){
   _rdTickCount++;
   let needsLbRender=false;
   const lbVisible=document.getElementById('panel-leaderboard')?.classList.contains('active');
-  const playersVisible=document.getElementById('panel-players')?.classList.contains('active');
 
   players.forEach(p=>{
-    // Don't skip players with no rdBaseX — _computeRDLive handles that gracefully (returns p.rd).
-    // Skipping them means _rdWasHidden is never set, so needsLbRender never fires after a match
-    // drops their RD below 100 for the first time.
     const liveRd=_computeRDLive(p);
     const isHidden=liveRd>100;
     const wasHidden=_rdWasHidden[p.firestoreId];
-    if(isHidden&&wasHidden===false) needsLbRender=true;  // player just left leaderboard
-    if(!isHidden&&(wasHidden===true||wasHidden===undefined)) needsLbRender=true;  // player joined (or first tick while visible)
+    if(isHidden&&wasHidden===false) needsLbRender=true;   // leaving: RD decayed above 100
+    if(!isHidden&&wasHidden===true) needsLbRender=true;   // joining: catches admin edits etc
     _rdWasHidden[p.firestoreId]=isHidden;
 
     const rdStr='±'+r2(liveRd);
 
-    // Leaderboard RD — update every second (needed to catch players falling off)
+    // Leaderboard RD column — update every second to catch players falling off
     if(lbVisible){
       let rdv=_rdLbRdValCache[p.firestoreId];
       if(!rdv){
@@ -1960,31 +1956,27 @@ function tickLiveRD(){
       if(rdv){ rdv.textContent=rdStr; rdv.style.color=liveRd>=95?'var(--loss)':''; }
     }
 
-    // Player cards — update every second when panel is visible, same as leaderboard
-    if(playersVisible){
-      document.querySelectorAll(`.player-card[data-id="${p.firestoreId}"]`).forEach(card=>{
-        // Update the RD value span
-        card.querySelectorAll('[data-rd-val]').forEach(val=>{
-          val.textContent=rdStr;
-          val.style.color=liveRd>100?'var(--loss)':liveRd>80?'var(--accent)':'var(--win)';
-        });
-        // Sync the HIDDEN tag in the card header
-        const nameBlock=card.querySelector('.pc-name-block');
-        if(nameBlock){
-          const existing=nameBlock.querySelector('.pc-tag:not([style*="admin"])');
-          if(liveRd>100){
-            if(!existing){
-              const tag=document.createElement('span');
-              tag.className='pc-tag';
-              tag.textContent='HIDDEN';
-              nameBlock.appendChild(tag);
-            }
-          } else {
-            if(existing&&existing.textContent==='HIDDEN') existing.remove();
-          }
-        }
+    // Player cards — update every second so RD and HIDDEN tag stay current
+    document.querySelectorAll(`.player-card[data-id="${p.firestoreId}"]`).forEach(card=>{
+      card.querySelectorAll('[data-rd-val]').forEach(val=>{
+        val.textContent=rdStr;
+        val.style.color=liveRd>100?'var(--loss)':liveRd>80?'var(--accent)':'var(--win)';
       });
-    }
+      const nameBlock=card.querySelector('.pc-name-block');
+      if(nameBlock){
+        const existing=nameBlock.querySelector('.pc-tag:not([style*="admin"])');
+        if(liveRd>100){
+          if(!existing){
+            const tag=document.createElement('span');
+            tag.className='pc-tag';
+            tag.textContent='HIDDEN';
+            nameBlock.appendChild(tag);
+          }
+        } else {
+          if(existing&&existing.textContent==='HIDDEN') existing.remove();
+        }
+      }
+    });
   });
 
   if(needsLbRender) renderLeaderboard();
@@ -2112,7 +2104,7 @@ window.triggerSeasonReset=async function(){
       return{ls,chartPts};
     }
 
-    await Promise.all(players.map(async p=>{
+    const playerUpdates=await Promise.all(players.map(async p=>{
       const pid=p.firestoreId;
       const{ls,chartPts}=computeSeasonStats(pid);
       const myMatches=allMatches
@@ -2139,11 +2131,18 @@ window.triggerSeasonReset=async function(){
         wins:p.wins,losses:p.losses,endedAt,longestWinStreak:ls
       };
       const _sa=_rdAnchor(120,1500);
-      return updateDoc(doc(db,'players',pid),{
-        rating:1500,rd:120,rdBaseX:_sa.rdBaseX,rdBaseTime:_sa.rdBaseTime,
-        wins:0,losses:0,seasons:[...existing,entry]
-      });
+      return {pid,rdBaseX:_sa.rdBaseX,rdBaseTime:_sa.rdBaseTime,seasons:[...existing,entry]};
     }));
+    const _srBatch=writeBatch(db);let _srCnt=0;const _srBatches=[_srBatch];
+    for(const upd of playerUpdates){
+      if(_srCnt>0&&_srCnt%499===0)_srBatches.push(writeBatch(db));
+      _srBatches[_srBatches.length-1].update(doc(db,'players',upd.pid),{
+        rating:1500,rd:120,rdBaseX:upd.rdBaseX,rdBaseTime:upd.rdBaseTime,
+        wins:0,losses:0,seasons:upd.seasons
+      });
+      _srCnt++;
+    }
+    await Promise.all(_srBatches.map(b=>b.commit()));
 
     await Promise.all(matchesSnap.docs.map(d=>deleteDoc(doc(db,'matches',d.id))));
     await setDoc(doc(db,'config','season'),{name:'',deadline:null,seasonNum:sNum+1});
@@ -2402,15 +2401,19 @@ window.restoreSeason=async function(){
     })));
 
     // 5. Restore each player's stats from the season entry and remove that season from history
-    await Promise.all(playerSeasonData.map(({player,entry})=>{
+    const _rsBatch=writeBatch(db);let _rsCnt=0;const _rsBatches=[_rsBatch];
+    for(const{player,entry}of playerSeasonData){
       const newSeasons=(player.seasons||[]).filter(x=>x.seasonNum!==sNum);
       const _ua=_rdAnchor(entry.rd,entry.rating);
-      return updateDoc(doc(db,'players',player.firestoreId),{
+      if(_rsCnt>0&&_rsCnt%499===0)_rsBatches.push(writeBatch(db));
+      _rsBatches[_rsBatches.length-1].update(doc(db,'players',player.firestoreId),{
         rating:entry.rating,
         rd:entry.rd,rdBaseX:_ua.rdBaseX,rdBaseTime:_ua.rdBaseTime,
         wins:entry.wins,losses:entry.losses,seasons:newSeasons,
       });
-    }));
+      _rsCnt++;
+    }
+    await Promise.all(_rsBatches.map(b=>b.commit()));
 
     // 6. Roll back season config to this season number (so admin can re-reset it properly)
     await setDoc(doc(db,'config','season'),{
@@ -2833,6 +2836,35 @@ window.adminRemovePlayer=async function(fid,name){
   try{await deleteDoc(doc(db,'players',fid));}catch(e){alert('Error: '+e.message);}
 };
 
+
+    // Batch all player writes into one commit → one onSnapshot → no render storm
+    const _buildPlayerBatches=(currentTop,getState,getNo1,now)=>{
+      const batches=[writeBatch(db)];
+      let cnt=0;
+      for(const p of players){
+        const s=getState(p.firestoreId);
+        if(!s)continue;
+        const n1=getNo1(p.firestoreId);
+        let longestNo1Ms=Math.max(n1?.longestNo1Ms||0,p.longestNo1Ms||0);
+        let no1Since=n1?.no1Since??null;
+        if(n1?.no1Since!=null&&p.firestoreId===currentTop){
+          const dur=now-n1.no1Since;
+          if(dur>longestNo1Ms)longestNo1Ms=dur;
+        } else if(p.firestoreId===currentTop&&!no1Since){
+          no1Since=p.no1Since||now;
+          const dur=now-no1Since;
+          if(dur>longestNo1Ms)longestNo1Ms=dur;
+        }
+        if(cnt>0&&cnt%499===0)batches.push(writeBatch(db));
+        batches[batches.length-1].update(doc(db,'players',p.firestoreId),{
+          rating:s.rating,rd:s.rd,rdBaseX:s.rdBaseX,rdBaseTime:s.rdBaseTime,
+          wins:s.wins,losses:s.losses,
+          no1Since:p.firestoreId===currentTop?no1Since:null,longestNo1Ms
+        });
+        cnt++;
+      }
+      return{batches,cnt};
+    };
 window.adminRemoveMatch=async function(fid){
   if(!confirm('Delete this match and recalculate all ratings from the last snapshot?'))return;
   try{
@@ -2873,9 +2905,9 @@ window.adminRemoveMatch=async function(fid){
     }
 
     const _stateAnchor=(pid,rd,rating,ts)=>{
-      const a=_rdAnchor(rd,rating);
+      const a=_rdAnchor(rd,rating,ts);
       state[pid].rdBaseX=a.rdBaseX;
-      state[pid].rdBaseTime=ts;
+      state[pid].rdBaseTime=a.rdBaseTime;
     };
     const _stateLiveRD=(pid,ts)=>{
       const s=state[pid];
@@ -2891,8 +2923,8 @@ window.adminRemoveMatch=async function(fid){
     if(snapshotState){
       for(const[pid,s]of Object.entries(snapshotState)){
         const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-        const a=_rdAnchor(rd,s.rating??1500);
-        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:snapshotCutoffTs||now};
+        const a=_rdAnchor(rd,s.rating??1500,snapshotCutoffTs||now);
+        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
         no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
       }
     }
@@ -2900,8 +2932,8 @@ window.adminRemoveMatch=async function(fid){
       if(!state[pid]){
         const liveP=players.find(x=>x.firestoreId===pid);
         const rd=120,rating=1500;
-        const a=_rdAnchor(rd,rating);
-        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:ts||now};
+        const a=_rdAnchor(rd,rating,ts||now);
+        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
       }
       if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
     };
@@ -2938,8 +2970,8 @@ window.adminRemoveMatch=async function(fid){
           for(const pid of Object.keys(no1State))delete no1State[pid];
           for(const[pid,s]of Object.entries(snappedPlayers)){
             const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-            const a2=_rdAnchor(rd,s.rating??1500);
-            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:evt._ts};
+            const a2=_rdAnchor(rd,s.rating??1500,evt._ts);
+            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:a2.rdBaseTime};
             no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
           }
         } else if(a.type==='stat_edit'){
@@ -2992,35 +3024,9 @@ window.adminRemoveMatch=async function(fid){
 
     await Promise.all(matchWrites);
 
-    const playerWrites=[];
     const currentTop=getTop(now);
-    for(const p of players){
-      const s=state[p.firestoreId];
-      if(!s)continue;
-      const n1=no1State[p.firestoreId];
-      // Always take the best known longestNo1Ms: max of replay state vs live Firestore
-      let longestNo1Ms=Math.max(n1?.longestNo1Ms||0, p.longestNo1Ms||0);
-      let no1Since=n1?.no1Since??null;
-      if(n1?.no1Since!=null&&p.firestoreId===currentTop){
-        const dur=now-n1.no1Since;
-        if(dur>longestNo1Ms)longestNo1Ms=dur;
-      } else if(p.firestoreId===currentTop&&!no1Since){
-        // Replay lost the no1Since anchor (snapshot predated tracking) —
-        // rescue it from live Firestore rather than resetting to now
-        no1Since=p.no1Since||now;
-        // Compute duration from rescued anchor and fold it into longestNo1Ms
-        const dur=now-no1Since;
-        if(dur>longestNo1Ms)longestNo1Ms=dur;
-      }
-      playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
-        rating:s.rating,rd:s.rd,
-        rdBaseX:s.rdBaseX,rdBaseTime:s.rdBaseTime,
-        wins:s.wins,losses:s.losses,
-        no1Since:p.firestoreId===currentTop?no1Since:null,
-        longestNo1Ms
-      }));
-    }
-    await Promise.all(playerWrites);
+    const{batches:pBatches,cnt:pCnt}=_buildPlayerBatches(currentTop,id=>state[id],id=>no1State[id],now);
+    await Promise.all(pBatches.map(b=>b.commit()));
     alert('Match deleted and all ratings recalculated from last snapshot.');
   }catch(e){alert('Error: '+e.message);console.error(e);}
 };
@@ -3065,9 +3071,9 @@ window.repairAllRatings=async function(){
     }
 
     const _stateAnchor=(pid,rd,rating,ts)=>{
-      const a=_rdAnchor(rd,rating);
+      const a=_rdAnchor(rd,rating,ts);
       state[pid].rdBaseX=a.rdBaseX;
-      state[pid].rdBaseTime=ts; // use event timestamp not wall clock
+      state[pid].rdBaseTime=a.rdBaseTime; // use event timestamp not wall clock
     };
     const _stateLiveRD=(pid,ts)=>{
       const s=state[pid];
@@ -3082,8 +3088,8 @@ window.repairAllRatings=async function(){
     if(snapshotState){
       for(const[pid,s]of Object.entries(snapshotState)){
         const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-        const a=_rdAnchor(rd,s.rating??1500);
-        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:snapshotCutoffTs||now};
+        const a=_rdAnchor(rd,s.rating??1500,snapshotCutoffTs||now);
+        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
         no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
       }
     }
@@ -3091,8 +3097,8 @@ window.repairAllRatings=async function(){
       if(!state[pid]){
         const liveP=players.find(x=>x.firestoreId===pid);
         const rd=120, rating=1500;
-        const a=_rdAnchor(rd,rating);
-        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:ts||now};
+        const a=_rdAnchor(rd,rating,ts||now);
+        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
       }
       if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
     };
@@ -3132,8 +3138,8 @@ window.repairAllRatings=async function(){
           for(const pid of Object.keys(no1State))delete no1State[pid];
           for(const[pid,s]of Object.entries(snappedPlayers)){
             const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-            const a2=_rdAnchor(rd,s.rating??1500);
-            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:evt._ts};
+            const a2=_rdAnchor(rd,s.rating??1500,evt._ts);
+            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:a2.rdBaseTime};
             no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
           }
         } else if(a.type==='stat_edit'){
@@ -3193,40 +3199,10 @@ window.repairAllRatings=async function(){
 
     await Promise.all(matchWrites);
 
-    // Write final player docs — anchor rdBaseX/rdBaseTime to now so live decay works immediately
-    const playerWrites=[];
     const currentTop=getTop(now);
-    for(const p of players){
-      const s=state[p.firestoreId];
-      if(!s)continue;
-      const n1=no1State[p.firestoreId];
-      // Always take the best known longestNo1Ms: max of replay state vs live Firestore
-      let longestNo1Ms=Math.max(n1?.longestNo1Ms||0, p.longestNo1Ms||0);
-      let no1Since=n1?.no1Since??null;
-      if(n1?.no1Since!=null&&p.firestoreId===currentTop){
-        const dur=now-n1.no1Since;
-        if(dur>longestNo1Ms)longestNo1Ms=dur;
-      } else if(p.firestoreId===currentTop&&!no1Since){
-        // Replay lost the no1Since anchor (snapshot predated tracking) —
-        // rescue it from live Firestore rather than resetting to now
-        no1Since=p.no1Since||now;
-        // Compute duration from rescued anchor and fold it into longestNo1Ms
-        const dur=now-no1Since;
-        if(dur>longestNo1Ms)longestNo1Ms=dur;
-      }
-      // Use the anchor from replay state (rdBaseTime = last match timestamp) so live decay
-      // correctly continues from the last match forward, not reset to now.
-      playerWrites.push(updateDoc(doc(db,'players',p.firestoreId),{
-        rating:s.rating,rd:s.rd,
-        rdBaseX:s.rdBaseX,rdBaseTime:s.rdBaseTime,
-        wins:s.wins,losses:s.losses,
-        no1Since:p.firestoreId===currentTop?no1Since:null,
-        longestNo1Ms
-      }));
-    }
-
-    await Promise.all(playerWrites);
-    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${playerWrites.length} player(s).`);
+    const{batches:pBatches,cnt:pCnt}=_buildPlayerBatches(currentTop,id=>state[id],id=>no1State[id],now);
+    await Promise.all(pBatches.map(b=>b.commit()));
+    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${pCnt} player(s).`);
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
@@ -4631,19 +4607,23 @@ window.restoreSnapshot=async function(snapId){
     const snapDoc=await getDoc(doc(db,'snapshots',snapId));
     if(!snapDoc.exists()){alert('Snapshot not found.');return;}
     const playerData=snapDoc.data().players||{};
-    const writes=[];
+    const _snapBatch=writeBatch(db);
+    let _snapCnt=0;
+    const _snapBatches=[_snapBatch];
     for(const[pid,s]of Object.entries(playerData)){
       const _restoreRd=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd??120));
       const _rsa=_rdAnchor(_restoreRd,s.rating??1500);
-      writes.push(updateDoc(doc(db,'players',pid),{
+      if(_snapCnt>0&&_snapCnt%499===0)_snapBatches.push(writeBatch(db));
+      _snapBatches[_snapBatches.length-1].update(doc(db,'players',pid),{
         rating:s.rating,rd:_restoreRd,
         rdBaseX:_rsa.rdBaseX,rdBaseTime:_rsa.rdBaseTime,
         wins:s.wins,losses:s.losses,
         no1Since:s.no1Since||null,
         longestNo1Ms:s.longestNo1Ms||0
-      }));
+      });
+      _snapCnt++;
     }
-    await Promise.all(writes);
+    await Promise.all(_snapBatches.map(b=>b.commit()));
     showMsg('snapshot-msg','Snapshot restored successfully.');
   }catch(e){showMsg('snapshot-msg','Error: '+e.message,true);}
 };
@@ -5041,9 +5021,11 @@ function _rdBaseTimeMs(t){
   return Number(t) || Date.now();
 }
 function _computeRDLive(p){
-  if(p.rdBaseX == null) return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, (p.rd != null ? p.rd : 120)));
-  const elapsedSec = (Date.now() - _rdBaseTimeMs(p.rdBaseTime)) / 1000;
-  const xNow = p.rdBaseX + Math.max(0, elapsedSec) * _rdRatingScale(p.rating);
+  // Synthesize rdBaseX for legacy players who predate the anchor system — same as _rdBuildPts
+  const rdBaseX = p.rdBaseX != null ? p.rdBaseX : _rdToX(Math.min(_RD_MAX_NEW-0.01, Math.max(_RD_MIN, p.rd != null ? p.rd : 120)));
+  const rdBaseTime = p.rdBaseX != null ? p.rdBaseTime : (p.rdBaseTime ?? Date.now());
+  const elapsedSec = (Date.now() - _rdBaseTimeMs(rdBaseTime)) / 1000;
+  const xNow = rdBaseX + Math.max(0, elapsedSec) * _rdRatingScale(p.rating);
   const rd = -_RD_NUMERATOR / (xNow + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
   return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, rd));
 }
