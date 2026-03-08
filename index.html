@@ -338,7 +338,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 #rd-modal-header .rd-modal-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
 #rd-modal-header .m-close{background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;cursor:pointer;padding:.3rem .55rem;line-height:1;font-family:'DM Mono',monospace;letter-spacing:.06em;transition:all .15s;}
 #rd-modal-header .m-close:hover{border-color:var(--text);color:var(--text);}
-#rd-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;background:var(--bg);display:flex;align-items:stretch;position:relative;}
+#rd-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;background:var(--bg);display:flex;flex-direction:column;align-items:stretch;position:relative;}
 #rd-decay-canvas{display:block;flex:1;min-height:0;min-width:0;cursor:crosshair;}
 .rd-legend{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap;}
 .rd-legend-item{display:flex;align-items:center;gap:.35rem;font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
@@ -1929,6 +1929,7 @@ function _rdClearCache(){
   for(const k in _rdLbRdValCache) delete _rdLbRdValCache[k];
 }
 
+let _rdSliderOffsetSec=0;
 let _rdTickCount=0;
 function tickLiveRD(){
   _rdTickCount++;
@@ -5048,27 +5049,36 @@ function _rdAnchor(rd, rating, ts){
   return { rdBaseX: _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, rd))), rdBaseTime: ts||Date.now() };
 }
 
-// Build chart points using live RD computation
-function _rdBuildPts(){
+// Build chart points using live RD computation; offsetSec projects forward in time
+function _rdBuildPts(offsetSec){
+  offsetSec=offsetSec||0;
   return players.map(p=>{
     let rdBaseX = p.rdBaseX;
     let rdBaseTime = p.rdBaseTime;
     if(rdBaseX == null){
-      // Fallback for players created before rdBaseX was introduced:
-      // synthesize anchor from stored rd so the dot appears at the right spot.
       rdBaseX = _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, p.rd || 120)));
       rdBaseTime = Date.now();
     }
+    // Current RD (no offset)
+    const elapsedNow = (Date.now() - _rdBaseTimeMs(rdBaseTime)) / 1000;
+    const xNow = rdBaseX + Math.max(0, elapsedNow) * _rdRatingScale(p.rating);
+    const liveRd = Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, -_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE));
+    // Projected RD (with offset)
+    const elapsedFuture = elapsedNow + offsetSec;
+    const xFuture = rdBaseX + Math.max(0, elapsedFuture) * _rdRatingScale(p.rating);
+    const futureRd = Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, -_RD_NUMERATOR/(xFuture+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE));
     return {
       pid:p.firestoreId,
       name:p.name,
       photoURL:p.photoURL||null,
-      rd:_computeRDLive(p),
+      rd:futureRd,
+      rdNow:liveRd,
       rating:p.rating||1500,
       rdBaseX: rdBaseX,
       rdBaseTime: rdBaseTime,
       inactive:_rdInactivePeriods(p),
-      hidden:_computeRDLive(p)>100,
+      hidden:futureRd>100,
+      hiddenNow:liveRd>100,
       immune:!!p.decayImmune
     };
   });
@@ -5513,7 +5523,7 @@ function drawRDDecayChart(hlPids){
   if(!cv||!players.length) return;
   cv._rdDrawn=true;
   _rdPreloadAvatars();
-  const pts = _rdBuildPts();
+  const pts = _rdBuildPts(_rdSliderOffsetSec||0);
   const dpr = window.devicePixelRatio||1;
   const scroller = document.getElementById('rd-canvas-scroll');
   const visW = scroller ? scroller.clientWidth : (cv.parentElement.offsetWidth||600);
@@ -5652,8 +5662,34 @@ function _rdDraw(cv,pts,hl,dpr){
   }
   ctx.stroke();
 
-  // Player dots
+  // Ghost dots (current position) when slider is offset
+  const sliderOffset=typeof _rdSliderOffsetSec==='number'?_rdSliderOffsetSec:0;
   const R=11;
+  if(sliderOffset>0){
+    pts.forEach(p=>{
+      if(!p.rdNow||!p.rating||!p.name)return;
+      const clampedNow=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rdNow));
+      const gx=_rdToX(clampedNow);
+      if(!isFinite(gx)||gx<0||gx>maxSec)return;
+      const gX=px(gx),gY=py(clampedNow);
+      const gcol=p.hiddenNow?ls:(p.immune?a3:ac);
+      ctx.beginPath();ctx.arc(gX,gY,R+1.5,0,Math.PI*2);
+      ctx.fillStyle=gcol+'40';ctx.fill();
+      ctx.beginPath();ctx.arc(gX,gY,R,0,Math.PI*2);
+      ctx.fillStyle=bg+'cc';ctx.fill();
+      // Arrow toward future position
+      const clampedFuture=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
+      const fx=_rdToX(clampedFuture);
+      if(isFinite(fx)&&fx>gx){
+        const fX=px(fx),fY=py(clampedFuture);
+        ctx.strokeStyle=gcol+'60';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+        ctx.beginPath();ctx.moveTo(gX,gY);ctx.lineTo(fX,fY);ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+  }
+
+  // Player dots (current or projected)
   pts.forEach(p=>{
     if(!p.rd||!p.rating||!p.name)return;
     const clampedRD=Math.max(_RD_MIN,Math.min(_RD_MAX_NEW-0.1,p.rd));
@@ -5679,7 +5715,7 @@ function _rdDraw(cv,pts,hl,dpr){
       ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(p.name.charAt(0).toUpperCase(),sX,sY);
     }
-    ctx.restore(); // restore per-dot clip
+    ctx.restore();
   });
   ctx.restore(); // restore plot area clip
 }
@@ -5830,6 +5866,45 @@ function _rdAnimateOrDraw(prevMap){
     _rdAnimReq=requestAnimationFrame(step);
   } catch(e){ console.error('_rdAnimateOrDraw error:',e); }
 }
+
+// ── RD FORECAST SLIDER ───────────────────────────────────────────────────────
+(function(){
+  document.addEventListener('input',function(e){
+    if(e.target.id!=='rd-time-slider')return;
+    _rdSliderOffsetSec=parseInt(e.target.value)||0;
+    const lbl=document.getElementById('rd-slider-label');
+    if(lbl){
+      if(_rdSliderOffsetSec===0){lbl.textContent='NOW';lbl.style.color='var(--accent)';}
+      else{
+        const d=Math.floor(_rdSliderOffsetSec/86400);
+        const h=Math.floor((_rdSliderOffsetSec%86400)/3600);
+        lbl.textContent=d>0?'+'+d+'d '+(h>0?h+'h':''):'+'+h+'h';
+        lbl.style.color=_rdSliderOffsetSec>=_rdSecondsToAny100()?'var(--loss)':'var(--accent)';
+      }
+    }
+    drawRDDecayChart({});
+  });
+  // Reset slider when modal closes
+  const _origClose=window.closeRDModal;
+  window.closeRDModal=function(){
+    _rdSliderOffsetSec=0;
+    const sl=document.getElementById('rd-time-slider');if(sl)sl.value=0;
+    const lbl=document.getElementById('rd-slider-label');if(lbl){lbl.textContent='NOW';lbl.style.color='var(--accent)';}
+    if(_origClose)_origClose();
+  };
+})();
+function _rdSecondsToAny100(){
+  // Returns the earliest seconds-until-purge among all non-immune visible players, or Infinity
+  let min=Infinity;
+  players.forEach(p=>{
+    if(p.decayImmune)return;
+    const lrd=_computeRDLive(p);
+    if(lrd>=100)return;
+    const sec=_rdSecondsToTarget(lrd,p.rating||1500,100);
+    if(sec>0&&sec<min)min=sec;
+  });
+  return min;
+}
 </script>
 <div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
   <div id="rd-modal-box">
@@ -5848,7 +5923,13 @@ function _rdAnimateOrDraw(prevMap){
       <div id="rd-canvas-scroll" style="flex:1;overflow-x:auto;overflow-y:hidden;position:relative;min-width:0;">
         <canvas id="rd-decay-canvas" style="display:block;height:100%;cursor:crosshair;"></canvas>
       </div>
-      <button class="chart-nav-btn nav-left" onclick="_switchToTrend()" title="Rating Trends" style="position:absolute;left:.75rem;">‹</button>
+      <div id="rd-slider-wrap" style="flex-shrink:0;padding:.55rem .9rem .45rem;display:flex;align-items:center;gap:.75rem;border-top:1px solid var(--border);background:var(--surface);">
+        <span style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;white-space:nowrap;">Forecast</span>
+        <input type="range" id="rd-time-slider" min="0" max="604800" step="3600" value="0"
+          style="flex:1;accent-color:var(--accent);cursor:pointer;">
+        <span id="rd-slider-label" style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--accent);min-width:4rem;text-align:right;white-space:nowrap;">NOW</span>
+      </div>
+      <button class="chart-nav-btn nav-left" onclick="_switchToTrend()" title="Rating Trends" style="position:absolute;left:.75rem;">&#8249;</button>
     </div>
   </div>
 </div>
