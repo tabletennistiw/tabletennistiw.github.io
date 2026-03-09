@@ -2912,11 +2912,14 @@ window.adminRemoveMatch=async function(fid){
     };
     const _stateLiveRD=(pid,ts)=>{
       const s=state[pid];
-      if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,(s.rd!=null?s.rd:120)));
-      const elapsedSec=(ts-s.rdBaseTime)/1000;
+      // Always derive rdBaseX from s.rd to prevent desync
+      const rdS=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd!=null?s.rd:120));
+      const baseX=_rdToX(rdS);
+      const baseTime=s.rdBaseTime??ts;
+      const elapsedSec=(ts-baseTime)/1000;
       const m=replayMult;
       const scale=(m&&m>0)?Math.pow(1500/Math.max(1,s.rating||1500),m):1;
-      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*scale;
+      const xNow=baseX+Math.max(0,elapsedSec)*scale;
       const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
       return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
     };
@@ -3078,11 +3081,14 @@ window.repairAllRatings=async function(){
     };
     const _stateLiveRD=(pid,ts)=>{
       const s=state[pid];
-      if(s.rdBaseX==null) return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,(s.rd!=null?s.rd:120)));
-      const elapsedSec=(ts-s.rdBaseTime)/1000;
+      // Always derive rdBaseX from s.rd to prevent desync
+      const rdS=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd!=null?s.rd:120));
+      const baseX=_rdToX(rdS);
+      const baseTime=s.rdBaseTime??ts;
+      const elapsedSec=(ts-baseTime)/1000;
       const m=replayMult;
       const scale=(m&&m>0)?Math.pow(1500/Math.max(1,s.rating||1500),m):1;
-      const xNow=s.rdBaseX+Math.max(0,elapsedSec)*scale;
+      const xNow=baseX+Math.max(0,elapsedSec)*scale;
       const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
       return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
     };
@@ -5022,9 +5028,15 @@ function _rdBaseTimeMs(t){
   return Number(t) || Date.now();
 }
 function _computeRDLive(p){
-  // Synthesize rdBaseX for legacy players who predate the anchor system — same as _rdBuildPts
-  const rdBaseX = p.rdBaseX != null ? p.rdBaseX : _rdToX(Math.min(_RD_MAX_NEW-0.01, Math.max(_RD_MIN, p.rd != null ? p.rd : 120)));
-  const rdBaseTime = p.rdBaseX != null ? p.rdBaseTime : (p.rdBaseTime ?? Date.now());
+  // Always re-derive rdBaseX from p.rd so rdBaseX can never drift out of sync
+  // with the stored rd value (e.g. from a failed/partial Firestore write).
+  // rdBaseX is just _rdToX(p.rd) — it's always recomputable and should not be trusted
+  // as an independent source of truth.
+  const rdStored = Math.min(_RD_MAX_NEW-0.01, Math.max(_RD_MIN, p.rd != null ? p.rd : 120));
+  const rdBaseX = _rdToX(rdStored);
+  // rdBaseTime is written atomically alongside rd on every match — fall back to
+  // Date.now() (zero elapsed) if it is missing for any reason.
+  const rdBaseTime = p.rdBaseTime ?? Date.now();
   const elapsedSec = (Date.now() - _rdBaseTimeMs(rdBaseTime)) / 1000;
   const xNow = rdBaseX + Math.max(0, elapsedSec) * _rdRatingScale(p.rating);
   const rd = -_RD_NUMERATOR / (xNow + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
@@ -5053,12 +5065,10 @@ function _rdAnchor(rd, rating, ts){
 function _rdBuildPts(offsetSec){
   offsetSec=offsetSec||0;
   return players.map(p=>{
-    let rdBaseX = p.rdBaseX;
-    let rdBaseTime = p.rdBaseTime;
-    if(rdBaseX == null){
-      rdBaseX = _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, p.rd || 120)));
-      rdBaseTime = Date.now();
-    }
+    // Always derive rdBaseX from p.rd — same desync prevention as _computeRDLive
+    const rdStored2 = Math.min(_RD_MAX_NEW-0.01, Math.max(_RD_MIN, p.rd != null ? p.rd : 120));
+    const rdBaseX = _rdToX(rdStored2);
+    const rdBaseTime = p.rdBaseTime ?? Date.now();
     // Current RD (no offset)
     const elapsedNow = (Date.now() - _rdBaseTimeMs(rdBaseTime)) / 1000;
     const xNow = rdBaseX + Math.max(0, elapsedNow) * _rdRatingScale(p.rating);
