@@ -5220,9 +5220,26 @@ window.updateRatingTrendChart=function(){
         if(hi===null||ctx.datasetIndex===hi) return c;
         return c.replace('hsl','hsla').replace(')',',0.2)');
       },
-      pointBackgroundColor:()=>'transparent',
+      pointBackgroundColor:ctx=>{
+        const last=pts.length-1;
+        if(ctx.dataIndex===0||ctx.dataIndex===last){
+          const c=datasets[ctx.datasetIndex]?._baseColor||col;
+          return c;
+        }
+        return 'transparent';
+      },
+      pointRadius:ctx=>{
+        const last=pts.length-1;
+        if(ctx.dataIndex===0||ctx.dataIndex===last) return 4;
+        return 2.5;
+      },
+      pointHoverRadius:ctx=>{
+        const last=pts.length-1;
+        if(ctx.dataIndex===0||ctx.dataIndex===last) return 6;
+        return 5;
+      },
       backgroundColor:col.replace('hsl','hsla').replace(')',',0.15)'),
-      borderWidth:2,pointRadius:3,pointHoverRadius:3,
+      borderWidth:2,
       pointStyle:'circle',
       tension:0,fill:false
     });
@@ -5244,22 +5261,56 @@ window.updateRatingTrendChart=function(){
     return;
   }
 
+  // Pre-compute initial bounds from all datasets so first render is correct
+  const _trendBounds=(dsets)=>{
+    const xs=[],ys=[];
+    dsets.forEach(ds=>ds.data.forEach(pt=>{xs.push(pt.x);ys.push(pt.y);}));
+    if(!xs.length)return{xMin:now-86400000,xMax:now,yMin:1400,yMax:1600};
+    const xMin=Math.min(...xs),xMax=Math.max(...xs),xSpan=Math.max(xMax-xMin,3600000);
+    const yMin=Math.min(...ys),yMax=Math.max(...ys),yPad=Math.max(yMax-yMin,50)*0.04;
+    return{xMin:xMin-xSpan*0.04,xMax:xMax+xSpan*0.04,yMin:Math.floor(yMin-yPad),yMax:Math.ceil(yMax+yPad)};
+  };
+  const _initBounds=_trendBounds(datasets);
+
+  const _trendPadPlugin={
+    id:'trendPad',
+    afterUpdate:chart=>{
+      const xs=[],ys=[];
+      chart.data.datasets.forEach((ds,i)=>{
+        if(chart.getDatasetMeta(i).hidden)return;
+        ds.data.forEach(pt=>{xs.push(pt.x);ys.push(pt.y);});
+      });
+      if(!xs.length)return;
+      const xMin=Math.min(...xs),xMax=Math.max(...xs),xSpan=Math.max(xMax-xMin,3600000);
+      const yMin=Math.min(...ys),yMax=Math.max(...ys),yPad=Math.max(yMax-yMin,50)*0.04;
+      const nx1=xMin-xSpan*0.04,nx2=xMax+xSpan*0.04,ny1=Math.floor(yMin-yPad),ny2=Math.ceil(yMax+yPad);
+      const xScale=chart.scales.x,yScale=chart.scales.y;
+      let needsUpdate=false;
+      if(xScale&&(xScale.options.min!==nx1||xScale.options.max!==nx2)){xScale.options.min=nx1;xScale.options.max=nx2;needsUpdate=true;}
+      if(yScale&&(yScale.options.min!==ny1||yScale.options.max!==ny2)){yScale.options.min=ny1;yScale.options.max=ny2;needsUpdate=true;}
+      if(needsUpdate)setTimeout(()=>chart.update(),0);
+    }
+  };
+
   window._ratingTrendChart=new Chart(canvas,{
     type:'line',
     data:{datasets},
-    plugins:[_trendHoverPlugin],
+    plugins:[_trendHoverPlugin,_trendPadPlugin],
     options:{
       responsive:true,
       maintainAspectRatio:false,
       animation:{duration:300},
       parsing:false,
+      layout:{padding:{left:0,right:4,top:4,bottom:0}},
       scales:{
         x:{
-          type:'linear',
+          type:'linear',offset:false,
+          min:_initBounds.xMin,max:_initBounds.xMax,
           ticks:{color:'#8a6a78',font:{family:'DM Mono,monospace',size:10},callback:v=>new Date(v).toLocaleDateString('en-US',{month:'short',day:'numeric'}),maxTicksLimit:7},
           grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}
         },
         y:{
+          min:_initBounds.yMin,max:_initBounds.yMax,
           ticks:{color:'#8a6a78',font:{family:'DM Mono,monospace',size:11}},
           grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}
         }
