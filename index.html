@@ -5318,7 +5318,7 @@ window.updateRatingTrendChart=function(){
       plugins:{
         legend:{
           labels:{
-            color:'#E1E2EF',font:{family:'DM Mono,monospace',size:11},
+            color:getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),font:{family:'DM Mono,monospace',size:11},
             boxWidth:12,padding:16,
             usePointStyle:false,
             generateLabels(chart){
@@ -5333,7 +5333,7 @@ window.updateRatingTrendChart=function(){
                   hidden,
                   index:i,
                   datasetIndex:i,
-                  fontColor:hidden?'#8a6a78':'#E1E2EF',
+                  fontColor:hidden?getComputedStyle(document.documentElement).getPropertyValue('--muted').trim():getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),
                 };
               });
             }
