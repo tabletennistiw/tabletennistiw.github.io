@@ -679,24 +679,13 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <div id="decay-info" style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8;padding:.6rem .8rem;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:.9rem">
             Loading current settings…
           </div>
-          <div class="field">
-            <label>Decay Period</label>
-            <div style="display:flex;gap:.6rem">
-              <input type="number" id="decay-amount" value="4" min="1" style="width:90px;flex-shrink:0;flex:none">
-              <select id="decay-unit">
-                <option value="minutes">Minutes</option>
-                <option value="hours" selected>Hours</option>
-                <option value="days">Days</option>
-              </select>
-            </div>
-          </div>
-          <div class="field" style="margin-top:.6rem">
-          </div>
           <div class="field" style="margin-top:.6rem">
             <label>Rating-Scaled Decay Exponent (m) <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Scale = (1500/rating)^m. At m=1: 1500-rated players decay at 1×, higher-rated decay slower. 0 = disabled (flat decay)</span></label>
             <input type="number" id="decay-scale-mult" value="0" min="0" step="0.1" style="width:120px">
           </div>
           <div class="field" style="margin-top:.6rem">
+            <label>General Decay Multiplier (g) <span style="font-size:.55rem;color:var(--muted);text-transform:none;letter-spacing:0">Full rate = g × (1500/rating)^m. At g=1: decay matches the curve as-is. g=2: everyone decays twice as fast. g=0.5: half speed.</span></label>
+            <input type="number" id="decay-general-mult" value="1" min="0.01" step="0.1" style="width:120px">
           </div>
           <button class="btn" onclick="saveDecay()">Save Decay Settings</button>
           <div class="msg" id="decay-msg"></div>
@@ -1065,6 +1054,7 @@ let players=[],matches=[],isAdmin=false,curProfileId=null;
 const ADMIN_PW='pppaddle';
 const RD_MAX=200;
 let DECAY_SCALE_MULTIPLIER=0;
+let DECAY_GENERAL_MULTIPLIER=1; // g in: rate = g * (1500/rating)^m
 const EPSILON=0.000001;
 
 // Show subtitle on wider screens
@@ -1207,17 +1197,15 @@ onSnapshot(query(collection(db,'matches'),orderBy('date','desc')),snap=>{
 onSnapshot(doc(db,'config','decay'),snap=>{
   if(snap.exists()){
     const d=snap.data();
-    const amt=d.amount||4, unt=d.unit||'hours';
-    const amtEl=document.getElementById('decay-amount');
-    amtEl.value=amt;
-    amtEl.dataset.saved=amt;
-    const sel=document.getElementById('decay-unit');
-    if(sel){for(let o of sel.options){if(o.value===unt){o.selected=true;break;}}sel.dataset.saved=unt;}
     if(d.decayScaleMult!=null){
       DECAY_SCALE_MULTIPLIER=d.decayScaleMult;
       const smEl=document.getElementById('decay-scale-mult');
       if(smEl){smEl.value=d.decayScaleMult;smEl.dataset.saved=d.decayScaleMult;}
     }
+    const gVal=d.decayGeneralMult!=null?d.decayGeneralMult:1;
+    DECAY_GENERAL_MULTIPLIER=gVal;
+    const gmEl=document.getElementById('decay-general-mult');
+    if(gmEl){gmEl.value=gVal;gmEl.dataset.saved=String(gVal);}
   }
   updateDecayStatus();
   updateDecayInfo();
@@ -1229,16 +1217,24 @@ function updateDecayInfo(){
   if(di) di.textContent=`Continuous RD decay · Max RD: 120 (asymptote) · Hidden from leaderboard if RD > 100`;
   const adp=document.getElementById('admin-decay-period-display');
   if(adp) adp.textContent='continuous (asymptotic curve)';
+  const m=DECAY_SCALE_MULTIPLIER;
+  const g=(DECAY_GENERAL_MULTIPLIER!=null&&DECAY_GENERAL_MULTIPLIER>0)?DECAY_GENERAL_MULTIPLIER:1;
   // Update rules panel scale exponent
   const rExp=document.getElementById('rules-scale-exp');
-  if(rExp) rExp.textContent=DECAY_SCALE_MULTIPLIER||1;
+  if(rExp) rExp.textContent=m||1;
   const rScale=document.getElementById('rules-scaled-decay-desc');
   if(rScale){
-    const mult=DECAY_SCALE_MULTIPLIER;
-    if(!mult||mult<=0){
-      rScale.innerHTML='Rating-scaled decay is currently disabled &mdash; all players decay at the same flat rate.';
+    const flatRate=g===1?'1×':`${g}×`;
+    const at1500=g;
+    const at2000=g*((!m||m<=0)?1:Math.pow(1500/2000,m));
+    if(!m||m<=0){
+      if(g===1){
+        rScale.innerHTML='Rating-scaled decay is currently disabled &mdash; all players decay at the same flat rate (1&times;).';
+      } else {
+        rScale.innerHTML=`All players decay at <strong style="color:var(--accent)">${g}&times;</strong> the base rate (g=${g}, m=0 so no rating scaling).`;
+      }
     } else {
-      rScale.innerHTML=`Higher-rated players decay more slowly. The decay rate scales as (1500&nbsp;/&nbsp;rating)<sup>${mult}</sup> &mdash; the current multiplier is <strong style="color:var(--accent)">${mult}</strong>. At this setting a 1500-rated player decays at 1&times;, while a 2000-rated player decays at ${((1500/2000)**mult).toFixed(3)}&times; &mdash; protecting earned rankings.`;
+      rScale.innerHTML=`Full decay rate = <strong style="color:var(--accent)">${g}&nbsp;&times;&nbsp;(1500&nbsp;/&nbsp;rating)<sup>${m}</sup></strong>. At this setting a 1500-rated player decays at <strong style="color:var(--accent)">${at1500.toFixed(3)}&times;</strong>, a 2000-rated player at <strong style="color:var(--accent)">${at2000.toFixed(3)}&times;</strong>.`;
     }
   }
 }
@@ -1249,36 +1245,33 @@ function updateDecayStatus(){
 
 // ── DECAY SETTINGS ────────────────────────────────────────────────────────────
 window.saveDecay=async function(){
-  const amount=parseFloat(document.getElementById('decay-amount').value);
-  const unit=document.getElementById('decay-unit').value;
-  if(!amount||amount<=0){showMsg('decay-msg','Enter a valid period.',true);return;}
   const newScaleMult=parseFloat(document.getElementById('decay-scale-mult')?.value);
   const resolvedNewScale=isNaN(newScaleMult)?0:newScaleMult;
+  const newGeneralMult=parseFloat(document.getElementById('decay-general-mult')?.value);
+  const resolvedNewGeneral=(!isNaN(newGeneralMult)&&newGeneralMult>0)?newGeneralMult:1;
   try{
-    const oldAmt=parseFloat(document.getElementById('decay-amount').dataset.saved||document.getElementById('decay-amount').value)||4;
-    const oldUnit=document.getElementById('decay-unit').dataset.saved||'hours';
     const smEl=document.getElementById('decay-scale-mult');
     const oldScaleMult=parseFloat(smEl?.dataset.saved??'0');
-    const now=Date.now();
-    await setDoc(doc(db,'config','decay'),{amount,unit,decayScaleMult:resolvedNewScale});// 
-      
-    document.getElementById('decay-amount').dataset.saved=amount;
-    document.getElementById('decay-unit').dataset.saved=unit;
+    const gmEl=document.getElementById('decay-general-mult');
+    const oldGeneralMult=parseFloat(gmEl?.dataset.saved??'1')||1;
+    await setDoc(doc(db,'config','decay'),{decayScaleMult:resolvedNewScale,decayGeneralMult:resolvedNewGeneral});
+
     if(smEl)smEl.dataset.saved=String(resolvedNewScale);
+    if(gmEl)gmEl.dataset.saved=String(resolvedNewGeneral);
     DECAY_SCALE_MULTIPLIER=resolvedNewScale;
-    // Apply in-memory immediately
+    DECAY_GENERAL_MULTIPLIER=resolvedNewGeneral;
     const msgs=[];
-    if(amount!==oldAmt||unit!==oldUnit){
-      await logAdminAction('decay_change',`RD decay changed to ${amount} ${unit}`,{
-        oldAmount:oldAmt,oldUnit,newAmount:amount,newUnit:unit
-      });
-      msgs.push(`decay → ${amount} ${unit}`);
-    }
     if(resolvedNewScale!==oldScaleMult){
-      await logAdminAction('decay_scale_change',`Rating-scaled decay multiplier changed to ${resolvedNewScale}`,{
+      await logAdminAction('decay_scale_change',`Rating-scaled decay exponent (m) changed to ${resolvedNewScale}`,{
         oldMult:oldScaleMult,newMult:resolvedNewScale
       });
-      msgs.push(`decay scale → ${resolvedNewScale}`);
+      msgs.push(`m → ${resolvedNewScale}`);
+    }
+    if(resolvedNewGeneral!==oldGeneralMult){
+      await logAdminAction('decay_general_change',`General decay multiplier (g) changed to ${resolvedNewGeneral}`,{
+        oldG:oldGeneralMult,newG:resolvedNewGeneral
+      });
+      msgs.push(`g → ${resolvedNewGeneral}`);
     }
     showMsg('decay-msg',msgs.length?`Saved: ${msgs.join(', ')}. Logged as admin action.`:'No changes to save.');
     updateDecayInfo();
@@ -1761,7 +1754,6 @@ function _lbUpdateHiddenNote(hiddenCount){
   }
 }
 
-// getLiveRD: compute RD live from the asymptotic formula with rdBaseX and rdBaseTime
 function getLiveRD(p){ return _computeRDLive(p); }
 
 
@@ -1773,10 +1765,10 @@ window.addPlayer=async function(){
   if(players.find(p=>p.name.toLowerCase()===name.toLowerCase())){showMsg('player-msg','Already exists.',true);return;}
   const btn=document.getElementById('add-player-btn');btn.disabled=true;
   try{
-    const _anchor = _rdAnchor(120, 1500);
+    const _anchor = _rdNewAnchor(120, Date.now());
     await addDoc(collection(db,'players'),{
       name, rating:1500, rd:120,
-      rdBaseX: _anchor.rdBaseX, rdBaseTime: _anchor.rdBaseTime,
+      rdAnchorRD: _anchor.rdAnchorRD, rdAnchorSec: _anchor.rdAnchorSec,
       wins:0, losses:0, createdAt:serverTimestamp()
     });
     document.getElementById('player-name').value='';
@@ -2131,14 +2123,14 @@ window.triggerSeasonReset=async function(){
         rating:p.rating,rd:p.rd,
         wins:p.wins,losses:p.losses,endedAt,longestWinStreak:ls
       };
-      const _sa=_rdAnchor(120,1500);
-      return {pid,rdBaseX:_sa.rdBaseX,rdBaseTime:_sa.rdBaseTime,seasons:[...existing,entry]};
+      const _sa=_rdNewAnchor(120, Date.now());
+      return {pid,rdAnchorRD:_sa.rdAnchorRD,rdAnchorSec:_sa.rdAnchorSec,seasons:[...existing,entry]};
     }));
     const _srBatch=writeBatch(db);let _srCnt=0;const _srBatches=[_srBatch];
     for(const upd of playerUpdates){
       if(_srCnt>0&&_srCnt%499===0)_srBatches.push(writeBatch(db));
       _srBatches[_srBatches.length-1].update(doc(db,'players',upd.pid),{
-        rating:1500,rd:120,rdBaseX:upd.rdBaseX,rdBaseTime:upd.rdBaseTime,
+        rating:1500,rd:120,rdAnchorRD:upd.rdAnchorRD,rdAnchorSec:upd.rdAnchorSec,
         wins:0,losses:0,seasons:upd.seasons
       });
       _srCnt++;
@@ -2405,11 +2397,11 @@ window.restoreSeason=async function(){
     const _rsBatch=writeBatch(db);let _rsCnt=0;const _rsBatches=[_rsBatch];
     for(const{player,entry}of playerSeasonData){
       const newSeasons=(player.seasons||[]).filter(x=>x.seasonNum!==sNum);
-      const _ua=_rdAnchor(entry.rd,entry.rating);
+      const _ua=_rdNewAnchor(entry.rd, Date.now());
       if(_rsCnt>0&&_rsCnt%499===0)_rsBatches.push(writeBatch(db));
       _rsBatches[_rsBatches.length-1].update(doc(db,'players',player.firestoreId),{
         rating:entry.rating,
-        rd:entry.rd,rdBaseX:_ua.rdBaseX,rdBaseTime:_ua.rdBaseTime,
+        rd:entry.rd,rdAnchorRD:_ua.rdAnchorRD,rdAnchorSec:_ua.rdAnchorSec,
         wins:entry.wins,losses:entry.losses,seasons:newSeasons,
       });
       _rsCnt++;
@@ -2579,9 +2571,11 @@ window.submitMatch=async function(){
       const w=ws.data(),l=ls.data();
 
       const now=Date.now();
-      // Use live RD (continuously decayed) so the match calculation reflects true uncertainty
-      const wLiveRd=_computeRDLive({...w, rdBaseX:w.rdBaseX, rdBaseTime:w.rdBaseTime});
-      const lLiveRd=_computeRDLive({...l, rdBaseX:l.rdBaseX, rdBaseTime:l.rdBaseTime});
+      // Anchor second = nearest whole second of match time (integer — no float drift)
+      const nowSec=Math.round(now/1000);
+      // Use live RD (continuously decayed to nearest whole second)
+      const wLiveRd=_computeRDLive(w);
+      const lLiveRd=_computeRDLive(l);
       uw=g2Update(
         {rating:w.rating, rd:wLiveRd},
         [{rating:l.rating, rd:lLiveRd, s:1}], now
@@ -2601,11 +2595,11 @@ window.submitMatch=async function(){
       });
       const topAfter=simP.filter(ranked).sort((a,b)=>b.rating-a.rating)[0];
 
-      // Anchor the asymptotic RD curve at the post-match RD value, now.
-      _wAnchor=_rdAnchor(uw.rd,uw.rating,now);
-      _lAnchor=_rdAnchor(ul.rd,ul.rating,now);
-      const wUpdate={rating:uw.rating,rd:uw.rd,wins:w.wins+1,rdBaseX:_wAnchor.rdBaseX,rdBaseTime:_wAnchor.rdBaseTime};
-      const lUpdate={rating:ul.rating,rd:ul.rd,losses:l.losses+1,rdBaseX:_lAnchor.rdBaseX,rdBaseTime:_lAnchor.rdBaseTime};
+      // Set new integer-second anchors for both players after this match
+      _wAnchor=_rdNewAnchor(uw.rd, now);
+      _lAnchor=_rdNewAnchor(ul.rd, now);
+      const wUpdate={rating:uw.rating,rd:uw.rd,wins:w.wins+1,rdAnchorRD:_wAnchor.rdAnchorRD,rdAnchorSec:_wAnchor.rdAnchorSec};
+      const lUpdate={rating:ul.rating,rd:ul.rd,losses:l.losses+1,rdAnchorRD:_lAnchor.rdAnchorRD,rdAnchorSec:_lAnchor.rdAnchorSec};
 
       if(topBefore?.id!==topAfter?.id){
         if(topBefore){
@@ -2651,8 +2645,8 @@ window.submitMatch=async function(){
     // Optimistically update local players so card RD + LB refresh immediately,
     // without waiting for the Firestore onSnapshot to propagate.
     players=players.map(p=>{
-      if(p.firestoreId===wid) return{...p,rating:uw.rating,rd:uw.rd,wins:p.wins+1,rdBaseX:_wAnchor.rdBaseX,rdBaseTime:_wAnchor.rdBaseTime};
-      if(p.firestoreId===lid) return{...p,rating:ul.rating,rd:ul.rd,losses:p.losses+1,rdBaseX:_lAnchor.rdBaseX,rdBaseTime:_lAnchor.rdBaseTime};
+      if(p.firestoreId===wid) return{...p,rating:uw.rating,rd:uw.rd,wins:p.wins+1,rdAnchorRD:_wAnchor.rdAnchorRD,rdAnchorSec:_wAnchor.rdAnchorSec};
+      if(p.firestoreId===lid) return{...p,rating:ul.rating,rd:ul.rd,losses:p.losses+1,rdAnchorRD:_lAnchor.rdAnchorRD,rdAnchorSec:_lAnchor.rdAnchorSec};
       return p;
     });
     renderLeaderboard();
@@ -2858,7 +2852,7 @@ window.adminRemovePlayer=async function(fid,name){
         }
         if(cnt>0&&cnt%499===0)batches.push(writeBatch(db));
         batches[batches.length-1].update(doc(db,'players',p.firestoreId),{
-          rating:s.rating,rd:s.rd,rdBaseX:s.rdBaseX,rdBaseTime:s.rdBaseTime,
+          rating:s.rating,rd:s.rd,rdAnchorRD:s.rdAnchorRD,rdAnchorSec:s.rdAnchorSec,
           wins:s.wins,losses:s.losses,
           no1Since:p.firestoreId===currentTop?no1Since:null,longestNo1Ms
         });
@@ -2869,171 +2863,226 @@ window.adminRemovePlayer=async function(fid,name){
 window.adminRemoveMatch=async function(fid){
   if(!confirm('Delete this match and recalculate all ratings from the last snapshot?'))return;
   try{
-    // 1. Delete the match first
     await deleteDoc(doc(db,'matches',fid));
-
-    // 2. Run the exact same repair engine as repairAllRatings so results are always identical
-    const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
-    const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-    const actionsSnap=await getDocs(query(collection(db,'adminActions'),orderBy('date','asc')));
-    const allAdminActions=actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-    const now=Date.now();
-
-    // Find most recent snapshot
-    let snapshotCutoffTs=0, snapshotState=null;
-    for(let i=allAdminActions.length-1;i>=0;i--){
-      const a=allAdminActions[i];
-      if(a.type==='snapshot'){
-        snapshotCutoffTs=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-        snapshotState=a.data?.players||{};
-        break;
-      }
-    }
-
-    // Build state — same logic as repairAllRatings
-    const state={};
-    const no1State={};
-
-    // Find multiplier active at snapshot cutoff (last decay_scale_change at or before it)
-    let replayMult=DECAY_SCALE_MULTIPLIER;
-    {
-      let bestTs=-Infinity;
-      for(const a of allAdminActions){
-        if(a.type!=='decay_scale_change')continue;
-        const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-        if(ts<=snapshotCutoffTs&&ts>bestTs){bestTs=ts;replayMult=a.data?.newMult??replayMult;}
-      }
-    }
-
-    const _stateAnchor=(pid,rd,rating,ts)=>{
-      const a=_rdAnchor(rd,rating,ts);
-      state[pid].rdBaseX=a.rdBaseX;
-      state[pid].rdBaseTime=a.rdBaseTime;
-    };
-    const _stateLiveRD=(pid,ts)=>{
-      const s=state[pid];
-      // Always derive rdBaseX from s.rd to prevent desync
-      const rdS=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd!=null?s.rd:120));
-      const baseX=_rdToX(rdS);
-      const baseTime=s.rdBaseTime??ts;
-      const elapsedSec=(ts-baseTime)/1000;
-      const m=replayMult;
-      const scale=(m&&m>0)?Math.pow(1500/Math.max(1,s.rating||1500),m):1;
-      const xNow=baseX+Math.max(0,elapsedSec)*scale;
-      const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
-      return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
-    };
-
-    if(snapshotState){
-      for(const[pid,s]of Object.entries(snapshotState)){
-        const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-        const a=_rdAnchor(rd,s.rating??1500,snapshotCutoffTs||now);
-        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
-        no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
-      }
-    }
-    const initPlayer=(pid,ts)=>{
-      if(!state[pid]){
-        const liveP=players.find(x=>x.firestoreId===pid);
-        const rd=120,rating=1500;
-        const a=_rdAnchor(rd,rating,ts||now);
-        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
-      }
-      if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
-    };
-
-    const events=[];
-    allMatches.forEach(m=>{
-      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
-      if(ts<=snapshotCutoffTs)return;
-      events.push({_type:'match',_ts:ts,data:m});
-    });
-    allAdminActions.forEach(a=>{
-      const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-      if(ts<=snapshotCutoffTs)return;
-      events.push({_type:'admin',_ts:ts,data:a});
-    });
-    events.sort((a,b)=>a._ts-b._ts);
-
-    const matchWrites=[];
-    const getTop=(ts)=>{
-      let top=null,topR=-Infinity;
-      for(const[pid,s]of Object.entries(state)){
-        const lrd=_stateLiveRD(pid,ts);
-        if(lrd<=100&&s.rating>topR){topR=s.rating;top=pid;}
-      }
-      return top;
-    };
-
-    for(const evt of events){
-      if(evt._type==='admin'){
-        const a=evt.data;
-        if(a.type==='snapshot'){
-          const snappedPlayers=a.data?.players||{};
-          for(const pid of Object.keys(state))delete state[pid];
-          for(const pid of Object.keys(no1State))delete no1State[pid];
-          for(const[pid,s]of Object.entries(snappedPlayers)){
-            const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-            const a2=_rdAnchor(rd,s.rating??1500,evt._ts);
-            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:a2.rdBaseTime};
-            no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
-          }
-        } else if(a.type==='stat_edit'){
-          const pid=a.data?.playerId;
-          if(!pid)continue;
-          initPlayer(pid,evt._ts);
-          const after=a.data?.after||{};
-          if(after.rating!=null)state[pid].rating=after.rating;
-          if(after.rd!=null){state[pid].rd=after.rd;_stateAnchor(pid,after.rd,state[pid].rating,evt._ts);}
-          if(after.wins!=null)state[pid].wins=after.wins;
-          if(after.losses!=null)state[pid].losses=after.losses;
-          if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
-        } else if(a.type==='decay_scale_change'){
-          if(a.data?.newMult!=null) replayMult=a.data.newMult;
-        }
-        continue;
-      }
-      const m=evt.data;
-      const pid1=m.p1id,pid2=m.p2id;
-      initPlayer(pid1,evt._ts);initPlayer(pid2,evt._ts);
-      const s1=state[pid1],s2=state[pid2];
-      const rd1=_stateLiveRD(pid1,evt._ts);
-      const rd2=_stateLiveRD(pid2,evt._ts);
-      const topBefore=getTop(evt._ts);
-      const u1=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
-      const u2=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
-      const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
-      const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
-      matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
-        p1oldRating:s1.rating,p1newRating:u1.rating,p1oldRD:rd1,p1newRD:u1.rd,p1delta,
-        p2oldRating:s2.rating,p2newRating:u2.rating,p2oldRD:rd2,p2newRD:u2.rd,p2delta,
-      }));
-      state[pid1].rating=u1.rating;state[pid1].rd=u1.rd;state[pid1].wins=s1.wins+1;
-      state[pid2].rating=u2.rating;state[pid2].rd=u2.rd;state[pid2].losses=s2.losses+1;
-      _stateAnchor(pid1,u1.rd,u1.rating,evt._ts);
-      _stateAnchor(pid2,u2.rd,u2.rating,evt._ts);
-      const topAfter=getTop(evt._ts);
-      if(topBefore!==topAfter){
-        if(topBefore&&no1State[topBefore]?.no1Since!=null){
-          const dur=evt._ts-no1State[topBefore].no1Since;
-          if(dur>no1State[topBefore].longestNo1Ms)no1State[topBefore].longestNo1Ms=dur;
-          no1State[topBefore].no1Since=null;
-        }
-        if(topAfter){
-          if(!no1State[topAfter])no1State[topAfter]={no1Since:null,longestNo1Ms:0};
-          if(no1State[topAfter].no1Since==null)no1State[topAfter].no1Since=evt._ts;
-        }
-      }
-    }
-
-    await Promise.all(matchWrites);
-
-    const currentTop=getTop(now);
-    const{batches:pBatches,cnt:pCnt}=_buildPlayerBatches(currentTop,id=>state[id],id=>no1State[id],now);
-    await Promise.all(pBatches.map(b=>b.commit()));
+    await _runRepairEngine();
     alert('Match deleted and all ratings recalculated from last snapshot.');
   }catch(e){alert('Error: '+e.message);console.error(e);}
 };
+
+
+// ── SHARED REPAIR ENGINE ──────────────────────────────────────────────────────
+// Single source of truth for replaying match history.
+// Used by: repairAllRatings, adminRemoveMatch
+//
+// INTEGER-SECOND MODEL:
+//   Every event timestamp is rounded to the nearest whole second.
+//   Elapsed seconds between events = evtSec - anchorSec  (both integers).
+//   This guarantees live calc and repair ALWAYS agree, because _computeRDLive
+//   also floors to the nearest second.
+// ─────────────────────────────────────────────────────────────────────────────
+async function _runRepairEngine(){
+  const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
+  const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+  const actionsSnap=await getDocs(query(collection(db,'adminActions'),orderBy('date','asc')));
+  const allAdminActions=actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+  const nowMs=Date.now();
+
+  // Helper: timestamp → milliseconds (handles Firestore Timestamp, number, string)
+  const _ts=t=>t?.toDate?t.toDate().getTime():t?.toMillis?t.toMillis():new Date(t).getTime();
+
+  // Find the most recent snapshot to use as starting state
+  let snapshotCutoffMs=0, snapshotState=null;
+  for(let i=allAdminActions.length-1;i>=0;i--){
+    const a=allAdminActions[i];
+    if(a.type==='snapshot'){
+      snapshotCutoffMs=_ts(a.date)||0;
+      snapshotState=a.data?.players||{};
+      break;
+    }
+  }
+
+  // Find the decay-scale multiplier active at snapshot time
+  let replayMult=DECAY_SCALE_MULTIPLIER;
+  let replayG=(DECAY_GENERAL_MULTIPLIER!=null&&DECAY_GENERAL_MULTIPLIER>0)?DECAY_GENERAL_MULTIPLIER:1;
+  {
+    let bestTs=-Infinity;
+    for(const a of allAdminActions){
+      const ts=_ts(a.date)||0;
+      if(ts>snapshotCutoffMs)continue;
+      if(a.type==='decay_scale_change'&&ts>bestTs){bestTs=ts;replayMult=a.data?.newMult??replayMult;}
+      if(a.type==='decay_general_change'){replayG=a.data?.newG??replayG;}
+    }
+  }
+
+  // Per-player replay state: { rating, rd, rdAnchorRD, rdAnchorSec, wins, losses, decayImmune }
+  const state={};
+  const no1State={};
+
+  // Set integer-second anchor in state for a player
+  const _stateAnchor=(pid,rd,evtMs)=>{
+    const sec=Math.round(evtMs/1000);
+    state[pid].rdAnchorRD=_rdClamp(rd);
+    state[pid].rdAnchorSec=sec;
+  };
+
+  // Compute RD for a player in state at a given event time (integer seconds, uses replayMult/replayG)
+  const _stateLiveRD=(pid,evtMs)=>{
+    const s=state[pid];
+    const anchorRD=_rdClamp(s.rdAnchorRD??s.rd??120);
+    const anchorSec=s.rdAnchorSec??Math.round((evtMs||nowMs)/1000);
+    const evtSec=Math.round(evtMs/1000);
+    const elapsedSec=Math.max(0,evtSec-anchorSec);
+    // Apply full formula: g * (1500/rating)^m — using replay values, not live globals
+    const ratingScale=(replayMult&&replayMult>0)?Math.pow(1500/Math.max(1,s.rating||1500),replayMult):1;
+    const scale=replayG*ratingScale;
+    const x0=_rdToX(anchorRD);
+    if(!isFinite(x0))return _RD_MAX_NEW;
+    const xNow=x0+elapsedSec*scale;
+    return _rdFromX(xNow);
+  };
+
+  // Initialise a player that appears in a match but has no state yet
+  const initPlayer=(pid,evtMs)=>{
+    if(!state[pid]){
+      const liveP=players.find(x=>x.firestoreId===pid);
+      const rd=120,rating=1500;
+      const sec=Math.round((evtMs||nowMs)/1000);
+      state[pid]={rating,rd,rdAnchorRD:_rdClamp(rd),rdAnchorSec:sec,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune)};
+    }
+    if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
+  };
+
+  // Seed state from snapshot
+  if(snapshotState){
+    for(const[pid,s]of Object.entries(snapshotState)){
+      const rd=_rdClamp(s.rd??120);
+      const sec=Math.round(snapshotCutoffMs/1000);
+      state[pid]={rating:s.rating??1500,rd,rdAnchorRD:rd,rdAnchorSec:sec,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune};
+      no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
+    }
+  }
+
+  // Build sorted event timeline (skip events at/before the snapshot)
+  const events=[];
+  allMatches.forEach(m=>{
+    const ts=_ts(m.date)||0;
+    if(ts<=snapshotCutoffMs)return;
+    events.push({_type:'match',_ts:ts,data:m});
+  });
+  allAdminActions.forEach(a=>{
+    const ts=_ts(a.date)||0;
+    if(ts<=snapshotCutoffMs)return;
+    events.push({_type:'admin',_ts:ts,data:a});
+  });
+  events.sort((a,b)=>a._ts-b._ts);
+
+  // getTop: which player is currently ranked #1 (RD≤100, highest rating) at a given moment
+  const getTop=(evtMs)=>{
+    let top=null,topR=-Infinity;
+    for(const[pid,s]of Object.entries(state)){
+      if(s.decayImmune){const lrd=_rdClamp(s.rdAnchorRD??s.rd??120);if(lrd<=100&&s.rating>topR){topR=s.rating;top=pid;}continue;}
+      const lrd=_stateLiveRD(pid,evtMs);
+      if(lrd<=100&&s.rating>topR){topR=s.rating;top=pid;}
+    }
+    return top;
+  };
+
+  // Check if any purged player has now decayed below RD 100 (re-appears on leaderboard)
+  // This is evaluated after every match so returning players are caught immediately
+  const _checkPurged=(evtMs)=>{
+    for(const[pid,s]of Object.entries(state)){
+      if(s.decayImmune)continue;
+      const lrd=_stateLiveRD(pid,evtMs);
+      // Just update the live rd in state — leaderboard visibility is determined by getLiveRD at render time
+      s._liveRdAtLastEvt=lrd;
+    }
+  };
+
+  const matchWrites=[];
+
+  for(const evt of events){
+    if(evt._type==='admin'){
+      const a=evt.data;
+      if(a.type==='decay_scale_change'){
+        if(a.data?.newMult!=null)replayMult=a.data.newMult;
+      }else if(a.type==='decay_general_change'){
+        if(a.data?.newG!=null)replayG=a.data.newG;
+      }else if(a.type==='snapshot'){
+        // A snapshot mid-timeline resets state entirely
+        const snappedPlayers=a.data?.players||{};
+        for(const pid of Object.keys(state))delete state[pid];
+        for(const pid of Object.keys(no1State))delete no1State[pid];
+        for(const[pid,s]of Object.entries(snappedPlayers)){
+          const rd=_rdClamp(s.rd??120);
+          const sec=Math.round(evt._ts/1000);
+          state[pid]={rating:s.rating??1500,rd,rdAnchorRD:rd,rdAnchorSec:sec,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune};
+          no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
+        }
+      }else if(a.type==='stat_edit'){
+        const pid=a.data?.playerId;
+        if(!pid)continue;
+        initPlayer(pid,evt._ts);
+        const after=a.data?.after||{};
+        if(after.rating!=null)state[pid].rating=after.rating;
+        if(after.rd!=null){state[pid].rd=after.rd;_stateAnchor(pid,after.rd,evt._ts);}
+        if(after.wins!=null)state[pid].wins=after.wins;
+        if(after.losses!=null)state[pid].losses=after.losses;
+        if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
+      }
+      continue;
+    }
+
+    // Match event
+    const m=evt.data;
+    const pid1=m.p1id, pid2=m.p2id;
+    initPlayer(pid1,evt._ts); initPlayer(pid2,evt._ts);
+    const s1=state[pid1], s2=state[pid2];
+
+    // RD at the moment of this match — integer-second calc, identical to live ticker
+    const rd1=_stateLiveRD(pid1,evt._ts);
+    const rd2=_stateLiveRD(pid2,evt._ts);
+    const topBefore=getTop(evt._ts);
+
+    const u1=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
+    const u2=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
+    const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
+    const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
+
+    matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
+      p1oldRating:s1.rating,p1newRating:u1.rating,p1oldRD:rd1,p1newRD:u1.rd,p1delta,
+      p2oldRating:s2.rating,p2newRating:u2.rating,p2oldRD:rd2,p2newRD:u2.rd,p2delta,
+    }));
+
+    // Advance state — anchor to the match's integer second
+    state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].wins=s1.wins+1;
+    state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].losses=s2.losses+1;
+    _stateAnchor(pid1,u1.rd,evt._ts);
+    _stateAnchor(pid2,u2.rd,evt._ts);
+
+    // Check purged players after every match so they can re-enter leaderboard
+    _checkPurged(evt._ts);
+
+    const topAfter=getTop(evt._ts);
+    if(topBefore!==topAfter){
+      if(topBefore&&no1State[topBefore]?.no1Since!=null){
+        const dur=evt._ts-no1State[topBefore].no1Since;
+        if(dur>no1State[topBefore].longestNo1Ms)no1State[topBefore].longestNo1Ms=dur;
+        no1State[topBefore].no1Since=null;
+      }
+      if(topAfter){
+        if(!no1State[topAfter])no1State[topAfter]={no1Since:null,longestNo1Ms:0};
+        if(no1State[topAfter].no1Since==null)no1State[topAfter].no1Since=evt._ts;
+      }
+    }
+  }
+
+  await Promise.all(matchWrites);
+
+  const currentTop=getTop(nowMs);
+  const{batches:pBatches,cnt:pCnt}=_buildPlayerBatches(currentTop,id=>state[id],id=>no1State[id],nowMs);
+  await Promise.all(pBatches.map(b=>b.commit()));
+  return{matchCount:matchWrites.length,playerCount:pCnt};
+}
 
 // ── REPAIR RATINGS ─────────────────────────────────────────────────────────
 window.repairAllRatings=async function(){
@@ -3041,181 +3090,15 @@ window.repairAllRatings=async function(){
   const btn=document.querySelector('[onclick="repairAllRatings()"]');
   if(btn){btn.disabled=true;btn.textContent='Repairing…';}
   try{
-    const matchesSnap=await getDocs(query(collection(db,'matches'),orderBy('date','asc')));
-    const allMatches=matchesSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-    const actionsSnap=await getDocs(query(collection(db,'adminActions'),orderBy('date','asc')));
-    const allAdminActions=actionsSnap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-    const now=Date.now();
-
-    // Find most recent snapshot — only replay after it
-    const allActionsSorted=[...allAdminActions];
-    let snapshotCutoffTs=0, snapshotState=null;
-    for(let i=allActionsSorted.length-1;i>=0;i--){
-      const a=allActionsSorted[i];
-      if(a.type==='snapshot'){
-        snapshotCutoffTs=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-        snapshotState=a.data?.players||{};
-        break;
-      }
-    }
-
-    // Build state from snapshot or from scratch
-    const state={};
-    const no1State={};
-
-    // Find multiplier active at snapshot cutoff (last decay_scale_change at or before it)
-    let replayMult=DECAY_SCALE_MULTIPLIER;
-    {
-      let bestTs=-Infinity;
-      for(const a of allAdminActions){
-        if(a.type!=='decay_scale_change')continue;
-        const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-        if(ts<=snapshotCutoffTs&&ts>bestTs){bestTs=ts;replayMult=a.data?.newMult??replayMult;}
-      }
-    }
-
-    const _stateAnchor=(pid,rd,rating,ts)=>{
-      const a=_rdAnchor(rd,rating,ts);
-      state[pid].rdBaseX=a.rdBaseX;
-      state[pid].rdBaseTime=a.rdBaseTime; // use event timestamp not wall clock
-    };
-    const _stateLiveRD=(pid,ts)=>{
-      const s=state[pid];
-      // Always derive rdBaseX from s.rd to prevent desync
-      const rdS=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd!=null?s.rd:120));
-      const baseX=_rdToX(rdS);
-      const baseTime=s.rdBaseTime??ts;
-      const elapsedSec=(ts-baseTime)/1000;
-      const m=replayMult;
-      const scale=(m&&m>0)?Math.pow(1500/Math.max(1,s.rating||1500),m):1;
-      const xNow=baseX+Math.max(0,elapsedSec)*scale;
-      const rd=-_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE;
-      return Math.min(_RD_MAX_NEW,Math.max(_RD_MIN,rd));
-    };
-    if(snapshotState){
-      for(const[pid,s]of Object.entries(snapshotState)){
-        const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-        const a=_rdAnchor(rd,s.rating??1500,snapshotCutoffTs||now);
-        state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
-        no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
-      }
-    }
-    const initPlayer=(pid,ts)=>{
-      if(!state[pid]){
-        const liveP=players.find(x=>x.firestoreId===pid);
-        const rd=120, rating=1500;
-        const a=_rdAnchor(rd,rating,ts||now);
-        state[pid]={rating,rd,wins:0,losses:0,decayImmune:!!(liveP?.decayImmune),rdBaseX:a.rdBaseX,rdBaseTime:a.rdBaseTime};
-      }
-      if(!no1State[pid])no1State[pid]={no1Since:null,longestNo1Ms:0};
-    };
-
-    // Build sorted event timeline (skip events at/before snapshot)
-    const events=[];
-    allMatches.forEach(m=>{
-      const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
-      if(ts<=snapshotCutoffTs)return;
-      events.push({_type:'match',_ts:ts,data:m});
-    });
-    allAdminActions.forEach(a=>{
-      const ts=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
-      if(ts<=snapshotCutoffTs)return;
-      events.push({_type:'admin',_ts:ts,data:a});
-    });
-    events.sort((a,b)=>a._ts-b._ts);
-
-    const matchWrites=[];
-    const getTop=(ts)=>{
-      let top=null,topR=-Infinity;
-      for(const[pid,s]of Object.entries(state)){
-        const lrd=_stateLiveRD(pid,ts);
-        if(lrd<=100&&s.rating>topR){topR=s.rating;top=pid;}
-      }
-      return top;
-    };
-
-    for(const evt of events){
-      if(evt._type==='admin'){
-        const a=evt.data;
-        if(a.type==='decay_scale_change'){
-          if(a.data?.newMult!=null) replayMult=a.data.newMult;
-        } else if(a.type==='snapshot'){
-          const snappedPlayers=a.data?.players||{};
-          for(const pid of Object.keys(state))delete state[pid];
-          for(const pid of Object.keys(no1State))delete no1State[pid];
-          for(const[pid,s]of Object.entries(snappedPlayers)){
-            const rd=Math.min(_RD_MAX_NEW-0.01,s.rd??120);
-            const a2=_rdAnchor(rd,s.rating??1500,evt._ts);
-            state[pid]={rating:s.rating??1500,rd,wins:s.wins??0,losses:s.losses??0,decayImmune:!!s.decayImmune,rdBaseX:a2.rdBaseX,rdBaseTime:a2.rdBaseTime};
-            no1State[pid]={no1Since:s.no1Since??null,longestNo1Ms:s.longestNo1Ms??0};
-          }
-        } else if(a.type==='stat_edit'){
-          const pid=a.data?.playerId;
-          if(!pid)continue;
-          initPlayer(pid,evt._ts);
-          const after=a.data?.after||{};
-          if(after.rating!=null)state[pid].rating=after.rating;
-          if(after.rd!=null){
-            state[pid].rd=after.rd;
-            _stateAnchor(pid,after.rd,state[pid].rating,evt._ts);
-          }
-          if(after.wins!=null)state[pid].wins=after.wins;
-          if(after.losses!=null)state[pid].losses=after.losses;
-          if(after.decayImmune!=null)state[pid].decayImmune=after.decayImmune;
-        }
-        continue;
-      }
-
-      const m=evt.data;
-      const pid1=m.p1id, pid2=m.p2id;
-      initPlayer(pid1,evt._ts); initPlayer(pid2,evt._ts);
-      const s1=state[pid1], s2=state[pid2];
-      // Use live RD at the time of the match
-      const rd1=_stateLiveRD(pid1,evt._ts);
-      const rd2=_stateLiveRD(pid2,evt._ts);
-      const topBefore=getTop(evt._ts);
-
-      const u1=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
-      const u2=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
-      const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
-      const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
-
-      matchWrites.push(updateDoc(doc(db,'matches',m.firestoreId),{
-        p1oldRating:s1.rating,p1newRating:u1.rating,p1oldRD:rd1,p1newRD:u1.rd,p1delta,
-        p2oldRating:s2.rating,p2newRating:u2.rating,p2oldRD:rd2,p2newRD:u2.rd,p2delta,
-      }));
-
-      state[pid1].rating=u1.rating; state[pid1].rd=u1.rd; state[pid1].wins=s1.wins+1;
-      state[pid2].rating=u2.rating; state[pid2].rd=u2.rd; state[pid2].losses=s2.losses+1;
-      _stateAnchor(pid1,u1.rd,u1.rating,evt._ts);
-      _stateAnchor(pid2,u2.rd,u2.rating,evt._ts);
-
-      const topAfter=getTop(evt._ts);
-      if(topBefore!==topAfter){
-        if(topBefore&&no1State[topBefore]?.no1Since!=null){
-          const dur=evt._ts-no1State[topBefore].no1Since;
-          if(dur>no1State[topBefore].longestNo1Ms)no1State[topBefore].longestNo1Ms=dur;
-          no1State[topBefore].no1Since=null;
-        }
-        if(topAfter){
-          if(!no1State[topAfter])no1State[topAfter]={no1Since:null,longestNo1Ms:0};
-          if(no1State[topAfter].no1Since==null)no1State[topAfter].no1Since=evt._ts;
-        }
-      }
-    }
-
-    await Promise.all(matchWrites);
-
-    const currentTop=getTop(now);
-    const{batches:pBatches,cnt:pCnt}=_buildPlayerBatches(currentTop,id=>state[id],id=>no1State[id],now);
-    await Promise.all(pBatches.map(b=>b.commit()));
-    showMsg('repair-msg',`Rewrote ${matchWrites.length} match records · repaired ${pCnt} player(s).`);
+    const{matchCount,playerCount}=await _runRepairEngine();
+    showMsg('repair-msg',`Rewrote ${matchCount} match records · repaired ${playerCount} player(s).`);
   }catch(e){
     showMsg('repair-msg','Error: '+e.message,true);
   }finally{
     if(btn){btn.disabled=false;btn.textContent='🔧 Repair All Ratings From Match History';}
   }
 };
+
 
 window.openEditPlayer=function(fid){
   const p=players.find(x=>x.firestoreId===fid);if(!p)return;
@@ -3253,9 +3136,9 @@ window.submitEditPlayer=async function(){
     const desc=`Edited ${name}: ${changes.length?changes.join(', '):'no changes'}`;
     const _editFields={name,rating,rd,wins,losses,decayImmune};
     if(rd !== p?.rd){
-      const _ea=_rdAnchor(rd,rating);
-      _editFields.rdBaseX=_ea.rdBaseX;
-      _editFields.rdBaseTime=_ea.rdBaseTime;
+      const _ea=_rdNewAnchor(rd, Date.now());
+      _editFields.rdAnchorRD=_ea.rdAnchorRD;
+      _editFields.rdAnchorSec=_ea.rdAnchorSec;
     }
     await updateDoc(doc(db,'players',fid),_editFields);
     await logAdminAction('stat_edit',desc,{playerId:fid,playerName:name,before,after});
@@ -4557,14 +4440,14 @@ window.takeSnapshot=async function(){
     const playerData={};
     players.forEach(p=>{
       if(!p.firestoreId)return;
-      const _snapLiveRd=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,_computeRDLive(p)));
-      const _snapAnchor=_rdAnchor(_snapLiveRd,p.rating);
+      const _snapLiveRd=_rdClamp(_computeRDLive(p));
+      const _snapAnchor=_rdNewAnchor(_snapLiveRd, Date.now());
       playerData[p.firestoreId]={
         name:p.name,
         rating:p.rating,
         rd:_snapLiveRd,
-        rdBaseX:_snapAnchor.rdBaseX,
-        rdBaseTime:_snapAnchor.rdBaseTime,
+        rdAnchorRD:_snapAnchor.rdAnchorRD,
+        rdAnchorSec:_snapAnchor.rdAnchorSec,
         wins:p.wins||0,
         losses:p.losses||0,
         decayImmune:!!p.decayImmune,
@@ -4618,12 +4501,12 @@ window.restoreSnapshot=async function(snapId){
     let _snapCnt=0;
     const _snapBatches=[_snapBatch];
     for(const[pid,s]of Object.entries(playerData)){
-      const _restoreRd=Math.min(_RD_MAX_NEW-0.01,Math.max(_RD_MIN,s.rd??120));
-      const _rsa=_rdAnchor(_restoreRd,s.rating??1500);
+      const _restoreRd=_rdClamp(s.rd??120);
+      const _rsa=_rdNewAnchor(_restoreRd, Date.now());
       if(_snapCnt>0&&_snapCnt%499===0)_snapBatches.push(writeBatch(db));
       _snapBatches[_snapBatches.length-1].update(doc(db,'players',pid),{
         rating:s.rating,rd:_restoreRd,
-        rdBaseX:_rsa.rdBaseX,rdBaseTime:_rsa.rdBaseTime,
+        rdAnchorRD:_rsa.rdAnchorRD,rdAnchorSec:_rsa.rdAnchorSec,
         wins:s.wins,losses:s.losses,
         no1Since:s.no1Since||null,
         longestNo1Ms:s.longestNo1Ms||0
@@ -4994,128 +4877,174 @@ function showMsg(id,text,isErr=false){const el=document.getElementById(id);el.te
 
 // ── RD DECAY CHART ────────────────────────────────────────────────────────────
 const _RDP={top:14,right:8,bottom:24,left:40}; // matches rating chart exactly
-// New RD decay formula (asymptotic curve with rating scaling)
-// y = -30240000 / (x + 336000) + 120
-// x = curve position in seconds, y = RD value
-// Min RD: 30, Max RD: 120
-// Each second: x increases by (1500 / current rating)
-const _RD_NUMERATOR = 30240000;
+
+// ── RD SYSTEM (COMPLETE REWRITE) ─────────────────────────────────────────────
+//
+// FORMULA: rd = -30240000 / (x + 336000) + 120
+//   x increases each second  →  rd increases toward 120 (asymptote)
+//   Min rd = 30, Max rd = 120
+//
+// CLOCK MODEL — think of it as a stopwatch on global time:
+//
+//   Each player document stores two anchor fields:
+//     rdAnchorRD  — the rd value at the anchor moment  [30..120]
+//     rdAnchorSec — Unix time in WHOLE SECONDS when anchor was set  (integer)
+//
+//   Live RD right now:
+//     elapsed = floor(nowSec) - rdAnchorSec          (whole seconds only)
+//     liveRD  = rdAfterSec(rdAnchorRD, rating, elapsed)
+//
+//   On every match the anchor is reset:
+//     1. anchorSec = round(matchTime / 1000)          (nearest whole second)
+//     2. matchRD   = rdAfterSec(rdAnchorRD, rating, anchorSec - rdAnchorSec)
+//     3. newRD     = Glicko2(matchRD)                 (decreases RD on play)
+//     4. new anchor = (newRD, anchorSec)
+//
+//   REPAIR does exactly the same steps, rounding each event to the nearest second.
+//   Live calc and repair are GUARANTEED to agree because both use integer-second
+//   arithmetic — sub-second drift between Date.now() and Firestore serverTimestamp
+//   disappears entirely.
+//
+// BACKWARD COMPAT:
+//   Old rdBaseX / rdBaseTime fields are read as fallback on players that haven't
+//   been through a repair yet. After repair runs once, all players have new fields.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _RD_NUMERATOR       = 30240000;
 const _RD_ASYMPTOTE_SHIFT = 336000;
-const _RD_ASYMPTOTE = 120;
-const _RD_MIN = 30;
-const _RD_MAX_NEW = 120;
+const _RD_ASYMPTOTE       = 120;
+const _RD_MIN             = 30;
+const _RD_MAX_NEW         = 120;
 const _RD_LO = 30, _RD_HI = 120, _RD_PX_PER = 30, _RD_ANIM_DUR = 650;
 
 let _rdAnimReq=null, _rdAnimStart=null, _rdAnimFrom={};
 
-// ratingScale = (1500/rating)^DECAY_SCALE_MULTIPLIER
-// multiplier=0 → flat decay (scale=1); higher rating → slower decay
+// Clamp an rd value to the valid range
+function _rdClamp(rd){ return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, (rd == null ? 120 : rd))); }
+
+// Decay rate = g * (1500/rating)^m
+// g=1, m=0  → flat rate of 1× (default)
+// g=2, m=0  → everyone decays 2× as fast
+// g=1, m=1  → higher-rated players decay slower, 1500-rated at exactly 1×
 function _rdRatingScale(rating){
   const m = DECAY_SCALE_MULTIPLIER;
-  if(!m || m <= 0) return 1;
-  return Math.pow(1500 / Math.max(1, rating || 1500), m);
+  const g = (DECAY_GENERAL_MULTIPLIER != null && DECAY_GENERAL_MULTIPLIER > 0) ? DECAY_GENERAL_MULTIPLIER : 1;
+  const ratingScale = (!m || m <= 0) ? 1 : Math.pow(1500 / Math.max(1, rating || 1500), m);
+  return g * ratingScale;
 }
 
-// Compute RD live from stored rdBaseX + rdBaseTime anchor.
-// rdBaseX is the curve x-position when the anchor was set (after a match or on player creation).
-// Elapsed real-world seconds are scaled by _rdRatingScale and added to advance x forward.
-function _rdBaseTimeMs(t){
-  // Firestore Timestamps have .toMillis(), plain numbers are already ms
-  if(!t) return Date.now();
-  if(typeof t === 'number') return t;
-  if(typeof t.toMillis === 'function') return t.toMillis();
-  if(typeof t.toDate === 'function') return t.toDate().getTime();
-  return Number(t) || Date.now();
-}
-function _computeRDLive(p){
-  // Always re-derive rdBaseX from p.rd so rdBaseX can never drift out of sync
-  // with the stored rd value (e.g. from a failed/partial Firestore write).
-  // rdBaseX is just _rdToX(p.rd) — it's always recomputable and should not be trusted
-  // as an independent source of truth.
-  const rdStored = Math.min(_RD_MAX_NEW-0.01, Math.max(_RD_MIN, p.rd != null ? p.rd : 120));
-  const rdBaseX = _rdToX(rdStored);
-  // rdBaseTime is written atomically alongside rd on every match — fall back to
-  // Date.now() (zero elapsed) if it is missing for any reason.
-  const rdBaseTime = p.rdBaseTime ?? Date.now();
-  const elapsedSec = (Date.now() - _rdBaseTimeMs(rdBaseTime)) / 1000;
-  const xNow = rdBaseX + Math.max(0, elapsedSec) * _rdRatingScale(p.rating);
-  const rd = -_RD_NUMERATOR / (xNow + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
-  return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, rd));
-}
-
-// Inverse formula: solve for x given RD
-// x = -30240000 / (y - 120) - 336000
+// Inverse formula: given rd, return x-position on the curve
+// x = -30240000 / (rd - 120) - 336000
 function _rdToX(rd){
-  if(rd >= _RD_ASYMPTOTE) return Infinity; // At asymptote
-  const denominator = rd - _RD_ASYMPTOTE;
-  if(denominator === 0) return Infinity;
-  return -_RD_NUMERATOR / denominator - _RD_ASYMPTOTE_SHIFT;
+  if(rd >= _RD_ASYMPTOTE) return Infinity;
+  const d = rd - _RD_ASYMPTOTE;
+  if(d === 0) return Infinity;
+  return -_RD_NUMERATOR / d - _RD_ASYMPTOTE_SHIFT;
 }
 
-// Compute rdBaseX for a player at their current rd, anchored to now.
-// This is stored in Firestore so _computeRDLive can track continuous decay from that point.
-function _rdAnchor(rd, rating, ts){
-  // rdBaseX is the curve position at the time of the anchor.
-  // We use _rdToX(rd) which gives the x where the asymptotic curve equals rd.
-  // ts should be the match/event timestamp so live and repair paths agree exactly.
-  return { rdBaseX: _rdToX(Math.min(_RD_MAX_NEW - 0.01, Math.max(_RD_MIN, rd))), rdBaseTime: ts||Date.now() };
+// Forward formula: given x-position, return clamped rd
+function _rdFromX(x){
+  const rd = -_RD_NUMERATOR / (x + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
+  return _rdClamp(rd);
 }
 
-// Build chart points using live RD computation; offsetSec projects forward in time
+// Core decay function: given an anchor rd + rating, compute rd after N WHOLE seconds
+// elapsedWholeSec is always an integer (floor/round before calling)
+function _rdAfterSec(anchorRD, rating, elapsedWholeSec){
+  const clamped = _rdClamp(anchorRD);
+  const x0 = _rdToX(clamped);
+  if(!isFinite(x0)) return _RD_MAX_NEW;
+  const xNow = x0 + Math.max(0, Math.floor(elapsedWholeSec)) * _rdRatingScale(rating || 1500);
+  return _rdFromX(xNow);
+}
+
+// Read anchor from a player object — supports new fields with fallback to old fields
+function _rdGetAnchor(p){
+  // New clean fields
+  if(p.rdAnchorSec != null){
+    return { rd: _rdClamp(p.rdAnchorRD ?? p.rd ?? 120), sec: p.rdAnchorSec };
+  }
+  // Fallback: old rdBaseTime (number in ms, Firestore Timestamp, etc.)
+  let ms = Date.now();
+  const t = p.rdBaseTime;
+  if(t != null){
+    if(typeof t === 'number')           ms = t > 2e10 ? t : t * 1000; // detect accidental seconds storage
+    else if(typeof t.toMillis==='function') ms = t.toMillis();
+    else if(typeof t.toDate==='function')   ms = t.toDate().getTime();
+    else ms = Number(t) || Date.now();
+  }
+  return { rd: _rdClamp(p.rd ?? 120), sec: Math.round(ms / 1000) };
+}
+
+// Build new anchor fields for writing to Firestore
+// tsMs: event time in milliseconds (rounded to nearest second internally)
+function _rdNewAnchor(rd, tsMs){
+  const sec = Math.round((tsMs || Date.now()) / 1000);
+  return { rdAnchorRD: _rdClamp(rd), rdAnchorSec: sec };
+}
+
+// Backward-compat alias — old call sites pass (rd, rating, ts) but rating is unused now
+function _rdAnchor(rd, _rating, ts){
+  const a = _rdNewAnchor(rd, ts || Date.now());
+  // Return both new fields AND old-style fields so any call site that missed the update still works
+  return { rdBaseX: _rdToX(_rdClamp(rd)), rdBaseTime: a.rdAnchorSec * 1000,
+           rdAnchorRD: a.rdAnchorRD, rdAnchorSec: a.rdAnchorSec };
+}
+
+// THE live RD function — single authoritative source of truth for any player's current RD
+// Operates in whole seconds only, so it always agrees with the repair engine
+function _computeRDLive(p){
+  if(p.decayImmune) return _rdClamp(p.rdAnchorRD ?? p.rd ?? 120);
+  const { rd: anchorRD, sec: anchorSec } = _rdGetAnchor(p);
+  const nowSec = Math.floor(Date.now() / 1000);
+  return _rdAfterSec(anchorRD, p.rating || 1500, nowSec - anchorSec);
+}
+
+// Build chart points for the RD decay modal; offsetSec projects forward in time
 function _rdBuildPts(offsetSec){
-  offsetSec=offsetSec||0;
-  return players.map(p=>{
-    // Always derive rdBaseX from p.rd — same desync prevention as _computeRDLive
-    const rdStored2 = Math.min(_RD_MAX_NEW-0.01, Math.max(_RD_MIN, p.rd != null ? p.rd : 120));
-    const rdBaseX = _rdToX(rdStored2);
-    const rdBaseTime = p.rdBaseTime ?? Date.now();
-    // Current RD (no offset)
-    const elapsedNow = (Date.now() - _rdBaseTimeMs(rdBaseTime)) / 1000;
-    const xNow = rdBaseX + Math.max(0, elapsedNow) * _rdRatingScale(p.rating);
-    const liveRd = Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, -_RD_NUMERATOR/(xNow+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE));
-    // Projected RD (with offset)
-    const elapsedFuture = elapsedNow + offsetSec;
-    const xFuture = rdBaseX + Math.max(0, elapsedFuture) * _rdRatingScale(p.rating);
-    const futureRd = Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, -_RD_NUMERATOR/(xFuture+_RD_ASYMPTOTE_SHIFT)+_RD_ASYMPTOTE));
+  offsetSec = offsetSec || 0;
+  return players.map(p => {
+    const { rd: anchorRD, sec: anchorSec } = _rdGetAnchor(p);
+    const rating = p.rating || 1500;
+    const nowSec = Math.floor(Date.now() / 1000);
+    const elapsedNow = Math.max(0, nowSec - anchorSec);
+    const liveRd    = _rdAfterSec(anchorRD, rating, elapsedNow);
+    const futureRd  = _rdAfterSec(anchorRD, rating, elapsedNow + Math.floor(offsetSec));
     return {
-      pid:p.firestoreId,
-      name:p.name,
-      photoURL:p.photoURL||null,
-      rd:futureRd,
-      rdNow:liveRd,
-      rating:p.rating||1500,
-      rdBaseX: rdBaseX,
-      rdBaseTime: rdBaseTime,
-      inactive:_rdInactivePeriods(p),
-      hidden:futureRd>100,
-      hiddenNow:liveRd>100,
-      immune:!!p.decayImmune
+      pid:     p.firestoreId,
+      name:    p.name,
+      photoURL: p.photoURL || null,
+      rd:      futureRd,
+      rdNow:   liveRd,
+      rating,
+      rdBaseX:   _rdToX(anchorRD),   // kept for chart x-axis rendering
+      rdBaseTime: anchorSec * 1000,   // kept for chart tooltip
+      inactive:   _rdInactivePeriods(p),
+      hidden:     futureRd > 100,
+      hiddenNow:  liveRd > 100,
+      immune:     !!p.decayImmune
     };
   });
 }
 
 function _rdInactivePeriods(p){
-  if(!p.rdBaseX && p.rdBaseX !== 0) return 0; // New formula, show 0
-  // For chart visualization: show as cumulative decay periods
-  return _rdToX(p.rd || 100) / 60; // Show as minutes for chart
+  const { rd: anchorRD } = _rdGetAnchor(p);
+  return _rdToX(_rdClamp(anchorRD)) / 60; // show as minutes for chart positioning
 }
 
 // For the future trajectory projection on chart (how RD will decay)
 // Projects future decay assuming constant rating
 function _rdProjectFuture(rd, rating, secondsAhead){
-  const x0 = _rdToX(rd);
-  const xFuture = x0 + secondsAhead * _rdRatingScale(rating);
-  const rdFuture = -_RD_NUMERATOR / (xFuture + _RD_ASYMPTOTE_SHIFT) + _RD_ASYMPTOTE;
-  return Math.min(_RD_MAX_NEW, Math.max(_RD_MIN, rdFuture));
+  return _rdAfterSec(rd, rating, Math.floor(secondsAhead));
 }
 
 // Estimate seconds until rd reaches target
 function _rdSecondsToTarget(rd0, rating, target){
   if(rd0 >= target) return 0;
-  const x0 = _rdToX(rd0);
-  const xTarget = _rdToX(target);
-  if(xTarget <= x0) return 0;
-  return (xTarget - x0) / _rdRatingScale(rating);
+  const x0 = _rdToX(_rdClamp(rd0));
+  const xTarget = _rdToX(_rdClamp(target));
+  if(!isFinite(x0)||!isFinite(xTarget)||xTarget <= x0) return 0;
+  return Math.ceil((xTarget - x0) / _rdRatingScale(rating || 1500));
 }
 
 window.toggleRDDecay=function(){ openRDModal(); };
