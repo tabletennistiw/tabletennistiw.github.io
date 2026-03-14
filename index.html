@@ -3506,7 +3506,7 @@ function drawChart(points){
     const pt=points[idx],col=idx===0?'#8a6a78':(pt.won?'#7ec8a0':'#ff4757');
     let html=`<span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${col}">${r2(pt.rating)}</span>`;
     if(idx===0)html+=`<br><span style="color:#8a6a78">Starting rating</span>`;
-    else{const d=new Date(pt.date);const ds=pt.rating-points[idx-1].rating;const df=(ds>=0?'+':'')+r2(Math.abs(ds));const dt=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});html+=`<br><span style="color:${col}">${pt.won?'WIN':'LOSS'}</span> vs ${esc(pt.label)}<br><span style="color:${col}">${df} pts</span> · ${dt}`;}
+    else{const d=new Date(pt.date);const ds=pt.rating-points[idx-1].rating;const df=(ds>=0?'+':'-')+r2(Math.abs(ds));const dt=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});html+=`<br><span style="color:${col}">${pt.won?'WIN':'LOSS'}</span> vs ${esc(pt.label)}<br><span style="color:${col}">${df} pts</span> · ${dt}`;}
     tip.innerHTML=html;tip.style.display='block';tip.style.left='-9999px';tip.style.top='-9999px';
     requestAnimationFrame(()=>{
       const cr=canvas.getBoundingClientRect();
@@ -5362,14 +5362,25 @@ window.updateRatingTrendChart=function(){
         },
         tooltip:{
           backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),borderColor:getComputedStyle(document.documentElement).getPropertyValue('--border').trim(),borderWidth:1,
-          titleColor:'#E1E2EF',bodyColor:'#8a6a78',
+          titleColor:getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),bodyColor:getComputedStyle(document.documentElement).getPropertyValue('--muted').trim(),
           titleFont:{family:'DM Mono,monospace',size:11},bodyFont:{family:'DM Mono,monospace',size:11},
           usePointStyle:true,
           boxWidth:8,
           filter:item=>!window._ratingTrendChart?.getDatasetMeta(item.datasetIndex)?.hidden,
           callbacks:{
             title:items=>new Date(items[0].parsed.x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
-            label:item=>`${item.dataset.label}: ${item.parsed.y}`,
+            label:item=>{
+              const ds=item.dataset;
+              const pt=ds.data[item.dataIndex];
+              const prev=ds.data[item.dataIndex-1];
+              const base=`${ds.label}: ${item.parsed.y}`;
+              if(!pt||item.dataIndex===0||item.dataIndex===ds.data.length-1) return base;
+              const diff=prev?item.parsed.y-prev.y:null;
+              const diffStr=diff!=null?(diff>=0?' +':' ')+r2(Math.abs(diff)):'';
+              const result=pt.won?'WIN':'LOSS';
+              const opp=pt.label?` vs ${pt.label}`:'';
+              return `${ds.label}: ${item.parsed.y}${diffStr} · ${result}${opp}`;
+            },
             labelColor:item=>({borderColor:item.dataset._baseColor,backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()}),
           }
         }
