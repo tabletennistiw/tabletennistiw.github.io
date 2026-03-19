@@ -1118,6 +1118,7 @@ function listenAdminActions(){
   if(adminActionsUnsub)return;
   adminActionsUnsub=onSnapshot(query(collection(db,'adminActions'),orderBy('date','asc')),snap=>{
     adminActions=snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
+    renderLeaderboard();
     renderHistory();
     if(isAdmin)renderAdminActionsLog();
   },err=>console.error(err));
@@ -1272,6 +1273,31 @@ window.saveDecay=async function(){
         oldG:oldGeneralMult,newG:resolvedNewGeneral
       });
       msgs.push(`g → ${resolvedNewGeneral}`);
+    }
+    // Re-anchor every player at this exact second so live calc starts fresh from now.
+    // Without this, _rdAfterSec would retroactively apply the new g/m back to each
+    // player's last match, over-inflating (or under-inflating) their current RD.
+    if(msgs.length && players.length){
+      const _reanchorNowSec = Math.floor(Date.now() / 1000);
+      const _reanchorBatch = writeBatch(db);
+      players.forEach(p => {
+        if(!p.firestoreId || p.decayImmune) return;
+        // Compute live RD using the OLD multipliers (still in globals until we just set them)
+        // We already updated the globals above, so temporarily use old values via _rdSegmented
+        // Actually: globals are already updated, but the anchor hasn't been written yet.
+        // Use _rdSegmented so it segments correctly up to now with old g, then new g takes over.
+        const lrd = _rdClamp(_rdSegmented(
+          _rdGetAnchor(p).rd, p.rating || 1500,
+          _rdGetAnchor(p).sec, _reanchorNowSec
+        ));
+        const newAnchor = _rdNewAnchor(lrd, _reanchorNowSec * 1000);
+        _reanchorBatch.update(doc(db,'players',p.firestoreId),{
+          rd: lrd,
+          rdAnchorRD: newAnchor.rdAnchorRD,
+          rdAnchorSec: newAnchor.rdAnchorSec
+        });
+      });
+      await _reanchorBatch.commit();
     }
     showMsg('decay-msg',msgs.length?`Saved: ${msgs.join(', ')}. Logged as admin action.`:'No changes to save.');
     updateDecayInfo();
@@ -1632,15 +1658,16 @@ function renderLeaderboard(){
   document.getElementById('lb-empty').style.display='none';
   const vis=sorted.filter(p=>getLiveRD(p)<=100);
   initLbQuoteZone(vis);
+  // Always show lb-table so the Rating/RD chart buttons in the header remain accessible.
+  document.getElementById('lb-table').style.display='block';
+  let hn=document.getElementById('lb-hidden-note');
   if(!vis.length){
-    document.getElementById('lb-table').style.display='none';
-    let hn=document.getElementById('lb-hidden-note');
     if(!hn){hn=document.createElement('div');hn.id='lb-hidden-note';hn.className='empty';document.getElementById('panel-leaderboard').appendChild(hn);}
-    hn.style.display='block';hn.textContent=sorted.length+' player(s) exist but all have RD>100. Play more games!';
+    hn.style.display='block';hn.textContent='All '+sorted.length+' player(s) have RD > 100 and are hidden. Use the RD chart above to track decay.';
+    _lbSetListHeight(0);
     return;
   }
-  const hn=document.getElementById('lb-hidden-note');if(hn)hn.style.display='none';
-  document.getElementById('lb-table').style.display='block';
+  if(hn)hn.style.display='none';
 
   // If this is the first render or a full rebuild, build all rows from scratch
   const list=document.getElementById('lb-list');
@@ -2751,7 +2778,7 @@ window.renderHistory=function(){
     const typeLabel=a.type==='stat_edit'?'STAT EDIT':a.type==='decay_change'?'DECAY CHANGE':a.type==='decay_scale_change'?'SCALE CHANGE':a.type==='snapshot'?'SNAPSHOT':'ADMIN ACTION';
     const isoVal=ts.toISOString().slice(0,16);
     const snapPlayers=a.type==='snapshot'&&a.data?.players?Object.values(a.data.players).sort((x,y)=>y.rating-x.rating):'';
-    const snapDropdown=snapPlayers?`<details style="margin-top:.4rem;width:100%"><summary style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.3rem">▶ ${snapPlayers.length} players</summary><div style="margin-top:.4rem;display:flex;flex-direction:column;gap:.18rem">${snapPlayers.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--text);display:flex;gap:.5rem"><span style="color:var(--accent);min-width:3.5rem">${Math.round(p.rating)}</span><span style="color:var(--muted);min-width:3rem">±${Math.round(p.rd)} RD</span><span>${esc(p.name)}</span><span style="color:var(--muted)">${p.wins}W–${p.losses}L</span></span>`).join('')}</div></details>`:'';
+    const snapDropdown=snapPlayers?`<details style="margin-top:.4rem;width:100%"><summary style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.3rem">▶ ${snapPlayers.length} players</summary><div style="margin-top:.4rem;display:flex;flex-direction:column;gap:.18rem">${snapPlayers.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--text);display:flex;gap:.5rem"><span style="color:var(--accent);min-width:3.5rem">${(+p.rating).toFixed(2)}</span><span style="color:var(--muted);min-width:3rem">±${(+p.rd).toFixed(2)} RD</span><span>${esc(p.name)}</span><span style="color:var(--muted)">${p.wins}W–${p.losses}L</span></span>`).join('')}</div></details>`:'';
     return`<div class="admin-action-row" style="flex-wrap:wrap">
       <span class="admin-action-badge" style="align-self:flex-start">${typeLabel}</span>
       <span class="admin-action-desc" style="flex:1;min-width:0">${esc(a.description||'')}${snapDropdown}</span>
@@ -2787,7 +2814,7 @@ function renderAdminActionsLog(){
     const typeLabel=a.type==='stat_edit'?'★ STAT EDIT':a.type==='decay_change'?'★ DECAY CHANGE':a.type==='decay_scale_change'?'★ SCALE CHANGE':a.type==='snapshot'?'★ SNAPSHOT':'★ ADMIN';
     const isoVal2=ts.toISOString().slice(0,16);
     const snapP2=a.type==='snapshot'&&a.data?.players?Object.values(a.data.players).sort((x,y)=>y.rating-x.rating):null;
-    const snapDrop2=snapP2?`<details style="margin-top:.35rem"><summary style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.3rem">▶ ${snapP2.length} players</summary><div style="margin-top:.35rem;display:flex;flex-direction:column;gap:.18rem">${snapP2.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.58rem;display:flex;gap:.5rem"><span style="color:var(--accent);min-width:3.5rem">${Math.round(p.rating)}</span><span style="color:var(--muted);min-width:3rem">±${Math.round(p.rd)} RD</span><span style="color:var(--text)">${esc(p.name)}</span><span style="color:var(--muted)">${p.wins}W–${p.losses}L</span></span>`).join('')}</div></details>`:'';
+    const snapDrop2=snapP2?`<details style="margin-top:.35rem"><summary style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.3rem">▶ ${snapP2.length} players</summary><div style="margin-top:.35rem;display:flex;flex-direction:column;gap:.18rem">${snapP2.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.58rem;display:flex;gap:.5rem"><span style="color:var(--accent);min-width:3.5rem">${(+p.rating).toFixed(2)}</span><span style="color:var(--muted);min-width:3rem">±${(+p.rd).toFixed(2)} RD</span><span style="color:var(--text)">${esc(p.name)}</span><span style="color:var(--muted)">${p.wins}W–${p.losses}L</span></span>`).join('')}</div></details>`:'';
     return`<div class="admin-mrow" style="border-color:rgba(201,160,220,.35);background:rgba(201,160,220,.04);flex-wrap:wrap;align-items:flex-start">
       <div class="admin-minfo" style="flex:1;min-width:0">
         <strong style="color:var(--admin)">${typeLabel}</strong> · ${esc(a.description||'')}${snapDrop2}<br>
@@ -2931,14 +2958,33 @@ async function _runRepairEngine(){
     const anchorRD=_rdClamp(s.rdAnchorRD??s.rd??120);
     const anchorSec=s.rdAnchorSec??Math.round((evtMs||nowMs)/1000);
     const evtSec=Math.round(evtMs/1000);
-    const elapsedSec=Math.max(0,evtSec-anchorSec);
-    // Apply full formula: g * (1500/rating)^m — using replay values, not live globals
-    const ratingScale=(replayMult&&replayMult>0)?Math.pow(1500/Math.max(1,s.rating||1500),replayMult):1;
-    const scale=replayG*ratingScale;
-    const x0=_rdToX(anchorRD);
-    if(!isFinite(x0))return _RD_MAX_NEW;
-    const xNow=x0+elapsedSec*scale;
-    return _rdFromX(xNow);
+    if(evtSec<=anchorSec) return _rdClamp(anchorRD);
+    // Walk all g/m changes in order to find value active at anchorSec, then segment forward
+    const allChanges=allAdminActions
+      .filter(a=>a.type==='decay_general_change'||a.type==='decay_scale_change')
+      .map(a=>({sec:Math.round(_tsToMs(a.date)/1000),type:a.type,data:a.data}))
+      .sort((a,b)=>a.sec-b.sec);
+    let segG=1, segM=0;
+    for(const ch of allChanges){
+      if(ch.sec>anchorSec) break;
+      if(ch.type==='decay_general_change') segG=ch.data?.newG??segG;
+      if(ch.type==='decay_scale_change')   segM=ch.data?.newMult??segM;
+    }
+    const segs=allChanges.filter(ch=>ch.sec>anchorSec&&ch.sec<evtSec);
+    let rd=_rdClamp(anchorRD), curSec=anchorSec;
+    const stepRD=(from,to)=>{
+      const elapsed=to-from; if(elapsed<=0)return;
+      const rs=(segM&&segM>0)?Math.pow(1500/Math.max(1,s.rating||1500),segM):1;
+      const x0=_rdToX(rd); if(!isFinite(x0)){rd=_RD_MAX_NEW;return;}
+      rd=_rdFromX(x0+elapsed*(segG>0?segG:1)*rs);
+    };
+    for(const ch of segs){
+      stepRD(curSec,ch.sec); curSec=ch.sec;
+      if(ch.type==='decay_general_change') segG=ch.data?.newG??segG;
+      if(ch.type==='decay_scale_change')   segM=ch.data?.newMult??segM;
+    }
+    stepRD(curSec,evtSec);
+    return rd;
   };
 
   // Initialise a player that appears in a match but has no state yet
@@ -3004,8 +3050,24 @@ async function _runRepairEngine(){
     if(evt._type==='admin'){
       const a=evt.data;
       if(a.type==='decay_scale_change'){
+        // Re-anchor every player at this exact second before changing the multiplier
+        // so future decay uses the new m from now, not retroactively
+        for(const pid of Object.keys(state)){
+          if(state[pid].decayImmune)continue;
+          const lrd=_stateLiveRD(pid,evt._ts);
+          _stateAnchor(pid,lrd,evt._ts);
+          state[pid].rd=lrd;
+        }
         if(a.data?.newMult!=null)replayMult=a.data.newMult;
       }else if(a.type==='decay_general_change'){
+        // Re-anchor every player at this exact second before changing the multiplier
+        // so future decay uses the new g from now, not retroactively
+        for(const pid of Object.keys(state)){
+          if(state[pid].decayImmune)continue;
+          const lrd=_stateLiveRD(pid,evt._ts);
+          _stateAnchor(pid,lrd,evt._ts);
+          state[pid].rd=lrd;
+        }
         if(a.data?.newG!=null)replayG=a.data.newG;
       }else if(a.type==='snapshot'){
         // A snapshot mid-timeline resets state entirely
@@ -4463,6 +4525,16 @@ window.takeSnapshot=async function(){
     });
     // Also log as admin action so replay picks it up
     await logAdminAction('snapshot',`Snapshot "${label}"`,{snapshotId:snapRef.id,players:playerData});
+    // Re-anchor every player doc to snapshot time so live calc never spans a g change boundary
+    const anchorBatch=writeBatch(db);
+    Object.entries(playerData).forEach(([pid,pd])=>{
+      anchorBatch.update(doc(db,'players',pid),{
+        rd:pd.rd,
+        rdAnchorRD:pd.rdAnchorRD,
+        rdAnchorSec:pd.rdAnchorSec
+      });
+    });
+    await anchorBatch.commit();
     document.getElementById('snapshot-label-input').value='';
     showMsg('snapshot-msg','Snapshot saved: "'+label+'"');
     renderSnapshotList();
@@ -4933,6 +5005,44 @@ function _rdRatingScale(rating){
   return g * ratingScale;
 }
 
+// Convert any Firestore timestamp / number / string to ms
+function _tsToMs(t){ return t?.toDate?t.toDate().getTime():t?.toMillis?t.toMillis():new Date(t).getTime(); }
+
+// Segmented RD calc: applies the correct g/m for each time window, matching the repair engine.
+function _rdSegmented(anchorRD, rating, anchorSec, targetSec){
+  if(targetSec <= anchorSec) return _rdClamp(anchorRD);
+  const changes = [];
+  (adminActions || []).forEach(a => {
+    if(a.type !== 'decay_general_change' && a.type !== 'decay_scale_change') return;
+    try { const sec = Math.round(_tsToMs(a.date) / 1000); changes.push({sec, type:a.type, data:a.data}); } catch(e){}
+  });
+  changes.sort((a,b) => a.sec - b.sec);
+  let g = 1, m = 0;
+  for(const ch of changes){
+    if(ch.sec > anchorSec) break;
+    if(ch.type === 'decay_general_change') g = ch.data?.newG ?? g;
+    if(ch.type === 'decay_scale_change')   m = ch.data?.newMult ?? m;
+  }
+  const segs = changes.filter(ch => ch.sec > anchorSec && ch.sec < targetSec);
+  let rd = _rdClamp(anchorRD);
+  let curSec = anchorSec;
+  const step = (from, to) => {
+    const elapsed = to - from;
+    if(elapsed <= 0) return;
+    const ratingScale = (!m || m <= 0) ? 1 : Math.pow(1500 / Math.max(1, rating), m);
+    const scale = (g > 0 ? g : 1) * ratingScale;
+    const x0 = _rdToX(rd);
+    if(!isFinite(x0)){ rd = _RD_MAX_NEW; return; }
+    rd = _rdFromX(x0 + elapsed * scale);
+  };
+  for(const ch of segs){ step(curSec, ch.sec); curSec = ch.sec;
+    if(ch.type === 'decay_general_change') g = ch.data?.newG ?? g;
+    if(ch.type === 'decay_scale_change')   m = ch.data?.newMult ?? m;
+  }
+  step(curSec, targetSec);
+  return rd;
+}
+
 // Inverse formula: given rd, return x-position on the curve
 // x = -30240000 / (rd - 120) - 336000
 function _rdToX(rd){
@@ -4997,6 +5107,14 @@ function _computeRDLive(p){
   if(p.decayImmune) return _rdClamp(p.rdAnchorRD ?? p.rd ?? 120);
   const { rd: anchorRD, sec: anchorSec } = _rdGetAnchor(p);
   const nowSec = Math.floor(Date.now() / 1000);
+  // Use segmented calc so g/m changes are applied from the correct moment, not retroactively.
+  // Falls back to simple _rdAfterSec if adminActions isn't loaded yet (non-admin or race).
+  if(adminActions && adminActions.length) {
+    try {
+      const result = _rdSegmented(anchorRD, p.rating || 1500, anchorSec, nowSec);
+      if(isFinite(result) && result >= _RD_MIN) return result;
+    } catch(e){ console.warn('_rdSegmented error:', e); }
+  }
   return _rdAfterSec(anchorRD, p.rating || 1500, nowSec - anchorSec);
 }
 
@@ -5007,9 +5125,9 @@ function _rdBuildPts(offsetSec){
     const { rd: anchorRD, sec: anchorSec } = _rdGetAnchor(p);
     const rating = p.rating || 1500;
     const nowSec = Math.floor(Date.now() / 1000);
-    const elapsedNow = Math.max(0, nowSec - anchorSec);
-    const liveRd    = _rdAfterSec(anchorRD, rating, elapsedNow);
-    const futureRd  = _rdAfterSec(anchorRD, rating, elapsedNow + Math.floor(offsetSec));
+    const futureSec = nowSec + Math.floor(offsetSec);
+    const liveRd    = _rdSegmented(anchorRD, rating, anchorSec, nowSec);
+    const futureRd  = _rdSegmented(anchorRD, rating, anchorSec, futureSec);
     return {
       pid:     p.firestoreId,
       name:    p.name,
@@ -5207,7 +5325,12 @@ window.updateRatingTrendChart=function(){
     sorted.forEach(m=>{
       const i1=m.p1id===p.firestoreId;
       const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
-      pts.push({x:ts,y:Math.round(i1?m.p1newRating:m.p2newRating)});
+      pts.push({
+        x:ts,
+        y:Math.round(i1?m.p1newRating:m.p2newRating),
+        won:m.winnerId===p.firestoreId,
+        label:i1?m.p2name:m.p1name
+      });
     });
     pts.push({x:now,y:Math.round(p.rating)});
     datasets.push({
@@ -5221,12 +5344,13 @@ window.updateRatingTrendChart=function(){
         return c.replace('hsl','hsla').replace(')',',0.2)');
       },
       pointBackgroundColor:ctx=>{
+        const hi=window._trendHoveredIdx;
         const last=pts.length-1;
-        if(ctx.dataIndex===0||ctx.dataIndex===last){
-          const c=datasets[ctx.datasetIndex]?._baseColor||col;
-          return c;
-        }
-        return 'transparent';
+        const isSentinel=ctx.dataIndex===0||ctx.dataIndex===last;
+        if(!isSentinel) return 'transparent';
+        const c=datasets[ctx.datasetIndex]?._baseColor||col;
+        if(hi===null||ctx.datasetIndex===hi) return c;
+        return c.replace('hsl','hsla').replace(')',',0.2)');
       },
       pointRadius:ctx=>{
         const last=pts.length-1;
@@ -5370,16 +5494,36 @@ window.updateRatingTrendChart=function(){
           callbacks:{
             title:items=>new Date(items[0].parsed.x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
             label:item=>{
-              const ds=item.dataset;
-              const pt=ds.data[item.dataIndex];
-              const prev=ds.data[item.dataIndex-1];
-              const base=`${ds.label}: ${item.parsed.y}`;
-              if(!pt||item.dataIndex===0||item.dataIndex===ds.data.length-1) return base;
+              const raw=item.raw;
+              const prev=item.dataset.data[item.dataIndex-1];
+              const base=`${item.dataset.label}: ${item.parsed.y}`;
+              if(!raw||raw.won===undefined||item.dataIndex===0||item.dataIndex===item.dataset.data.length-1) return base;
               const diff=prev?item.parsed.y-prev.y:null;
-              const diffStr=diff!=null?(diff>=0?' +':' ')+r2(Math.abs(diff)):'';
-              const result=pt.won?'WIN':'LOSS';
-              const opp=pt.label?` vs ${pt.label}`:'';
-              return `${ds.label}: ${item.parsed.y}${diffStr} · ${result}${opp}`;
+              const diffStr=diff!=null?(diff>=0?' +':' -')+r2(Math.abs(diff)):'';
+              const result=raw.won?'WIN':'LOSS';
+              const opp=raw.label?` vs ${raw.label}`:'';
+              return `${item.dataset.label}: ${item.parsed.y}${diffStr} · ${result}${opp}`;
+            },
+            afterBody:items=>{
+              const chart=window._ratingTrendChart;
+              if(!chart||!items.length)return[];
+              const hoveredTs=items[0].raw?.x;
+              const hoveredDsIdx=items[0].datasetIndex;
+              if(!hoveredTs)return[];
+              const lines=[];
+              chart.data.datasets.forEach((ds,di)=>{
+                if(di===hoveredDsIdx)return;
+                if(chart.getDatasetMeta(di).hidden)return;
+                const match=ds.data.find(pt=>pt.x===hoveredTs&&pt.label!==undefined);
+                if(!match)return;
+                const prev=ds.data[ds.data.indexOf(match)-1];
+                const diff=prev?match.y-prev.y:null;
+                const diffStr=diff!=null?(diff>=0?' +':' -')+r2(Math.abs(diff)):'';
+                const result=match.won?'WIN':'LOSS';
+                const opp=match.label?` vs ${match.label}`:'';
+                lines.push(`${ds.label}: ${match.y}${diffStr} · ${result}${opp}`);
+              });
+              return lines;
             },
             labelColor:item=>({borderColor:item.dataset._baseColor,backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()}),
           }
