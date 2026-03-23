@@ -350,6 +350,19 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .chart-nav-btn.nav-left{left:0;}
 .lb-rd-btn,.lb-rating-btn{background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;padding:.1rem .35rem;font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.04em;line-height:1.4;vertical-align:middle;transition:color .15s,border-color .15s,background .15s;text-transform:uppercase;}
 .lb-rd-btn:hover,.lb-rating-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(229,178,93,.08);}
+#an-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;overflow:hidden;}
+#an-modal-overlay.open{display:flex;}
+@media(min-width:600px){#an-modal-overlay.open{align-items:center;padding:1.25rem;}}
+#an-modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:1200px;
+  height:92vh;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+#an-modal-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);flex-wrap:wrap;}
+#an-modal-header .an-modal-title-block{flex:1;display:flex;flex-direction:column;gap:.15rem;}
+#an-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:.1em;color:var(--accent);line-height:1;margin:0;}
+#an-modal-header .an-modal-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+#an-modal-body{flex:1;overflow:hidden;padding:.75rem;min-height:0;height:0;background:var(--bg);display:flex;flex-direction:column;align-items:stretch;position:relative;}
+.an-fullscreen-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.an-fullscreen-btn:hover{border-color:var(--accent);color:var(--accent);}
+
 #rating-trend-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:500;align-items:center;justify-content:center;padding:0;overflow:hidden;}
 #rating-trend-modal-overlay.open{display:flex;}
 @media(min-width:600px){#rating-trend-modal-overlay.open{align-items:center;padding:1.25rem;}}
@@ -516,6 +529,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   <button class="active" onclick="showPanel('leaderboard',this)">Leaderboard</button>
   <button onclick="showPanel('players',this)">Players</button>
   <button onclick="showPanel('matches',this)">Matches</button>
+  <button onclick="showPanel('analysis',this)">Analysis</button>
   <button onclick="showPanel('rules',this)">Rules</button>
   <button onclick="showPanel('brackets',this)">Tournaments</button>
   <button onclick="showPanel('settings',this)">⚙ Theme</button>
@@ -569,6 +583,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
           <h2>Submit Match</h2>
           <div class="field"><label>Winner</label><select id="match-winner"></select></div>
           <div class="field"><label>Loser</label><select id="match-loser"></select></div>
+          <div class="field"><label>Format</label><select id="match-format"><option value="11" selected>ft11 · standard</option><option value="13">ft13</option><option value="15">ft15</option><option value="17">ft17</option><option value="19">ft19</option><option value="21">ft21</option></select></div>
           <div class="field"><label>Score (optional)</label><input type="text" id="match-score" placeholder="e.g. 11-7"></div>
           <button class="btn" id="submit-match-btn" onclick="submitMatch()">Submit Match</button>
           <div class="msg" id="match-msg"></div>
@@ -582,6 +597,64 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
         <div id="h2h-banner" style="display:none;background:var(--surface);border:1px solid var(--border);padding:.75rem 1rem;margin-bottom:1rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap"></div>
         <div id="history-list"><div class="loading">Loading matches</div></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS -->
+  <div id="panel-analysis" class="panel">
+    <div style="max-width:860px;margin:0 auto">
+
+      <!-- rating gain chart -->
+      <div style="background:var(--bg);border:1px solid var(--border);margin-bottom:.65rem">
+        <div style="display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:nowrap;overflow-x:auto">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.08em;color:var(--accent);line-height:1;flex-shrink:0">Rating Gain</div>
+          <div style="flex:1"></div>
+          <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0">
+            <select id="an-a-player" onchange="anLoadPlayer('a')" style="width:auto;font-size:.65rem;background:var(--bg);border:1px solid var(--border);color:var(--accent);padding:.25rem .45rem;font-family:'DM Mono',monospace"><option value="">— player —</option></select>
+            <span style="font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);flex-shrink:0">vs</span>
+            <select id="an-b-player" onchange="anLoadPlayer('b')" style="width:auto;font-size:.65rem;background:var(--bg);border:1px solid var(--border);color:var(--accent3);padding:.25rem .45rem;font-family:'DM Mono',monospace"><option value="">Everyone</option></select>
+          </div>
+          <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0" id="an-fmt-checks"></div>
+          <button id="an-tog-win" onclick="anToggle('win')" style="flex-shrink:0;background:rgba(126,200,160,.12);border:1px solid var(--win);color:var(--win);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;padding:.25rem .5rem;cursor:pointer;text-transform:uppercase;transition:opacity .15s">Win</button>
+          <button id="an-tog-loss" onclick="anToggle('loss')" style="flex-shrink:0;background:rgba(217,83,79,.12);border:1px solid var(--loss);color:var(--loss);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;padding:.25rem .5rem;cursor:pointer;text-transform:uppercase;transition:opacity .15s">Loss</button>
+          <button onclick="openAnModal()" class="an-fullscreen-btn" style="flex-shrink:0">⛶ Fullscreen</button>
+        </div>
+        <div style="position:relative;aspect-ratio:5/2;cursor:crosshair">
+          <canvas id="an-chart" style="display:block;width:100%;height:100%"></canvas>
+        </div>
+      </div>
+
+      <!-- inline RD decay -->
+      <div style="background:var(--bg);border:1px solid var(--border);margin-bottom:.65rem">
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--surface)">
+          <div style="flex:1">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.08em;color:var(--accent);line-height:1">RD Decay</div>
+            <div style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:.1rem">Activity &amp; ranked cutoff</div>
+          </div>
+          <button onclick="openRDModal()" class="an-fullscreen-btn">⛶ Fullscreen</button>
+        </div>
+        <div style="position:relative;aspect-ratio:5/2;background:var(--bg);overflow:hidden">
+          <canvas id="rd-decay-inline" style="display:block;width:100%;height:100%;cursor:crosshair"></canvas>
+        </div>
+      </div>
+
+      <!-- inline rating trends -->
+      <div style="background:var(--bg);border:1px solid var(--border);margin-bottom:.65rem">
+        <div style="display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:nowrap;overflow-x:auto">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.08em;color:var(--accent);line-height:1;flex-shrink:0">Rating Trends</div>
+          <div style="flex:1"></div>
+          <select id="an-trend-timeframe" onchange="updateRatingTrendInline()" style="flex-shrink:0;width:auto;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.25rem .45rem;font-family:'DM Mono',monospace;font-size:.52rem;cursor:pointer">
+            <option value="week">Last Week</option>
+            <option value="month" selected>Last Month</option>
+            <option value="all">All Time</option>
+          </select>
+          <button onclick="openRatingTrendModal()" class="an-fullscreen-btn" style="flex-shrink:0">⛶ Fullscreen</button>
+        </div>
+        <div style="position:relative;aspect-ratio:5/2;background:var(--bg)">
+          <canvas id="rating-trend-inline" style="display:block;width:100%;height:100%"></canvas>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -706,7 +779,15 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       </div>
 
       <div class="admin-section" style="max-width:480px">
-        <div class="admin-stitle">Repair Ratings</div>
+        <div class="admin-stitle">Backfill Match Formats</div>
+        <div class="form-card" style="border-color:rgba(201,160,220,.15)">
+          <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">All matches played before the format field was added have no format stored. This sets every match without a format to <strong style="color:var(--text)">ft11</strong>. Run <strong style="color:var(--text)">Repair All Ratings</strong> afterward to recalculate with the multiplier applied.</p>
+          <button class="btn-admin" onclick="backfillFt11()" style="font-size:.68rem;padding:.65rem 1.2rem">⚡ Mark All Formatless Matches as ft11</button>
+          <div class="msg" id="backfill-msg" style="margin-top:.65rem"></div>
+        </div>
+      </div>
+
+      <div class="admin-section" style="max-width:480px">
         <div class="form-card" style="border-color:rgba(201,160,220,.15)">
           <p style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6">Recalculates every player's rating and RD directly from their last stored match result, then applies any accumulated decay since that match. Use this to fix any players whose values were incorrectly reset.</p>
           <button class="btn-admin" onclick="repairAllRatings()" style="font-size:.68rem;padding:.65rem 1.2rem">🔧 Repair All Ratings From Match History</button>
@@ -1078,6 +1159,21 @@ function E(mu, muj, phij) {
   return 1 / (1 + Math.exp(-gPhi(phij) * (mu - muj)));
 }
 
+
+// ── FORMAT MULTIPLIER HELPERS ─────────────────────────────────────────────────
+function _ftBinom(n,k){if(k>n||k<0)return 0;if(k===0||k===n)return 1;let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r;}
+function _ftPWin(p,N){const q=1-p;let s=0;for(let k=0;k<=N-2;k++)s+=_ftBinom(N-1+k,k)*Math.pow(p,N)*Math.pow(q,k);const pd=_ftBinom(2*N-2,N-1)*Math.pow(p,N-1)*Math.pow(q,N-1);s+=pd*(p*p)/(p*p+q*q);return s;}
+function _ftSolveP(target,N){let lo=0.001,hi=0.999;for(let i=0;i<80;i++){const mid=(lo+hi)/2;_ftPWin(mid,N)<target?lo=mid:hi=mid;}return(lo+hi)/2;}
+// Returns multiplier x such that p11^x = pN (baseline ft11)
+// winnerE = Glicko expected score (winner's perspective, i.e. their ft11 win prob)
+function _ftMult(winnerE, N){
+  if(N===11||winnerE<=0.001||winnerE>=0.999)return 1;
+  const p=_ftSolveP(winnerE,11);
+  const pN=_ftPWin(p,N);
+  if(pN<=0||pN>=1)return 1;
+  const m=Math.log(pN)/Math.log(winnerE);
+  return isFinite(m)?m:1;
+}
 
 function g2Update(player, opps) {
   const { mu, phi } = toG2(player.rating, player.rd);
@@ -2603,14 +2699,17 @@ window.submitMatch=async function(){
       // Use live RD (continuously decayed to nearest whole second)
       const wLiveRd=_computeRDLive(w);
       const lLiveRd=_computeRDLive(l);
-      uw=g2Update(
-        {rating:w.rating, rd:wLiveRd},
-        [{rating:l.rating, rd:lLiveRd, s:1}], now
-      );
-      ul=g2Update(
-        {rating:l.rating, rd:lLiveRd},
-        [{rating:w.rating, rd:wLiveRd, s:0}], now
-      );
+      const ftN=parseInt(document.getElementById('match-format').value)||11;
+      const{mu:_wmu,phi:_wphi}=toG2(w.rating,wLiveRd);
+      const{mu:_lmu,phi:_lphi}=toG2(l.rating,lLiveRd);
+      const _wE=E(_wmu,_lmu,_lphi); // winner's expected score (ft11 proxy)
+      const _lE=1-_wE;               // loser's expected score
+      const _wMult=_ftMult(_wE,ftN);
+      const _lMult=_ftMult(_lE,ftN);
+      const _uwRaw=g2Update({rating:w.rating,rd:wLiveRd},[{rating:l.rating,rd:lLiveRd,s:1}],now);
+      const _ulRaw=g2Update({rating:l.rating,rd:lLiveRd},[{rating:w.rating,rd:wLiveRd,s:0}],now);
+      uw={rating:w.rating+(_uwRaw.rating-w.rating)*_wMult, rd:_uwRaw.rd};
+      ul={rating:l.rating+(_ulRaw.rating-l.rating)*_lMult, rd:_ulRaw.rd};
       const allSnap=await getDocs(query(collection(db,'players')));
       const allP=allSnap.docs.map(d=>({id:d.id,...d.data()}));
       const ranked=p=>_computeRDLive(p)<=100;
@@ -2657,7 +2756,7 @@ window.submitMatch=async function(){
       tx.set(doc(collection(db,'matches')),{
         winnerId:wid,loserId:lid,winnerName:w.name,loserName:l.name,
         p1id:wid,p2id:lid,p1name:w.name,p2name:l.name,score:1,
-        matchScore:sc||null,
+        matchScore:sc||null, format:ftN,
         p1delta:Math.round((uw.rating-w.rating)*10)/10,
         p2delta:Math.round((ul.rating-l.rating)*10)/10,
         p1oldRD:wLiveRd,p2oldRD:lLiveRd,p1newRD:uw.rd,p2newRD:ul.rd,
@@ -2742,6 +2841,7 @@ window.renderHistory=function(){
   function renderMatchRow(m){
     const ts=m.date?.toDate?m.date.toDate():new Date(m.date);
     const ds=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ti=ts.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const fmtBadge=m.format&&m.format!==11?`<span style="font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.07em;color:var(--accent3);border:1px solid rgba(201,160,220,.4);padding:.08rem .3rem;margin-left:.35rem">ft${m.format}</span>`:'';
     const d1=(m.p1delta>=0?'+':'')+m.p1delta,d2=(m.p2delta>=0?'+':'')+m.p2delta;
     const s1='';
     const s2='';
@@ -2750,7 +2850,7 @@ window.renderHistory=function(){
       <div class="match-player"><span class="name">${escCap(m.p1name)}</span><span class="delta ${m.p1delta>=0?'pos':'neg'}">${d1} (${r2(m.p1oldRating)}→${r2(m.p1newRating)})</span><span class="rdi">RD:${m.p1oldRD!=null?"±"+r2(m.p1oldRD)+"→":""}±${r2(m.p1newRD)}${s1}</span></div>
       <div class="match-mid"><div class="match-result"><span class="ws">WIN</span>${m.matchScore?`<span class="match-score-lbl">${esc(m.matchScore)}</span>`:'<span style="font-size:.8rem;color:var(--muted)">vs</span>'}<span class="ls">LOSS</span></div>${delBtn}</div>
       <div class="match-player" style="text-align:right"><span class="name">${escCap(m.p2name)}</span><span class="delta ${m.p2delta>=0?'pos':'neg'}">${d2} (${r2(m.p2oldRating)}→${r2(m.p2newRating)})</span><span class="rdi">RD:${m.p2oldRD!=null?"±"+r2(m.p2oldRD)+"→":""}±${r2(m.p2newRD)}${s2}</span></div>
-      <div class="match-meta-col">${ds} · ${ti}</div>
+      <div class="match-meta-col">${ds} · ${ti}${fmtBadge}</div>
     </div>`;
   }
 
@@ -3105,8 +3205,16 @@ async function _runRepairEngine(){
     const rd2=_stateLiveRD(pid2,evt._ts);
     const topBefore=getTop(evt._ts);
 
-    const u1=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
-    const u2=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
+    const u1raw=g2Update({rating:s1.rating,rd:rd1},[{rating:s2.rating,rd:rd2,s:1}],evt._ts);
+    const u2raw=g2Update({rating:s2.rating,rd:rd2},[{rating:s1.rating,rd:rd1,s:0}],evt._ts);
+    const _ftN=m.format||11;
+    const{mu:_m1,phi:_p1}=toG2(s1.rating,rd1);
+    const{mu:_m2,phi:_p2}=toG2(s2.rating,rd2);
+    const _e1=E(_m1,_m2,_p2);
+    const _mult1=_ftMult(_e1,_ftN);
+    const _mult2=_ftMult(1-_e1,_ftN);
+    const u1={rating:s1.rating+(u1raw.rating-s1.rating)*_mult1,rd:u1raw.rd};
+    const u2={rating:s2.rating+(u2raw.rating-s2.rating)*_mult2,rd:u2raw.rd};
     const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
     const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
 
@@ -4940,6 +5048,14 @@ window.showPanel=function(id,btn){
     buildSliders(saved||THEMES['Default']);
   }
   if(id==='rules'){updateDecayInfo();}
+  if(id==='analysis'){
+    _anBuildFmtChecks();
+    _anPopulateDropdowns();
+    _anDefaultPlayers();
+    _anComputeOpponents();
+    const cv=document.getElementById('an-chart');if(cv&&!cv._anHoverInit)_anInitHover(cv,false);
+    setTimeout(()=>{_anDrawAll();drawRDDecayInline();updateRatingTrendInline();},60);
+  }
 };
 
 function cap(s){return String(s).replace(/\b\w/g,c=>c.toUpperCase());}
@@ -5227,14 +5343,11 @@ window.trendToggleAll=function(){
   const chart=window._ratingTrendChart;
   if(!chart)return;
   const anyVisible=chart.data.datasets.some((_,i)=>!chart.getDatasetMeta(i).hidden);
-  if(anyVisible){
-    chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=true;});
-  } else {
-    chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=false;});
-  }
+  if(anyVisible){chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=true;});}
+  else{chart.data.datasets.forEach((_,i)=>{chart.getDatasetMeta(i).hidden=false;});}
   const btn=document.getElementById('trend-toggle-btn');
   const nowAnyVisible=chart.data.datasets.some((_,i)=>!chart.getDatasetMeta(i).hidden);
-  if(btn) btn.textContent=nowAnyVisible?'None':'All';
+  if(btn)btn.textContent=nowAnyVisible?'None':'All';
   chart.update();
 };
 
@@ -5276,6 +5389,7 @@ const _trendHoverPlugin={
 
 // Reorder datasets so hovered one draws last (on top), restore original order on null
 function _applyTrendHover(chart, hi){
+  if(!chart)return;
   chart.data.datasets.forEach((ds,di)=>{
     if(hi===null){
       ds.borderColor=ds._baseColor;
@@ -5291,14 +5405,13 @@ function _applyTrendHover(chart, hi){
   chart.update('none');
 }
 
-window.updateRatingTrendChart=function(){
-  const timeframe=document.getElementById('trend-timeframe')?.value||'month';
+// ── SHARED TREND CHART FACTORY ───────────────────────────────────────────────
+function _buildTrendDatasets(timeframe){
   const now=Date.now();
   let cutoff=0;
   if(timeframe==='week')cutoff=now-7*24*60*60*1000;
   else if(timeframe==='month')cutoff=now-30*24*60*60*1000;
 
-  // Collect eligible players first so we know total for color spread
   const eligible=[];
   players.forEach(p=>{
     const pm=matches.filter(m=>{
@@ -5311,7 +5424,7 @@ window.updateRatingTrendChart=function(){
   const datasets=[];
   eligible.forEach(({p,pm},idx)=>{
     const col=_playerColor(idx,eligible.length);
-    const sorted=pm.sort((a,b)=>{
+    const sorted=pm.slice().sort((a,b)=>{
       const ta=a.date?.toDate?a.date.toDate().getTime():new Date(a.date).getTime();
       const tb=b.date?.toDate?b.date.toDate().getTime():new Date(b.date).getTime();
       return ta-tb;
@@ -5325,67 +5438,54 @@ window.updateRatingTrendChart=function(){
     sorted.forEach(m=>{
       const i1=m.p1id===p.firestoreId;
       const ts=m.date?.toDate?m.date.toDate().getTime():new Date(m.date).getTime();
-      pts.push({
-        x:ts,
-        y:Math.round(i1?m.p1newRating:m.p2newRating),
-        won:m.winnerId===p.firestoreId,
-        label:i1?m.p2name:m.p1name
-      });
+      pts.push({x:ts,y:Math.round(i1?m.p1newRating:m.p2newRating),won:m.winnerId===p.firestoreId,label:i1?m.p2name:m.p1name,format:m.format||null});
     });
     pts.push({x:now,y:Math.round(p.rating)});
     datasets.push({
-      label:p.name,data:pts,
-      _baseColor:col,
-      borderColor:col,
+      label:p.name,data:pts,_baseColor:col,borderColor:col,
       pointBorderColor:ctx=>{
         const hi=window._trendHoveredIdx;
         const c=datasets[ctx.datasetIndex]?._baseColor||col;
-        if(hi===null||ctx.datasetIndex===hi) return c;
+        if(hi===null||ctx.datasetIndex===hi)return c;
         return c.replace('hsl','hsla').replace(')',',0.2)');
       },
       pointBackgroundColor:ctx=>{
         const hi=window._trendHoveredIdx;
         const last=pts.length-1;
         const isSentinel=ctx.dataIndex===0||ctx.dataIndex===last;
-        if(!isSentinel) return 'transparent';
+        if(!isSentinel)return 'transparent';
         const c=datasets[ctx.datasetIndex]?._baseColor||col;
-        if(hi===null||ctx.datasetIndex===hi) return c;
+        if(hi===null||ctx.datasetIndex===hi)return c;
         return c.replace('hsl','hsla').replace(')',',0.2)');
       },
-      pointRadius:ctx=>{
-        const last=pts.length-1;
-        if(ctx.dataIndex===0||ctx.dataIndex===last) return 4;
-        return 2.5;
-      },
-      pointHoverRadius:ctx=>{
-        const last=pts.length-1;
-        if(ctx.dataIndex===0||ctx.dataIndex===last) return 6;
-        return 5;
-      },
+      pointRadius:ctx=>{const last=pts.length-1;return(ctx.dataIndex===0||ctx.dataIndex===last)?4:2.5;},
+      pointHoverRadius:ctx=>{const last=pts.length-1;return(ctx.dataIndex===0||ctx.dataIndex===last)?6:5;},
       backgroundColor:col.replace('hsl','hsla').replace(')',',0.15)'),
-      borderWidth:2,
-      pointStyle:'circle',
-      tension:0,fill:false
+      borderWidth:2,pointStyle:'circle',tension:0,fill:false
     });
   });
+  return{datasets,now};
+}
 
-  const canvas=document.getElementById('rating-trend-canvas');
-  if(!canvas)return;
-  if(window._ratingTrendChart){window._ratingTrendChart.destroy();window._ratingTrendChart=null;}
+function _makeTrendChart(canvas,chartKey,datasets,now,legendSize){
+  const s=getComputedStyle(document.documentElement);
+  const textCol=s.getPropertyValue('--text').trim();
+  const mutedCol=s.getPropertyValue('--muted').trim();
+  const bgCol=s.getPropertyValue('--bg').trim();
+  const bdCol=s.getPropertyValue('--border').trim();
+
+  if(window[chartKey]){window[chartKey].destroy();window[chartKey]=null;}
   window._trendHoveredIdx=null;
 
   if(!datasets.length){
-    const ctx2=canvas.getContext('2d');
-    ctx2.clearRect(0,0,canvas.width,canvas.height);
-    ctx2.fillStyle='#8a6a78';
-    ctx2.font='13px DM Mono,monospace';
-    ctx2.textAlign='center';
-    ctx2.textBaseline='middle';
-    ctx2.fillText('No matches in selected timeframe',canvas.offsetWidth/2||200,canvas.offsetHeight/2||100);
-    return;
+    const c2=canvas.getContext('2d');
+    c2.clearRect(0,0,canvas.width,canvas.height);
+    c2.fillStyle=mutedCol;c2.font='13px DM Mono,monospace';
+    c2.textAlign='center';c2.textBaseline='middle';
+    c2.fillText('No matches in selected timeframe',canvas.offsetWidth/2||200,canvas.offsetHeight/2||100);
+    return null;
   }
 
-  // Pre-compute initial bounds from all datasets so first render is correct
   const _trendBounds=(dsets)=>{
     const xs=[],ys=[];
     dsets.forEach(ds=>ds.data.forEach(pt=>{xs.push(pt.x);ys.push(pt.y);}));
@@ -5416,150 +5516,143 @@ window.updateRatingTrendChart=function(){
     }
   };
 
-  window._ratingTrendChart=new Chart(canvas,{
+  const chart=new Chart(canvas,{
     type:'line',
     data:{datasets},
     plugins:[_trendHoverPlugin,_trendPadPlugin],
     options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      animation:{duration:300},
-      parsing:false,
+      responsive:true,maintainAspectRatio:false,animation:{duration:300},parsing:false,
       layout:{padding:{left:0,right:4,top:4,bottom:0}},
       scales:{
-        x:{
-          type:'linear',offset:false,
-          min:_initBounds.xMin,max:_initBounds.xMax,
-          ticks:{color:'#8a6a78',font:{family:'DM Mono,monospace',size:10},callback:v=>new Date(v).toLocaleDateString('en-US',{month:'short',day:'numeric'}),maxTicksLimit:7},
-          grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}
-        },
-        y:{
-          min:_initBounds.yMin,max:_initBounds.yMax,
-          ticks:{color:'#8a6a78',font:{family:'DM Mono,monospace',size:11}},
-          grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}
-        }
+        x:{type:'linear',offset:false,min:_initBounds.xMin,max:_initBounds.xMax,
+          ticks:{color:mutedCol,font:{family:'DM Mono,monospace',size:10},callback:v=>new Date(v).toLocaleDateString('en-US',{month:'short',day:'numeric'}),maxTicksLimit:7},
+          grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}},
+        y:{min:_initBounds.yMin,max:_initBounds.yMax,
+          ticks:{color:mutedCol,font:{family:'DM Mono,monospace',size:11}},
+          grid:{color:'rgba(74,42,56,.5)'},border:{color:'rgba(74,42,56,.5)'}}
       },
       plugins:{
         legend:{
-          labels:{
-            color:getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),font:{family:'DM Mono,monospace',size:11},
-            boxWidth:12,padding:16,
-            usePointStyle:false,
+          labels:{color:textCol,font:{family:'DM Mono,monospace',size:legendSize||11},boxWidth:12,padding:legendSize?10:16,usePointStyle:false,
             generateLabels(chart){
               return chart.data.datasets.map((ds,i)=>{
-                const meta=chart.getDatasetMeta(i);
-                const hidden=meta.hidden;
-                return {
-                  text:ds.label,
-                  fillStyle:hidden?'transparent':ds._baseColor,
-                  strokeStyle:ds._baseColor,
-                  lineWidth:2,
-                  hidden,
-                  index:i,
-                  datasetIndex:i,
-                  fontColor:hidden?getComputedStyle(document.documentElement).getPropertyValue('--muted').trim():getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),
-                };
+                const meta=chart.getDatasetMeta(i);const hidden=meta.hidden;
+                return{text:ds.label,fillStyle:hidden?'transparent':ds._baseColor,strokeStyle:ds._baseColor,lineWidth:2,hidden,index:i,datasetIndex:i,
+                  fontColor:hidden?mutedCol:textCol};
               });
             }
           },
-          onClick(e,item,legend){
-            const chart=legend.chart;
-            const meta=chart.getDatasetMeta(item.datasetIndex);
-            meta.hidden=!meta.hidden;
-            chart.update();
-          },
+          onClick(e,item,legend){const chart=legend.chart;const meta=chart.getDatasetMeta(item.datasetIndex);meta.hidden=!meta.hidden;chart.update();},
           onHover:(evt,item)=>{
-            const chart=window._ratingTrendChart;
-            if(!chart||window._trendHoveredIdx===item.datasetIndex)return;
-            if(chart.getDatasetMeta(item.datasetIndex).hidden)return;
-            window._trendLegendActive=true;
-            window._trendHoveredIdx=item.datasetIndex;
-            _applyTrendHover(chart,item.datasetIndex);
+            const c=window[chartKey];if(!c||window._trendHoveredIdx===item.datasetIndex)return;
+            if(c.getDatasetMeta(item.datasetIndex).hidden)return;
+            window._trendLegendActive=true;window._trendHoveredIdx=item.datasetIndex;_applyTrendHover(c,item.datasetIndex);
           },
           onLeave:()=>{
-            const chart=window._ratingTrendChart;
-            if(!chart)return;
-            window._trendLegendActive=false;
-            window._trendHoveredIdx=null;
-            _applyTrendHover(chart,null);
+            const c=window[chartKey];if(!c)return;
+            window._trendLegendActive=false;window._trendHoveredIdx=null;_applyTrendHover(c,null);
           }
         },
         tooltip:{
-          backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),borderColor:getComputedStyle(document.documentElement).getPropertyValue('--border').trim(),borderWidth:1,
-          titleColor:getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),bodyColor:getComputedStyle(document.documentElement).getPropertyValue('--muted').trim(),
+          backgroundColor:bgCol,borderColor:bdCol,borderWidth:1,
+          titleColor:textCol,bodyColor:mutedCol,
           titleFont:{family:'DM Mono,monospace',size:11},bodyFont:{family:'DM Mono,monospace',size:11},
-          usePointStyle:true,
-          boxWidth:8,
-          filter:item=>!window._ratingTrendChart?.getDatasetMeta(item.datasetIndex)?.hidden,
+          usePointStyle:true,boxWidth:8,
+          filter:item=>!window[chartKey]?.getDatasetMeta(item.datasetIndex)?.hidden,
           callbacks:{
             title:items=>new Date(items[0].parsed.x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
             label:item=>{
-              const raw=item.raw;
-              const prev=item.dataset.data[item.dataIndex-1];
+              const raw=item.raw;const prev=item.dataset.data[item.dataIndex-1];
               const base=`${item.dataset.label}: ${item.parsed.y}`;
-              if(!raw||raw.won===undefined||item.dataIndex===0||item.dataIndex===item.dataset.data.length-1) return base;
+              if(!raw||raw.won===undefined||item.dataIndex===0||item.dataIndex===item.dataset.data.length-1)return base;
               const diff=prev?item.parsed.y-prev.y:null;
               const diffStr=diff!=null?(diff>=0?' +':' -')+r2(Math.abs(diff)):'';
-              const result=raw.won?'WIN':'LOSS';
-              const opp=raw.label?` vs ${raw.label}`:'';
-              return `${item.dataset.label}: ${item.parsed.y}${diffStr} · ${result}${opp}`;
+              const fmtStr=raw.format?` · ft${raw.format}`:'';
+              return `${item.dataset.label}: ${item.parsed.y}${diffStr} · ${raw.won?'WIN':'LOSS'}${raw.label?' vs '+raw.label:''}${fmtStr}`;
             },
             afterBody:items=>{
-              const chart=window._ratingTrendChart;
-              if(!chart||!items.length)return[];
-              const hoveredTs=items[0].raw?.x;
-              const hoveredDsIdx=items[0].datasetIndex;
+              const c=window[chartKey];if(!c||!items.length)return[];
+              const hoveredTs=items[0].raw?.x;const hoveredDsIdx=items[0].datasetIndex;
               if(!hoveredTs)return[];
               const lines=[];
-              chart.data.datasets.forEach((ds,di)=>{
-                if(di===hoveredDsIdx)return;
-                if(chart.getDatasetMeta(di).hidden)return;
-                const match=ds.data.find(pt=>pt.x===hoveredTs&&pt.label!==undefined);
-                if(!match)return;
+              c.data.datasets.forEach((ds,di)=>{
+                if(di===hoveredDsIdx||c.getDatasetMeta(di).hidden)return;
+                const match=ds.data.find(pt=>pt.x===hoveredTs&&pt.label!==undefined);if(!match)return;
                 const prev=ds.data[ds.data.indexOf(match)-1];
                 const diff=prev?match.y-prev.y:null;
                 const diffStr=diff!=null?(diff>=0?' +':' -')+r2(Math.abs(diff)):'';
-                const result=match.won?'WIN':'LOSS';
-                const opp=match.label?` vs ${match.label}`:'';
-                lines.push(`${ds.label}: ${match.y}${diffStr} · ${result}${opp}`);
+                const fmtStr=match.format?` · ft${match.format}`:'';
+                lines.push(`${ds.label}: ${match.y}${diffStr} · ${match.won?'WIN':'LOSS'}${match.label?' vs '+match.label:''}${fmtStr}`);
               });
               return lines;
             },
-            labelColor:item=>({borderColor:item.dataset._baseColor,backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()}),
+            labelColor:item=>({borderColor:item.dataset._baseColor,backgroundColor:bgCol}),
           }
         }
       }
     }
   });
+  window[chartKey]=chart;
 
-  // Direct canvas mouse events for line proximity hover — no conflict with legend
+  // Line proximity hover
   canvas.onmousemove=e=>{
-    const chart=window._ratingTrendChart;
-    if(!chart||window._trendLegendActive)return;
-    const rect=canvas.getBoundingClientRect();
-    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-    let found=null, bestD=20;
-    chart.data.datasets.forEach((ds,di)=>{
-      if(chart.getDatasetMeta(di).hidden)return;
-      chart.getDatasetMeta(di).data.forEach(pt=>{
-        const{x,y}=pt.getProps(['x','y'],true);
-        const d=Math.hypot(mx-x,my-y);
-        if(d<bestD){bestD=d;found=di;}
-      });
+    const c=window[chartKey];if(!c||window._trendLegendActive)return;
+    const rect=canvas.getBoundingClientRect();const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    let found=null,bestD=20;
+    c.data.datasets.forEach((ds,di)=>{
+      if(c.getDatasetMeta(di).hidden)return;
+      c.getDatasetMeta(di).data.forEach(pt=>{const{x,y}=pt.getProps(['x','y'],true);const d=Math.hypot(mx-x,my-y);if(d<bestD){bestD=d;found=di;}});
     });
-    if(found!==window._trendHoveredIdx){
-      window._trendHoveredIdx=found;
-      _applyTrendHover(chart,found);
-    }
+    if(found!==window._trendHoveredIdx){window._trendHoveredIdx=found;_applyTrendHover(c,found);}
   };
   canvas.onmouseleave=()=>{
-    const chart=window._ratingTrendChart;
-    if(!chart||window._trendHoveredIdx===null)return;
-    window._trendHoveredIdx=null;
-    _applyTrendHover(chart,null);
+    const c=window[chartKey];if(!c||window._trendHoveredIdx===null)return;
+    window._trendHoveredIdx=null;_applyTrendHover(c,null);
   };
+  return chart;
+}
+
+window.updateRatingTrendChart=function(){
+  const timeframe=document.getElementById('trend-timeframe')?.value||'month';
+  const{datasets,now}=_buildTrendDatasets(timeframe);
+  const canvas=document.getElementById('rating-trend-canvas');if(!canvas)return;
+  _makeTrendChart(canvas,'_ratingTrendChart',datasets,now,11);
 };
 
+window.updateRatingTrendInline=function(){
+  const timeframe=document.getElementById('an-trend-timeframe')?.value||'month';
+  const{datasets,now}=_buildTrendDatasets(timeframe);
+  const canvas=document.getElementById('rating-trend-inline');if(!canvas)return;
+  _makeTrendChart(canvas,'_ratingTrendInlineChart',datasets,now,9);
+};
+
+window._switchToAnFromTrend=function(){
+  const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const trendBox=document.getElementById('rating-trend-modal-box');
+  const anOverlay=document.getElementById('an-modal-overlay');
+  const anBox=document.getElementById('an-modal-box');
+  const DUR=300;
+  anOverlay.style.background='transparent';
+  anOverlay.style.zIndex='501';
+  anBox.style.transition='none';
+  anBox.style.transform='translateX(-100vw)';
+  anOverlay.classList.add('open');
+  _anBuildModalFmtChecks();_anModalOpen=true;
+  const _anCv=document.getElementById('an-modal-chart');if(_anCv&&!_anCv._anHoverInit)_anInitHover(_anCv,true);
+  setTimeout(()=>_anDrawModal(),50);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    trendBox.style.transition=`transform ${DUR}ms cubic-bezier(.4,0,.2,1)`;
+    anBox.style.transition=`transform ${DUR}ms cubic-bezier(.4,0,.2,1)`;
+    trendBox.style.transform='translateX(100vw)';
+    anBox.style.transform='translateX(0)';
+    setTimeout(()=>{
+      trendOverlay.classList.remove('open');
+      anOverlay.style.zIndex='';anOverlay.style.background='';
+      trendBox.style.transition='';trendBox.style.transform='';
+      anBox.style.transition='';
+    },DUR+20);
+  }));
+};
 window._switchToRD=function _switchToRD(){
   const trendOverlay=document.getElementById('rating-trend-modal-overlay');
   const trendBox=document.getElementById('rating-trend-modal-box');
@@ -5622,14 +5715,18 @@ window._switchToTrend=function _switchToTrend(){
 document.addEventListener('keydown',e=>{
   const rdOverlay=document.getElementById('rd-modal-overlay');
   const trendOverlay=document.getElementById('rating-trend-modal-overlay');
+  const anOverlay=document.getElementById('an-modal-overlay');
   const rdOpen=rdOverlay&&rdOverlay.classList.contains('open');
   const trendOpen=trendOverlay&&trendOverlay.classList.contains('open');
+  const anOpen=anOverlay&&anOverlay.classList.contains('open');
   if(e.key==='Escape'){
-    if(rdOpen||trendOpen){closeRDModal();closeRatingTrendModal();e.stopPropagation();}
-  } else if(e.key==='ArrowRight'&&trendOpen){
-    _switchToRD();
-  } else if(e.key==='ArrowLeft'&&rdOpen){
-    _switchToTrend();
+    if(rdOpen||trendOpen||anOpen){closeRDModal();closeRatingTrendModal();closeAnModal();e.stopPropagation();}
+  } else if(e.key==='ArrowRight'){
+    if(trendOpen)_switchToRD();
+    else if(anOpen)_switchAnToTrend();
+  } else if(e.key==='ArrowLeft'){
+    if(rdOpen)_switchToTrend();
+    else if(trendOpen)_switchToAnFromTrend();
   }
 });
 
@@ -5656,6 +5753,8 @@ function _rdPreloadAvatars(){
       _rdImgCache[p.firestoreId] = img;
       const overlay = document.getElementById('rd-modal-overlay');
       if(overlay && overlay.classList.contains('open')) drawRDDecayChart({});
+      const inlineCv = document.getElementById('rd-decay-inline');
+      if(inlineCv && inlineCv._rdDrawn) drawRDDecayInline();
     };
     img.onerror = ()=>{ _rdImgCache[p.firestoreId] = null; };
     img.src = p.photoURL;
@@ -6039,7 +6138,6 @@ function _rdAnimateOrDraw(prevMap){
   };
 })();
 function _rdSecondsToAny100(){
-  // Returns the earliest seconds-until-purge among all non-immune visible players, or Infinity
   let min=Infinity;
   players.forEach(p=>{
     if(p.decayImmune)return;
@@ -6050,6 +6148,420 @@ function _rdSecondsToAny100(){
   });
   return min;
 }
+
+// ── BACKFILL FT11 ─────────────────────────────────────────────────────────────
+window.backfillFt11=async function(){
+  const msg=document.getElementById('backfill-msg');
+  msg.textContent='Scanning…';msg.className='msg';msg.style.display='block';
+  try{
+    const snap=await getDocs(collection(db,'matches'));
+    const toFix=snap.docs.filter(d=>!d.data().format);
+    if(!toFix.length){msg.textContent='All matches already have a format set.';return;}
+    const BATCH=450;
+    for(let i=0;i<toFix.length;i+=BATCH){
+      const b=writeBatch(db);
+      toFix.slice(i,i+BATCH).forEach(d=>b.update(doc(db,'matches',d.id),{format:11}));
+      await b.commit();
+    }
+    msg.textContent=`Done — marked ${toFix.length} match${toFix.length!==1?'es':''} as ft11.`;
+  }catch(e){msg.textContent='Error: '+e.message;msg.className='msg err';}
+};
+
+
+
+// ── ANALYSIS PANEL ────────────────────────────────────────────────────────────
+const AN_FORMATS=[11,15,21];
+const AN_COLORS=['#E5B25D','#7ec8a0','#c9a0dc'];
+const AN_STEPS=Array.from({length:641},(_,i)=>-800+i*2.5);
+let _anShowWin=true,_anShowLoss=true;
+const _anFmtVis={11:true,15:true,21:true};
+let _anMyRD=80,_anOppRD=80,_anDiff=0,_anVsAll=true;
+let _anOpponents=[],_anImgCache={};
+let _anHoverX=null,_anModalHoverX=null,_anModalOpen=false;
+
+function _anGlickoGain(diff,myRD,oppRD,win){
+  const{mu,phi}=toG2(1500,myRD);const{mu:muj,phi:phij}=toG2(1500+diff,oppRD);
+  const gj=gPhi(phij),ej=E(mu,muj,phij);const v=1/(gj*gj*ej*(1-ej));
+  const phiNew=1/Math.sqrt(1/(phi*phi)+1/v);
+  return fromG2(mu+phiNew*phiNew*gj*((win?1:0)-ej),phiNew).r-1500;
+}
+function _anPWinFromDiff(d){return 1/(1+Math.pow(10,-d/400));}
+
+function _anPreloadImgs(){
+  _anOpponents.forEach(opp=>{
+    if(!opp.photoURL||_anImgCache[opp.pid])return;
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>{_anImgCache[opp.pid]=img;_anDrawAll();if(_anModalOpen)_anDrawModal();};
+    img.onerror=()=>{_anImgCache[opp.pid]=null;};
+    img.src=opp.photoURL;_anImgCache[opp.pid]=img;
+  });
+}
+
+function _anComputeOpponents(){
+  const aPid=document.getElementById('an-a-player')?.value;
+  const bPid=document.getElementById('an-b-player')?.value;
+  const pA=players.find(x=>x.firestoreId===aPid);
+  if(!pA){_anOpponents=[];return;}
+  _anMyRD=Math.min(200,Math.max(30,Math.round(_computeRDLive(pA))));
+  if(bPid){
+    _anVsAll=false;const pB=players.find(x=>x.firestoreId===bPid);
+    if(pB){const rdB=Math.min(200,Math.max(30,Math.round(_computeRDLive(pB))));_anOppRD=rdB;_anDiff=pB.rating-pA.rating;_anOpponents=[{name:escCap(pB.name),diff:_anDiff,myRD:_anMyRD,oppRD:rdB,pid:bPid,photoURL:pB.photoURL||null}];}
+    else _anOpponents=[];
+  } else {
+    _anVsAll=true;
+    _anOpponents=players.filter(x=>x.firestoreId!==aPid).map(pB=>({name:escCap(pB.name),diff:pB.rating-pA.rating,myRD:_anMyRD,oppRD:Math.min(200,Math.max(30,Math.round(_computeRDLive(pB)))),pid:pB.firestoreId,photoURL:pB.photoURL||null}));
+    _anOppRD=_anOpponents.length?Math.round(_anOpponents.reduce((s,o)=>s+o.oppRD,0)/_anOpponents.length):80;_anDiff=0;
+  }
+  _anPreloadImgs();
+}
+
+function _anDefaultPlayers(){
+  const ranked=players.filter(p=>_computeRDLive(p)<=100).sort((a,b)=>b.rating-a.rating);
+  const pool=ranked.length>=1?ranked:[...players].sort((a,b)=>b.rating-a.rating);
+  if(!pool.length)return;
+  const pA=pool[0];
+  ['an-a-player','an-modal-a-player'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=pA.firestoreId;});
+  ['an-b-player','an-modal-b-player'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+window.anLoadPlayer=function(side){
+  const pid=document.getElementById('an-'+side+'-player')?.value||'';
+  const md=document.getElementById('an-modal-'+side+'-player');if(md)md.value=pid;
+  _anComputeOpponents();_anDrawAll();if(_anModalOpen)_anDrawModal();
+};
+window.anSwapPlayers=function(){
+  const selA=document.getElementById('an-a-player');const selB=document.getElementById('an-b-player');
+  const sa=selA.value,sb=selB.value;if(!sa||!sb)return;
+  selA.value=sb;selB.value=sa;
+  ['an-modal-a-player','an-modal-b-player'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.value=i===0?sb:sa;});
+  _anComputeOpponents();_anDrawAll();if(_anModalOpen)_anDrawModal();
+};
+
+function _anPopulateDropdowns(){
+  const pOpts=players.map(p=>`<option value="${p.firestoreId}">${escCap(p.name)}</option>`).join('');
+  ['an-a-player','an-modal-a-player'].forEach(id=>{const el=document.getElementById(id);if(el){const v=el.value;el.innerHTML='<option value="">— player —</option>'+pOpts;if(v)el.value=v;}});
+  ['an-b-player','an-modal-b-player'].forEach(id=>{const el=document.getElementById(id);if(el){const v=el.value;el.innerHTML='<option value="">Everyone</option>'+pOpts;if(v)el.value=v;}});
+}
+
+function _anBuildFmtChecks(){
+  const wrap=document.getElementById('an-fmt-checks');if(!wrap||wrap.children.length)return;
+  AN_FORMATS.forEach((N,idx)=>{
+    const btn=document.createElement('button');
+    const col=AN_COLORS[idx];
+    btn.id='anfmtlbl-'+N;
+    btn.textContent='ft'+N;
+    btn.style.cssText=`background:none;border:1px solid ${col}88;color:${col};font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;padding:.25rem .5rem;cursor:pointer;text-transform:uppercase;transition:opacity .15s`;
+    btn.onclick=()=>{
+      _anFmtVis[N]=!_anFmtVis[N];
+      btn.style.opacity=_anFmtVis[N]?'1':'0.35';
+      const mc=document.getElementById('anfmtcbm-'+N);
+      if(mc){mc.checked=_anFmtVis[N];mc.parentElement.style.opacity=_anFmtVis[N]?'1':'0.3';}
+      _anDrawAll();if(_anModalOpen)_anDrawModal();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+window.anToggle=function(type){
+  if(type==='win')_anShowWin=!_anShowWin;else _anShowLoss=!_anShowLoss;
+  const val=(type==='win'?_anShowWin:_anShowLoss)?'1':'0.35';
+  ['an-tog-'+type,'an-modal-tog-'+type].forEach(id=>{const b=document.getElementById(id);if(b)b.style.opacity=val;});
+  _anDrawAll();if(_anModalOpen)_anDrawModal();
+};
+
+// ── PURE CANVAS RENDERER ──────────────────────────────────────────────────────
+// ── ANALYSIS DRAW ─────────────────────────────────────────────────────────────
+// Cache CSS var reads — refreshed once per draw, not once per getPropertyValue call
+let _anCss={ac:'#E5B25D',mt:'#8a6a78',bg:'#1e1018',bd:'#4a2a38'};
+function _anReadCss(){
+  const s=getComputedStyle(document.documentElement);
+  _anCss={ac:s.getPropertyValue('--accent').trim(),mt:s.getPropertyValue('--muted').trim(),bg:s.getPropertyValue('--bg').trim(),bd:s.getPropertyValue('--border').trim()};
+}
+
+// RAF throttle state
+let _anRafPending=false,_anModalRafPending=false;
+
+function _anDraw(cv,hoverX){
+  if(!cv)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.offsetWidth||600,H=cv.offsetHeight||280;
+  // Only resize canvas backing store when dimensions actually changed (avoids GPU realloc every frame)
+  const wPx=Math.round(W*dpr),hPx=Math.round(H*dpr);
+  if(cv.width!==wPx||cv.height!==hPx){
+    cv.width=wPx;cv.height=hPx;
+    cv.style.width=W+'px';cv.style.height=H+'px';
+  }
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  _anReadCss();
+  const{ac,mt,bg,bd}=_anCss;
+  const P={top:34,right:12,bottom:32,left:54};
+  const cW=W-P.left-P.right,cH=H-P.top-P.bottom;
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // x range — scale to actual opponent spread, fall back to ±400
+  let xMin=-400,xMax=400;
+  if(_anOpponents.length){
+    let lo=Infinity,hi=-Infinity;
+    _anOpponents.forEach(o=>{if(o.diff<lo)lo=o.diff;if(o.diff>hi)hi=o.diff;});
+    const span=Math.max(hi-lo,200);const pad=span*0.25;
+    xMin=Math.min(lo-pad,-span*0.1);xMax=Math.max(hi+pad,span*0.1);
+  }
+  const xRange=xMax-xMin;
+  const px=d=>P.left+((d-xMin)/xRange)*cW;
+  const px_inv=x=>xMin+((x-P.left)/cW)*xRange;
+
+  // y range
+  let yMin=Infinity,yMax=-Infinity;
+  AN_FORMATS.forEach(N=>{
+    if(!_anFmtVis[N])return;
+    // sample at a coarser resolution for range calc
+    for(let d=xMin;d<=xMax;d+=(xRange/80)){
+      if(_anShowWin){const v=_anGlickoGain(d,_anMyRD,_anOppRD,true)*_ftMult(_anPWinFromDiff(-d),N);if(v<yMin)yMin=v;if(v>yMax)yMax=v;}
+      if(_anShowLoss){const v=_anGlickoGain(d,_anMyRD,_anOppRD,false)*_ftMult(_anPWinFromDiff(d),N);if(v<yMin)yMin=v;if(v>yMax)yMax=v;}
+    }
+  });
+  if(!isFinite(yMin)){yMin=-60;yMax=60;}
+  const yRange=yMax-yMin||10;const yPad=yRange*0.1;yMin-=yPad;yMax+=yPad;
+  const step=yRange>120?25:yRange>50?10:yRange>20?5:2;
+  const py=v=>P.top+(1-(v-yMin)/(yMax-yMin))*cH;
+
+  // y gridlines + labels
+  for(let t=Math.ceil(yMin/step)*step;t<=yMax+0.001;t+=step){
+    const y=py(t);if(y<P.top-2||y>P.top+cH+2)continue;
+    ctx.strokeStyle=t===0?'rgba(138,106,120,0.6)':'rgba(74,42,56,0.8)';ctx.lineWidth=t===0?1.5:1;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(P.left,y);ctx.lineTo(P.left+cW,y);ctx.stroke();
+    ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText((t>=0?'+':'')+t.toFixed(0),P.left-5,y);
+  }
+  // y axis border + label
+  ctx.strokeStyle=bd;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.left,P.top);ctx.lineTo(P.left,P.top+cH);ctx.stroke();
+  ctx.save();ctx.translate(12,P.top+cH/2);ctx.rotate(-Math.PI/2);
+  ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('RATING GAIN',0,0);ctx.restore();
+
+  // x axis ticks — pick nice round numbers within range
+  const xTickStep=xRange>1200?200:xRange>600?100:xRange>300?50:25;
+  const xTickStart=Math.ceil(xMin/xTickStep)*xTickStep;
+  // "DIFF →" label above everything, then numbers below it
+  ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('DIFF →',P.left+cW/2,P.top-12);
+  for(let d=xTickStart;d<=xMax+0.001;d+=xTickStep){
+    const x=px(d);if(x<P.left+4||x>P.left+cW-4)continue;
+    ctx.strokeStyle='rgba(74,42,56,0.5)';ctx.lineWidth=0.5;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(x,P.top);ctx.lineTo(x,P.top+cH);ctx.stroke();
+    ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.fillText(d===0?'0':(d>0?'+'+d:String(d)),x,P.top-2);
+  }
+
+  // bottom x axis: win % (no border line, just labels below plot)
+  [5,10,20,30,40,50,60,70,80,90,95].forEach(pct=>{
+    const d=400*Math.log10((1-pct/100)/(pct/100));
+    const x=px(d);if(x<P.left+16||x>P.left+cW-16)return;
+    ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText(pct+'%',x,P.top+cH+3);
+  });
+  ctx.fillStyle=mt;ctx.font='9px DM Mono,monospace';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('P(WIN FT11)',P.left+cW/2,P.top+cH+16);
+
+  // clip to plot
+  ctx.save();ctx.beginPath();ctx.rect(P.left,P.top,cW,cH);ctx.clip();
+
+  // curves — draw at cW/2 samples for performance
+  const nSamples=Math.min(Math.round(cW/1.5),480);
+  AN_FORMATS.forEach((N,idx)=>{
+    if(!_anFmtVis[N])return;
+    const col=AN_COLORS[idx];const lw=N===11?2.5:1.5;
+    if(_anShowWin){
+      ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.setLineDash([]);ctx.beginPath();let f=true;
+      for(let i=0;i<=nSamples;i++){const d=xMin+(i/nSamples)*xRange;const y=py(_anGlickoGain(d,_anMyRD,_anOppRD,true)*_ftMult(_anPWinFromDiff(-d),N));f?ctx.moveTo(px(d),y):ctx.lineTo(px(d),y);f=false;}
+      ctx.stroke();
+    }
+    if(_anShowLoss){
+      ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.setLineDash([5,4]);ctx.beginPath();let f=true;
+      for(let i=0;i<=nSamples;i++){const d=xMin+(i/nSamples)*xRange;const y=py(_anGlickoGain(d,_anMyRD,_anOppRD,false)*_ftMult(_anPWinFromDiff(d),N));f?ctx.moveTo(px(d),y):ctx.lineTo(px(d),y);f=false;}
+      ctx.stroke();ctx.setLineDash([]);
+    }
+  });
+
+  // player avatar dots
+  const R=10;
+  _anOpponents.forEach(opp=>{
+    const x=px(opp.diff);if(x<P.left-R||x>P.left+cW+R)return;
+    AN_FORMATS.forEach((N,idx)=>{
+      if(!_anFmtVis[N])return;
+      const col=AN_COLORS[idx];
+      [[true,_anShowWin],[false,_anShowLoss]].forEach(([win,show])=>{
+        if(!show)return;
+        const v=win?_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,true)*_ftMult(_anPWinFromDiff(-opp.diff),N):_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,false)*_ftMult(_anPWinFromDiff(opp.diff),N);
+        const y=py(v);
+        ctx.beginPath();ctx.arc(x,y,R+1.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+        ctx.save();ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.clip();
+        const img=opp.photoURL?_anImgCache[opp.pid]:null;
+        if(img&&img.complete&&img.naturalWidth){ctx.drawImage(img,x-R,y-R,R*2,R*2);}
+        else{ctx.fillStyle=bg;ctx.fillRect(x-R,y-R,R*2,R*2);ctx.fillStyle=col;ctx.font=`bold ${R}px DM Mono,monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(opp.name.charAt(0).toUpperCase(),x,y);}
+        ctx.restore();
+        if(!win){ctx.beginPath();ctx.arc(x,y,R+1.5,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.setLineDash([3,2]);ctx.stroke();ctx.setLineDash([]);}
+      });
+    });
+  });
+
+  // hover — only activate when near a player dot
+  if(hoverX!=null){
+    let nearOpp=null,nearDist=Infinity;
+    _anOpponents.forEach(opp=>{const d=Math.abs(px(opp.diff)-hoverX);if(d<nearDist){nearDist=d;nearOpp=opp;}});
+    if(nearOpp&&nearDist<22){
+      const snapX=px(nearOpp.diff);
+      const snapDiff=nearOpp.diff;
+      // crosshair
+      ctx.strokeStyle='rgba(229,178,93,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.moveTo(snapX,P.top);ctx.lineTo(snapX,P.top+cH);ctx.stroke();ctx.setLineDash([]);
+      // glow
+      AN_FORMATS.forEach((N,idx)=>{
+        if(!_anFmtVis[N])return;
+        const col=AN_COLORS[idx];
+        [[true,_anShowWin],[false,_anShowLoss]].forEach(([win,show])=>{
+          if(!show)return;
+          const v=win?_anGlickoGain(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD,true)*_ftMult(_anPWinFromDiff(-nearOpp.diff),N):_anGlickoGain(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD,false)*_ftMult(_anPWinFromDiff(nearOpp.diff),N);
+          ctx.beginPath();ctx.arc(snapX,py(v),R+4,0,Math.PI*2);ctx.fillStyle=col+'44';ctx.fill();
+        });
+      });
+      ctx.restore();
+      // axis labels
+      const winPct=(_anPWinFromDiff(-snapDiff)*100).toFixed(1)+'%';
+      const diffStr=snapDiff>=0?'+'+snapDiff.toFixed(1):snapDiff.toFixed(1);
+      ctx.fillStyle=ac;ctx.font='bold 9px DM Mono,monospace';ctx.textAlign='center';
+      ctx.textBaseline='bottom';ctx.fillText(diffStr,Math.min(Math.max(snapX,P.left+22),W-22),P.top-1);
+      ctx.textBaseline='top';ctx.fillText(winPct,Math.min(Math.max(snapX,P.left+22),W-22),P.top+cH+2);
+      // tooltip
+      const tipOpps=_anOpponents.filter(o=>Math.abs(px(o.diff)-snapX)<=8);
+      if(tipOpps.length){
+        ctx.font='10px DM Mono,monospace';
+        const lines=[];
+        tipOpps.forEach(opp=>{
+          lines.push({text:opp.name,bold:true,col:ac});
+          AN_FORMATS.forEach((N,idx)=>{
+            if(!_anFmtVis[N])return;
+            const parts=[];
+            if(_anShowWin)parts.push(`w:+${(_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,true)*_ftMult(_anPWinFromDiff(-opp.diff),N)).toFixed(2)}`);
+            if(_anShowLoss)parts.push(`l:${(_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,false)*_ftMult(_anPWinFromDiff(opp.diff),N)).toFixed(2)}`);
+            if(parts.length)lines.push({text:`ft${N} ${parts.join(' ')}`,col:AN_COLORS[idx]});
+          });
+        });
+        const pad=7,lh=14;
+        const maxW=Math.max(...lines.map(l=>{ctx.font=l.bold?'bold 10px DM Mono,monospace':'10px DM Mono,monospace';return ctx.measureText(l.text).width;}));
+        const bw=maxW+pad*2,bh=lines.length*lh+pad*2;
+        let bx=snapX+10,by=P.top+8;
+        if(bx+bw>W-4)bx=snapX-bw-10;if(by+bh>H-4)by=H-bh-4;
+        ctx.fillStyle='#1e1018ee';ctx.strokeStyle='rgba(74,42,56,1)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.rect(bx,by,bw,bh);ctx.fill();ctx.stroke();
+        lines.forEach((l,i)=>{ctx.fillStyle=l.col;ctx.font=l.bold?'bold 10px DM Mono,monospace':'10px DM Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(l.text,bx+pad,by+pad+i*lh);});
+      }
+    } else {
+      ctx.restore();
+    }
+  } else {
+    ctx.restore();
+  }
+}
+
+function _anDrawAll(){const cv=document.getElementById('an-chart');_anDraw(cv,_anHoverX);}
+function _anDrawModal(){const cv=document.getElementById('an-modal-chart');_anDraw(cv,_anModalHoverX);}
+
+function _anInitHover(cv,isModal){
+  if(!cv||cv._anHoverInit)return;cv._anHoverInit=true;
+  const getX=e=>{const r=cv.getBoundingClientRect();return(e.touches?e.touches[0].clientX:e.clientX)-r.left;};
+  const onMove=e=>{
+    if(isModal){_anModalHoverX=getX(e);if(!_anModalRafPending){_anModalRafPending=true;requestAnimationFrame(()=>{_anModalRafPending=false;_anDrawModal();});}}
+    else{_anHoverX=getX(e);if(!_anRafPending){_anRafPending=true;requestAnimationFrame(()=>{_anRafPending=false;_anDrawAll();});}}
+  };
+  const onLeave=()=>{
+    if(isModal){_anModalHoverX=null;_anDrawModal();}
+    else{_anHoverX=null;_anDrawAll();}
+  };
+  cv.addEventListener('mousemove',onMove);
+  cv.addEventListener('mouseleave',onLeave);
+  cv.addEventListener('touchmove',onMove,{passive:true});
+  cv.addEventListener('touchend',onLeave);
+}
+
+function _anUpdate(){
+  if(!document.getElementById('panel-analysis')?.classList.contains('active'))return;
+  _anComputeOpponents();
+  const cv=document.getElementById('an-chart');if(cv&&!cv._anHoverInit)_anInitHover(cv,false);
+  _anDrawAll();if(_anModalOpen)_anDrawModal();
+}
+
+// ── INLINE RD DECAY ───────────────────────────────────────────────────────────
+function drawRDDecayInline(){
+  const cv=document.getElementById('rd-decay-inline');if(!cv||!players.length)return;
+  _rdPreloadAvatars();
+  const pts=_rdBuildPts(0);const dpr=window.devicePixelRatio||1;
+  const W=cv.parentElement.clientWidth||600,H=cv.parentElement.clientHeight||240;
+  const fullW=Math.round(W*(60/20));
+  cv.width=Math.round(fullW*dpr);cv.height=Math.round(H*dpr);
+  cv.style.width=fullW+'px';cv.style.height=H+'px';
+  cv._rdDrawn=true;
+  cv.parentElement.style.overflowX='auto';_rdDraw(cv,pts,{},dpr);
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────────────
+function _anBuildModalFmtChecks(){
+  const wrap=document.getElementById('an-modal-fmt-checks');if(!wrap)return;wrap.innerHTML='';
+  AN_FORMATS.forEach((N,idx)=>{
+    const lbl=document.createElement('label');
+    lbl.style.cssText=`display:flex;align-items:center;gap:3px;cursor:pointer;font-family:'DM Mono',monospace;font-size:.5rem;color:${AN_COLORS[idx]};border:1px solid ${AN_COLORS[idx]}55;padding:2px 6px;user-select:none;opacity:${_anFmtVis[N]?'1':'0.3'};transition:opacity .15s`;
+    lbl.innerHTML=`<input type="checkbox" ${_anFmtVis[N]?'checked':''} id="anfmtcbm-${N}" style="accent-color:${AN_COLORS[idx]};width:auto"><span>ft${N}</span>`;
+    lbl.querySelector('input').onchange=e=>{
+      _anFmtVis[N]=e.target.checked;lbl.style.opacity=_anFmtVis[N]?'1':'0.3';
+      const pc=document.getElementById('anfmtcb-'+N);if(pc){pc.checked=_anFmtVis[N];pc.parentElement.style.opacity=_anFmtVis[N]?'1':'0.3';}
+      _anDrawAll();_anDrawModal();};
+    wrap.appendChild(lbl);
+  });
+}
+window.anModalToggle=function(type){
+  if(type==='win')_anShowWin=!_anShowWin;else _anShowLoss=!_anShowLoss;
+  const val=(type==='win'?_anShowWin:_anShowLoss)?'1':'0.35';
+  ['an-tog-'+type,'an-modal-tog-'+type].forEach(id=>{const b=document.getElementById(id);if(b)b.style.opacity=val;});
+  _anDrawAll();_anDrawModal();
+};
+window.anModalLoadPlayer=function(side){
+  const pid=document.getElementById('an-modal-'+side+'-player')?.value||'';
+  const pd=document.getElementById('an-'+side+'-player');if(pd)pd.value=pid;
+  _anComputeOpponents();_anDrawAll();_anDrawModal();
+  const sub=document.getElementById('an-modal-sub');if(sub)_anSetModalSub();
+};
+function _anSetModalSub(){
+  const sub=document.getElementById('an-modal-sub');if(!sub)return;
+  const aPid=document.getElementById('an-modal-a-player')?.value;const bPid=document.getElementById('an-modal-b-player')?.value;
+  const aName=aPid?(escCap(players.find(x=>x.firestoreId===aPid)?.name)||'A'):'A';
+  const bName=bPid?(escCap(players.find(x=>x.firestoreId===bPid)?.name)||''):'Everyone';
+  sub.textContent=`${aName} vs ${bName}`;
+}
+window.openAnModal=function(){
+  const overlay=document.getElementById('an-modal-overlay');if(!overlay)return;
+  overlay.classList.add('open');document.body.style.overflow='hidden';_anModalOpen=true;
+  _anBuildModalFmtChecks();_anPopulateDropdowns();
+  const pa=document.getElementById('an-a-player')?.value;const pb=document.getElementById('an-b-player')?.value;
+  if(pa){const m=document.getElementById('an-modal-a-player');if(m)m.value=pa;}
+  const mb=document.getElementById('an-modal-b-player');if(mb)mb.value=pb||'';
+  ['win','loss'].forEach(t=>{const b=document.getElementById('an-modal-tog-'+t);if(b)b.style.opacity=(t==='win'?_anShowWin:_anShowLoss)?'1':'0.35';});
+  _anSetModalSub();
+  const cv=document.getElementById('an-modal-chart');if(cv&&!cv._anHoverInit)_anInitHover(cv,true);
+  setTimeout(()=>_anDrawModal(),50);
+};
+window.closeAnModal=function(){
+  const overlay=document.getElementById('an-modal-overlay');if(!overlay)return;
+  overlay.classList.remove('open');overlay.style.background='';document.body.style.overflow='';_anModalOpen=false;
+};
+window.addEventListener('resize',function(){
+  if(document.getElementById('panel-analysis')?.classList.contains('active')){
+    setTimeout(_anDrawAll,50);
+    setTimeout(updateRatingTrendInline,50);
+  }
+  if(_anModalOpen)setTimeout(_anDrawModal,50);
+});
+const _origRPS=window.renderPlayersList;
+window.renderPlayersList=function(){if(_origRPS)_origRPS();_anPopulateDropdowns();};
 </script>
 <div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
   <div id="rd-modal-box">
@@ -6096,8 +6608,33 @@ function _rdSecondsToAny100(){
       </div>
     </div>
     <div id="rating-trend-modal-body">
-      <button class="chart-nav-btn nav-right" onclick="_switchToRD()" title="RD Decay">›</button>
+      <button class="chart-nav-btn nav-right" onclick="_switchToRD()" title="RD Decay">&#8250;</button>
+      <button class="chart-nav-btn nav-left" onclick="_switchToAnFromTrend()" title="Rating Gain">&#8249;</button>
       <canvas id="rating-trend-canvas" style="display:block;width:100%;flex:1;min-height:0;"></canvas>
+    </div>
+  </div>
+</div>
+<div id="an-modal-overlay" onclick="if(event.target===this)closeAnModal()">
+  <div id="an-modal-box">
+    <div id="an-modal-header">
+      <div class="an-modal-title-block">
+        <h3>Rating Gain</h3>
+        <span class="an-modal-sub" id="an-modal-sub">by format · A's perspective</span>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+        <select id="an-modal-a-player" onchange="anModalLoadPlayer('a')" style="font-size:.62rem;background:var(--bg);border:1px solid var(--border);color:var(--accent);padding:.22rem .45rem;font-family:'DM Mono',monospace"><option value="">Player A</option></select>
+        <span style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted)">vs</span>
+        <select id="an-modal-b-player" onchange="anModalLoadPlayer('b')" style="font-size:.62rem;background:var(--bg);border:1px solid var(--border);color:var(--accent3);padding:.22rem .45rem;font-family:'DM Mono',monospace;min-width:100px"><option value="">Everyone</option></select>
+        <div style="display:flex;gap:.35rem;flex-wrap:wrap" id="an-modal-fmt-checks"></div>
+        <button id="an-modal-tog-win" onclick="anModalToggle('win')" style="background:rgba(126,200,160,.12);border:1px solid var(--win);color:var(--win);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;padding:.22rem .45rem;cursor:pointer;text-transform:uppercase;transition:opacity .15s">Win</button>
+        <button id="an-modal-tog-loss" onclick="anModalToggle('loss')" style="background:rgba(217,83,79,.12);border:1px solid var(--loss);color:var(--loss);font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.07em;padding:.22rem .45rem;cursor:pointer;text-transform:uppercase;transition:opacity .15s">Loss</button>
+        <button class="m-close" onclick="closeAnModal()">ESC</button>
+      </div>
+    </div>
+    <div id="an-modal-body" style="position:relative">
+      <canvas id="an-modal-chart" style="display:block;width:100%;height:100%;cursor:crosshair"></canvas>
+      <button class="chart-nav-btn nav-right" onclick="_switchAnToTrend()" title="Rating Trends">&#8250;</button>
+      <button class="chart-nav-btn nav-left" onclick="_switchAnToRD()" title="RD Decay">&#8249;</button>
     </div>
   </div>
 </div>
