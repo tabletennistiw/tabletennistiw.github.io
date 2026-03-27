@@ -2704,12 +2704,11 @@ window.submitMatch=async function(){
       const{mu:_lmu,phi:_lphi}=toG2(l.rating,lLiveRd);
       const _wE=E(_wmu,_lmu,_lphi); // winner's expected score (ft11 proxy)
       const _lE=1-_wE;               // loser's expected score
-      const _wMult=_ftMult(_wE,ftN);
-      const _lMult=_ftMult(_lE,ftN);
+      const _mult=_ftMult(_wE,ftN);
       const _uwRaw=g2Update({rating:w.rating,rd:wLiveRd},[{rating:l.rating,rd:lLiveRd,s:1}],now);
       const _ulRaw=g2Update({rating:l.rating,rd:lLiveRd},[{rating:w.rating,rd:wLiveRd,s:0}],now);
-      uw={rating:w.rating+(_uwRaw.rating-w.rating)*_wMult, rd:_uwRaw.rd};
-      ul={rating:l.rating+(_ulRaw.rating-l.rating)*_lMult, rd:_ulRaw.rd};
+      uw={rating:w.rating+(_uwRaw.rating-w.rating)*_mult, rd:_uwRaw.rd};
+      ul={rating:l.rating+(_ulRaw.rating-l.rating)*_mult, rd:_ulRaw.rd};
       const allSnap=await getDocs(query(collection(db,'players')));
       const allP=allSnap.docs.map(d=>({id:d.id,...d.data()}));
       const ranked=p=>_computeRDLive(p)<=100;
@@ -3211,10 +3210,9 @@ async function _runRepairEngine(){
     const{mu:_m1,phi:_p1}=toG2(s1.rating,rd1);
     const{mu:_m2,phi:_p2}=toG2(s2.rating,rd2);
     const _e1=E(_m1,_m2,_p2);
-    const _mult1=_ftMult(_e1,_ftN);
-    const _mult2=_ftMult(1-_e1,_ftN);
-    const u1={rating:s1.rating+(u1raw.rating-s1.rating)*_mult1,rd:u1raw.rd};
-    const u2={rating:s2.rating+(u2raw.rating-s2.rating)*_mult2,rd:u2raw.rd};
+    const _mult=_ftMult(_e1,_ftN);
+    const u1={rating:s1.rating+(u1raw.rating-s1.rating)*_mult,rd:u1raw.rd};
+    const u2={rating:s2.rating+(u2raw.rating-s2.rating)*_mult,rd:u2raw.rd};
     const p1delta=Math.round((u1.rating-s1.rating)*10)/10;
     const p2delta=Math.round((u2.rating-s2.rating)*10)/10;
 
