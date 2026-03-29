@@ -6191,6 +6191,7 @@ function _anGlickoGain(diff,myRD,oppRD,win){
   return fromG2(mu+phiNew*phiNew*gj*((win?1:0)-ej),phiNew).r-1500;
 }
 function _anPWinFromDiff(d){return 1/(1+Math.pow(10,-d/400));}
+function _anPWinGlicko(d,myRD,oppRD){const{mu,phi}=toG2(1500,myRD);const{mu:muj,phi:phij}=toG2(1500+d,oppRD);return E(mu,muj,phij);}
 
 function _anPreloadImgs(){
   _anOpponents.forEach(opp=>{
@@ -6321,8 +6322,8 @@ function _anDraw(cv,hoverX){
     if(!_anFmtVis[N])return;
     // sample at a coarser resolution for range calc
     for(let d=xMin;d<=xMax;d+=(xRange/80)){
-      if(_anShowWin){const v=_anGlickoGain(d,_anMyRD,_anOppRD,true)*_ftMult(_anPWinFromDiff(-d),N);if(v<yMin)yMin=v;if(v>yMax)yMax=v;}
-      if(_anShowLoss){const v=_anGlickoGain(d,_anMyRD,_anOppRD,false)*_ftMult(_anPWinFromDiff(d),N);if(v<yMin)yMin=v;if(v>yMax)yMax=v;}
+      if(_anShowWin){const v=_anGlickoGain(d,_anMyRD,_anOppRD,true)*_ftMult(_anPWinGlicko(d,_anMyRD,_anOppRD),N);if(v<yMin)yMin=v;if(v>yMax)yMax=v;}
+      if(_anShowLoss){const v=_anGlickoGain(d,_anMyRD,_anOppRD,false)*_ftMult(1-_anPWinGlicko(d,_anMyRD,_anOppRD),N);if(v<yMin)yMin=v;if(v>yMax)yMax=v;}
     }
   });
   if(!isFinite(yMin)){yMin=-60;yMax=60;}
@@ -6378,12 +6379,12 @@ function _anDraw(cv,hoverX){
     const col=AN_COLORS[idx];const lw=N===11?2.5:1.5;
     if(_anShowWin){
       ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.setLineDash([]);ctx.beginPath();let f=true;
-      for(let i=0;i<=nSamples;i++){const d=xMin+(i/nSamples)*xRange;const y=py(_anGlickoGain(d,_anMyRD,_anOppRD,true)*_ftMult(_anPWinFromDiff(-d),N));f?ctx.moveTo(px(d),y):ctx.lineTo(px(d),y);f=false;}
+      for(let i=0;i<=nSamples;i++){const d=xMin+(i/nSamples)*xRange;const y=py(_anGlickoGain(d,_anMyRD,_anOppRD,true)*_ftMult(_anPWinGlicko(d,_anMyRD,_anOppRD),N));f?ctx.moveTo(px(d),y):ctx.lineTo(px(d),y);f=false;}
       ctx.stroke();
     }
     if(_anShowLoss){
       ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.setLineDash([5,4]);ctx.beginPath();let f=true;
-      for(let i=0;i<=nSamples;i++){const d=xMin+(i/nSamples)*xRange;const y=py(_anGlickoGain(d,_anMyRD,_anOppRD,false)*_ftMult(_anPWinFromDiff(d),N));f?ctx.moveTo(px(d),y):ctx.lineTo(px(d),y);f=false;}
+      for(let i=0;i<=nSamples;i++){const d=xMin+(i/nSamples)*xRange;const y=py(_anGlickoGain(d,_anMyRD,_anOppRD,false)*_ftMult(1-_anPWinGlicko(d,_anMyRD,_anOppRD),N));f?ctx.moveTo(px(d),y):ctx.lineTo(px(d),y);f=false;}
       ctx.stroke();ctx.setLineDash([]);
     }
   });
@@ -6397,7 +6398,7 @@ function _anDraw(cv,hoverX){
       const col=AN_COLORS[idx];
       [[true,_anShowWin],[false,_anShowLoss]].forEach(([win,show])=>{
         if(!show)return;
-        const v=win?_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,true)*_ftMult(_anPWinFromDiff(-opp.diff),N):_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,false)*_ftMult(_anPWinFromDiff(opp.diff),N);
+        const v=win?_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,true)*_ftMult(_anPWinGlicko(opp.diff,opp.myRD,opp.oppRD),N):_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,false)*_ftMult(1-_anPWinGlicko(opp.diff,opp.myRD,opp.oppRD),N);
         const y=py(v);
         ctx.beginPath();ctx.arc(x,y,R+1.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
         ctx.save();ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.clip();
@@ -6426,7 +6427,7 @@ function _anDraw(cv,hoverX){
         const col=AN_COLORS[idx];
         [[true,_anShowWin],[false,_anShowLoss]].forEach(([win,show])=>{
           if(!show)return;
-          const v=win?_anGlickoGain(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD,true)*_ftMult(_anPWinFromDiff(-nearOpp.diff),N):_anGlickoGain(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD,false)*_ftMult(_anPWinFromDiff(nearOpp.diff),N);
+          const v=win?_anGlickoGain(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD,true)*_ftMult(_anPWinGlicko(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD),N):_anGlickoGain(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD,false)*_ftMult(1-_anPWinGlicko(nearOpp.diff,nearOpp.myRD,nearOpp.oppRD),N);
           ctx.beginPath();ctx.arc(snapX,py(v),R+4,0,Math.PI*2);ctx.fillStyle=col+'44';ctx.fill();
         });
       });
@@ -6447,8 +6448,8 @@ function _anDraw(cv,hoverX){
           AN_FORMATS.forEach((N,idx)=>{
             if(!_anFmtVis[N])return;
             const parts=[];
-            if(_anShowWin)parts.push(`w:+${(_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,true)*_ftMult(_anPWinFromDiff(-opp.diff),N)).toFixed(2)}`);
-            if(_anShowLoss)parts.push(`l:${(_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,false)*_ftMult(_anPWinFromDiff(opp.diff),N)).toFixed(2)}`);
+            if(_anShowWin)parts.push(`w:+${(_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,true)*_ftMult(_anPWinGlicko(opp.diff,opp.myRD,opp.oppRD),N)).toFixed(2)}`);
+            if(_anShowLoss)parts.push(`l:${(_anGlickoGain(opp.diff,opp.myRD,opp.oppRD,false)*_ftMult(1-_anPWinGlicko(opp.diff,opp.myRD,opp.oppRD),N)).toFixed(2)}`);
             if(parts.length)lines.push({text:`ft${N} ${parts.join(' ')}`,col:AN_COLORS[idx]});
           });
         });
