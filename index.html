@@ -511,6 +511,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .clip-dl:hover{color:var(--text);}
 .clip-del{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--loss);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.05em;opacity:.7;}
 .clip-del:hover{opacity:1;}
+.clip-ts{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.04em;}
 </style>
 </head>
 <body>
@@ -6804,6 +6805,15 @@ window.renderPlayersList=function(){if(_origRPS)_origRPS();_anPopulateDropdowns(
 
 // ── CLIPS ─────────────────────────────────────────────────────────────────
 let _clipsLoaded=false;
+function _fmtClipTs(ts){
+  if(!ts)return'';
+  let d;
+  if(ts&&typeof ts.toDate==='function')d=ts.toDate();
+  else if(typeof ts==='number')d=new Date(ts);
+  else d=new Date(ts);
+  if(isNaN(d))return'';
+  return d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+}
 async function renderClips(){
   if(_clipsLoaded)return;
   const grid=document.getElementById('clips-grid');
@@ -6820,13 +6830,18 @@ async function renderClips(){
       const data=d.data();
       const {url,clip_num}=data;
       const label=data.name||`CLIP #${clip_num}`;
+      const ts=_fmtClipTs(data.created_at);
       const card=document.createElement('div');
       card.className='clip-card';
       card.dataset.id=d.id;
-      const delBtn=isAdmin?`<button class="clip-del" onclick="deleteClip('${d.id}',this)" title="Delete clip">✕ delete</button>`:'';
+      const delBtn=isAdmin?`<button class="clip-del" onclick="window.deleteClip('${d.id}',this)" title="Delete clip">✕ delete</button>`:'';
+      const tsHtml=ts?`<span class="clip-ts">${ts}</span>`:'';
       card.innerHTML=`<video src="${url}" controls playsinline preload="metadata"></video>
         <div class="clip-card-meta">
-          <span class="clip-name" title="Click to rename" onclick="startRenameClip(this,'${d.id}')">${label}</span>
+          <div style="display:flex;flex-direction:column;gap:.15rem;min-width:0;flex:1">
+            <span class="clip-name" title="Click to rename" onclick="window.startRenameClip(this,'${d.id}')">${label}</span>
+            ${tsHtml}
+          </div>
           <div class="clip-actions">
             ${delBtn}
             <a class="clip-dl" href="${url}" target="_blank">↓ dl</a>
@@ -6840,7 +6855,7 @@ async function renderClips(){
     console.error(e);
   }
 }
-function startRenameClip(span,docId){
+window.startRenameClip=function(span,docId){
   const cur=span.textContent;
   const input=document.createElement('input');
   input.className='clip-name-input';
@@ -6854,7 +6869,7 @@ function startRenameClip(span,docId){
     labelSpan.className='clip-name';
     labelSpan.title='Click to rename';
     labelSpan.textContent=newName;
-    labelSpan.onclick=()=>startRenameClip(labelSpan,docId);
+    labelSpan.onclick=()=>window.startRenameClip(labelSpan,docId);
     input.replaceWith(labelSpan);
     if(newName!==cur){
       try{await updateDoc(doc(db,'clips',docId),{name:newName});}
@@ -6863,8 +6878,8 @@ function startRenameClip(span,docId){
   }
   input.addEventListener('blur',save);
   input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=cur;input.blur();}});
-}
-async function deleteClip(docId,btn){
+};
+window.deleteClip=async function(docId,btn){
   if(!isAdmin)return;
   if(!confirm('Delete this clip from the website?'))return;
   try{
@@ -6877,7 +6892,7 @@ async function deleteClip(docId,btn){
       document.getElementById('clips-empty').style.display='';
     }
   }catch(e){alert('Delete failed: '+e.message);}
-}
+};
 </script>
 <div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
   <div id="rd-modal-box">
