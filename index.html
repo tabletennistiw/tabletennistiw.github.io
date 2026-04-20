@@ -173,6 +173,13 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent);color:var(--accent);display:none;}
 .msg.err{border-color:var(--loss);background:rgba(255,71,87,.05);color:var(--loss);}
 
+/* DOUBLES PAIRS */
+.doubles-pair-row{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;background:var(--surface);border:1px solid var(--border);margin-bottom:.3rem;flex-wrap:wrap;}
+.doubles-pair-row.pending{border-color:rgba(229,178,93,.3);background:rgba(229,178,93,.03);}
+.doubles-pair-row.confirmed{border-color:rgba(126,200,160,.25);background:rgba(126,200,160,.03);}
+.doubles-pair-names{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.06em;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doubles-section-title{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.45rem;margin-top:.1rem;}
+
 /* ADMIN ACTION ROW */
 .admin-action-row{background:rgba(201,160,220,.07);border:1px solid rgba(201,160,220,.35);padding:.65rem .9rem;
   margin-bottom:.35rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
@@ -439,6 +446,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .br-pill.winners{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);}
 .br-pill.losers{background:rgba(217,83,79,.1);color:var(--loss);border:1px solid rgba(217,83,79,.2);}
 .br-pill.grand{background:rgba(201,160,220,.1);color:var(--admin);border:1px solid rgba(201,160,220,.25);}
+.br-pill.doubles{background:rgba(126,200,160,.1);color:var(--win);border:1px solid rgba(126,200,160,.22);}
 /* Bracket viewport */
 .br-viewport{position:relative;height:calc(100vh - 220px);min-height:420px;overflow:hidden;
   background:var(--bg);border:1px solid var(--border);border-radius:3px;cursor:grab;width:100%;touch-action:none;}
@@ -488,6 +496,16 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   .players-sidebar{width:100%;max-width:100%;}
   .form-card{width:100%;max-width:100%;box-sizing:border-box;}
 }
+
+/* CLIPS */
+#clips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;padding:1.25rem;}
+.clip-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
+.clip-card:hover{border-color:var(--accent);}
+.clip-card video{width:100%;display:block;background:#000;max-height:200px;}
+.clip-card-meta{padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center;}
+.clip-num{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.06em;}
+.clip-dl{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);text-decoration:none;letter-spacing:.05em;}
+.clip-dl:hover{color:var(--text);}
 </style>
 </head>
 <body>
@@ -532,6 +550,7 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   <button onclick="showPanel('analysis',this)">Analysis</button>
   <button onclick="showPanel('rules',this)">Rules</button>
   <button onclick="showPanel('brackets',this)">Tournaments</button>
+  <button onclick="showPanel('clips',this)">📹 Clips</button>
   <button onclick="showPanel('settings',this)">⚙ Theme</button>
   <button id="admin-tab-btn" class="admin-tab" onclick="showPanel('admin',this)" style="display:none">★ Admin</button>
 </nav>
@@ -868,6 +887,18 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
       </div>
       <div id="brackets-list"><div class="empty">No active tournaments. Create one to get started.</div></div>
 
+      <!-- Doubles pairs -->
+      <div style="margin-top:2.5rem;border-top:1px solid var(--border);padding-top:1.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text)">Doubles</div>
+            <div style="font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted);letter-spacing:.06em;margin-top:.15rem">Suggest a pair · Admin confirms &amp; creates bracket</div>
+          </div>
+          <button class="btn-ghost" onclick="openSuggestPairModal()" style="font-size:.62rem">+ Suggest a Pair</button>
+        </div>
+        <div id="doubles-pairs-list"><div class="empty">No pairs yet. Suggest one to get started!</div></div>
+      </div>
+
       <!-- Past tournaments -->
       <div style="margin-top:2.5rem;border-top:1px solid var(--border);padding-top:1.75rem">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--text);margin-bottom:1.25rem">Past Tournaments</div>
@@ -877,6 +908,13 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   </div>
 
   <!-- SETTINGS / THEME -->
+  <!-- CLIPS -->
+  <div id="panel-clips" class="panel">
+    <div id="clips-loading" class="loading">Loading clips…</div>
+    <div id="clips-empty" class="empty" style="display:none">No clips yet. Hit the button on court!</div>
+    <div id="clips-grid" style="display:none"></div>
+  </div>
+
   <div id="panel-settings" class="panel">
     <div style="max-width:700px">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.08em;color:var(--text);margin-bottom:1.5rem">Theme</div>
@@ -1126,9 +1164,11 @@ const FIREBASE_CONFIG = {
   appId:"1:902138155809:web:0860c66b77d07746952460"
 };
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getStorage,ref as storRef,listAll,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction,writeBatch,Timestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG);
 const db=getFirestore(app);
+const stor=getStorage(app);
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let players=[],matches=[],isAdmin=false,curProfileId=null;
@@ -3715,6 +3755,7 @@ window.showPanel=function(id,btn){
   if(id==='matches')renderHistory();
   if(id==='admin')renderAdminPanel();
   if(id==='brackets'){renderBrackets();renderPastTournaments();}
+  if(id==='clips')renderClips();
 };
 
 // Kill floating quotes when the user switches away from the tab
@@ -3754,7 +3795,8 @@ function renderBrackets(){
         <div>
           <span style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.06em;color:var(--text)">${esc(b.name)}</span>
           <span class="br-pill ${b.format==='double'?'losers':'winners'}">${b.format==='double'?'Double Elim':'Single Elim'}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted);margin-left:.4rem">${b.players.length} players · ${b.seeding==='random'?'Random draw':'Rated seeds'}</span>
+          ${b.isDoubles?'<span class="br-pill doubles">Doubles</span>':''}
+          <span style="font-family:'DM Mono',monospace;font-size:.56rem;color:var(--muted);margin-left:.4rem">${b.players.length} ${b.isDoubles?'pairs':'players'} · ${b.seeding==='random'?'Random draw':b.isDoubles?'As confirmed':'Rated seeds'}</span>
         </div>
         <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:3px;overflow:hidden;">
@@ -4599,7 +4641,191 @@ window.createBracket=async function(){
 async function saveBracketsToStorage(){try{await setDoc(doc(db,'config','brackets'),{data:JSON.stringify(brackets)});}catch(e){console.error('Save brackets error',e);}}
 async function loadBracketsFromStorage(){try{const d=await getDoc(doc(db,'config','brackets'));if(d.exists()&&d.data().data)brackets=JSON.parse(d.data().data);}catch(e){console.error('Load brackets error',e);}}
 
-// ── SNAPSHOTS ─────────────────────────────────────────────────────────────────
+// ── DOUBLES PAIRS ─────────────────────────────────────────────────────────────
+let doublesPairs=[];
+
+async function saveDoublesPairsToStorage(){
+  try{await setDoc(doc(db,'config','doublesPairs'),{data:JSON.stringify(doublesPairs)});}
+  catch(e){console.error('Save doubles pairs error',e);}
+}
+async function loadDoublesPairsFromStorage(){
+  try{
+    const d=await getDoc(doc(db,'config','doublesPairs'));
+    if(d.exists()&&d.data().data)doublesPairs=JSON.parse(d.data().data);
+  }catch(e){console.error('Load doubles pairs error',e);}
+}
+
+function renderDoublesPairs(){
+  const el=document.getElementById('doubles-pairs-list');
+  if(!el)return;
+  const confirmed=doublesPairs.filter(p=>p.status==='confirmed');
+  const pending=doublesPairs.filter(p=>p.status==='pending');
+  let html='';
+
+  if(pending.length){
+    html+=`<div class="doubles-section-title">${isAdmin?`Pending Approval (${pending.length})`:`Pending Review (${pending.length})`}</div>`;
+    html+=pending.map(p=>`
+      <div class="doubles-pair-row pending">
+        <span class="doubles-pair-names">${escCap(p.p1)} <span style="color:var(--muted);font-weight:300">/</span> ${escCap(p.p2)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--muted);white-space:nowrap;flex-shrink:0">${_dpRelTime(p.submittedAt)}</span>
+        ${isAdmin?`<div style="display:flex;gap:.35rem;flex-shrink:0">
+          <button class="btn" style="font-size:.52rem;padding:.28rem .65rem" onclick="confirmDoublePair('${esc(p.id)}')">✓ Confirm</button>
+          <button class="btn-danger" style="font-size:.52rem" onclick="removeDoublePair('${esc(p.id)}')">✕</button>
+        </div>`:`<span style="font-family:'DM Mono',monospace;font-size:.5rem;color:var(--muted);border:1px solid var(--border);padding:.1rem .4rem;white-space:nowrap;flex-shrink:0">Awaiting admin</span>`}
+      </div>`).join('');
+  }
+
+  if(confirmed.length){
+    if(pending.length)html+=`<div class="doubles-section-title" style="margin-top:.85rem">Confirmed Pairs (${confirmed.length})</div>`;
+    html+=confirmed.map(p=>`
+      <div class="doubles-pair-row confirmed">
+        <span class="doubles-pair-names">${escCap(p.p1)} <span style="color:var(--muted);font-weight:300">/</span> ${escCap(p.p2)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--win);flex-shrink:0;display:flex;align-items:center;gap:.25rem">✓ Confirmed</span>
+        ${isAdmin?`<button class="btn-danger" style="font-size:.52rem;flex-shrink:0" onclick="removeDoublePair('${esc(p.id)}')">✕</button>`:''}
+      </div>`).join('');
+    if(isAdmin&&confirmed.length>=2){
+      html+=`<div style="margin-top:.9rem">
+        <button class="btn" onclick="openDoublesBracketModal()">+ Create Doubles Bracket</button>
+      </div>`;
+    } else if(!isAdmin&&confirmed.length>=2){
+      html+=`<div style="margin-top:.65rem;font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted)">
+        ${confirmed.length} pair${confirmed.length!==1?'s':''} ready · Admin can start the bracket
+      </div>`;
+    }
+  }
+
+  if(!confirmed.length&&!pending.length){
+    html='<div class="empty">No pairs yet. Be the first to suggest one!</div>';
+  }
+  el.innerHTML=html;
+}
+
+function _dpRelTime(ts){
+  if(!ts)return'';
+  const diff=Date.now()-ts;
+  if(diff<60000)return'just now';
+  if(diff<3600000)return Math.floor(diff/60000)+'m ago';
+  if(diff<86400000)return Math.floor(diff/3600000)+'h ago';
+  return Math.floor(diff/86400000)+'d ago';
+}
+
+function _dpPopulateDatalist(){
+  ['pair-p1-datalist','pair-p2-datalist'].forEach(id=>{
+    const dl=document.getElementById(id);
+    if(!dl)return;
+    dl.innerHTML=players.map(p=>`<option value="${esc(cap(p.name))}"></option>`).join('');
+  });
+}
+
+window.openSuggestPairModal=async function(){
+  await loadDoublesPairsFromStorage();
+  _dpPopulateDatalist();
+  document.getElementById('pair-p1-input').value='';
+  document.getElementById('pair-p2-input').value='';
+  document.getElementById('suggest-pair-msg').style.display='none';
+  document.getElementById('suggest-pair-overlay').classList.add('open');
+};
+
+window.submitDoublePair=async function(){
+  const p1raw=document.getElementById('pair-p1-input').value.trim();
+  const p2raw=document.getElementById('pair-p2-input').value.trim();
+  if(!p1raw||!p2raw){showMsg('suggest-pair-msg','Enter both player names.',true);return;}
+  if(p1raw.toLowerCase()===p2raw.toLowerCase()){showMsg('suggest-pair-msg','Players must be different.',true);return;}
+  // Fuzzy-match against known players (case-insensitive)
+  const lookup=(raw)=>{
+    const exact=players.find(p=>p.name.toLowerCase()===raw.toLowerCase());
+    return exact?cap(exact.name):cap(raw);
+  };
+  const p1=lookup(p1raw),p2=lookup(p2raw);
+  // Duplicate check
+  const already=doublesPairs.find(p=>
+    (p.p1.toLowerCase()===p1.toLowerCase()&&p.p2.toLowerCase()===p2.toLowerCase())||
+    (p.p1.toLowerCase()===p2.toLowerCase()&&p.p2.toLowerCase()===p1.toLowerCase())
+  );
+  if(already){
+    const alreadyLabel=already.status==='confirmed'?'already confirmed':'already pending';
+    showMsg('suggest-pair-msg',`This pair is ${alreadyLabel}.`,true);return;
+  }
+  const pair={id:Date.now()+'_'+Math.random().toString(36).slice(2,7),p1,p2,status:'pending',submittedAt:Date.now()};
+  doublesPairs.push(pair);
+  await saveDoublesPairsToStorage();
+  showMsg('suggest-pair-msg',`✓ ${p1} / ${p2} submitted! Waiting for admin confirmation.`);
+  document.getElementById('pair-p1-input').value='';
+  document.getElementById('pair-p2-input').value='';
+  renderDoublesPairs();
+  setTimeout(()=>document.getElementById('suggest-pair-overlay').classList.remove('open'),1800);
+};
+
+window.confirmDoublePair=async function(id){
+  const p=doublesPairs.find(x=>x.id===id);
+  if(!p||!isAdmin)return;
+  p.status='confirmed';
+  await saveDoublesPairsToStorage();
+  renderDoublesPairs();
+};
+
+window.removeDoublePair=async function(id){
+  if(!isAdmin)return;
+  doublesPairs=doublesPairs.filter(p=>p.id!==id);
+  await saveDoublesPairsToStorage();
+  renderDoublesPairs();
+};
+
+window.openDoublesBracketModal=function(){
+  if(!isAdmin){alert('Admin login required to create brackets.');return;}
+  const confirmed=doublesPairs.filter(p=>p.status==='confirmed');
+  if(confirmed.length<2){alert('At least 2 confirmed pairs are needed.');return;}
+  document.getElementById('doubles-bracket-name-input').value='';
+  document.getElementById('doubles-bracket-create-msg').style.display='none';
+  // Populate confirmed pairs list with checkboxes
+  const listEl=document.getElementById('doubles-bracket-pairs-list');
+  listEl.innerHTML=confirmed.map((p,i)=>`
+    <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.78rem;padding:.3rem .1rem;border-bottom:1px solid rgba(74,42,56,.3)">
+      <input type="checkbox" class="dp-br-check" value="${esc(p.id)}" checked>
+      <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.55rem;min-width:14px">${i+1}</span>
+      <span style="flex:1">${escCap(p.p1)} <span style="color:var(--muted);">/</span> ${escCap(p.p2)}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:.5rem;color:var(--win)">✓</span>
+    </label>`).join('');
+  document.getElementById('doubles-bracket-overlay').classList.add('open');
+};
+
+window.createDoublesBracket=async function(){
+  if(!isAdmin)return;
+  const name=document.getElementById('doubles-bracket-name-input').value.trim();
+  if(!name){showMsg('doubles-bracket-create-msg','Enter a tournament name.',true);return;}
+  const format=document.getElementById('doubles-bracket-format').value;
+  const seedingMode=document.getElementById('doubles-bracket-seeding').value;
+  // Read checked pair IDs
+  const checkedIds=new Set(Array.from(document.querySelectorAll('.dp-br-check:checked')).map(el=>el.value));
+  const selectedPairs=doublesPairs.filter(p=>p.status==='confirmed'&&checkedIds.has(p.id));
+  if(selectedPairs.length<2){showMsg('doubles-bracket-create-msg','Select at least 2 pairs.',true);return;}
+  let pairNames=selectedPairs.map(p=>`${cap(p.p1)} / ${cap(p.p2)}`);
+  if(seedingMode==='random'){
+    for(let i=pairNames.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pairNames[i],pairNames[j]]=[pairNames[j],pairNames[i]];}
+  }
+  const b=buildBr(pairNames,format);
+  b.id=Date.now();b.name=name;b.seeding=seedingMode;b.players=pairNames;b.createdAt=Date.now();b.isDoubles=true;
+  propagateBr(b);
+  brackets.push(b);
+  // Only remove pairs that were actually used in this bracket
+  const usedIds=new Set(selectedPairs.map(p=>p.id));
+  doublesPairs=doublesPairs.filter(p=>!usedIds.has(p.id));
+  await Promise.all([saveBracketsToStorage(),saveDoublesPairsToStorage()]);
+  document.getElementById('doubles-bracket-overlay').classList.remove('open');
+  renderDoublesPairs();
+  showPanel('brackets',document.querySelector('nav button[onclick*="brackets"]'));
+};
+
+// Load doubles pairs on init
+(async()=>{await loadDoublesPairsFromStorage();renderDoublesPairs();})();
+// Hook into tab switch — patch showPanel to also refresh doubles
+(function(){
+  const _orig=window.showPanel;
+  window.showPanel=function(id,btn){
+    _orig(id,btn);
+    if(id==='brackets'){loadDoublesPairsFromStorage().then(()=>renderDoublesPairs());}
+  };
+})();
 window.takeSnapshot=async function(){
   const label=document.getElementById('snapshot-label-input').value.trim()||('Snapshot '+new Date().toLocaleString());
   const msgEl=document.getElementById('snapshot-msg');
@@ -6568,6 +6794,39 @@ window.addEventListener('resize',function(){
 });
 const _origRPS=window.renderPlayersList;
 window.renderPlayersList=function(){if(_origRPS)_origRPS();_anPopulateDropdowns();};
+
+// ── CLIPS ─────────────────────────────────────────────────────────────────
+let _clipsLoaded=false;
+async function renderClips(){
+  if(_clipsLoaded)return;
+  const grid=document.getElementById('clips-grid');
+  const loading=document.getElementById('clips-loading');
+  const empty=document.getElementById('clips-empty');
+  try{
+    const listRef=storRef(stor,'highlights/');
+    const res=await listAll(listRef);
+    loading.style.display='none';
+    if(res.items.length===0){empty.style.display='';return;}
+    const items=[...res.items].sort((a,b)=>b.name.localeCompare(a.name));
+    grid.style.display='';
+    for(const item of items){
+      const url=await getDownloadURL(item);
+      const num=item.name.replace('highlight_','').replace('.mp4','');
+      const card=document.createElement('div');
+      card.className='clip-card';
+      card.innerHTML=`<video src="${url}" controls playsinline preload="metadata"></video>
+        <div class="clip-card-meta">
+          <span class="clip-num">CLIP #${num}</span>
+          <a class="clip-dl" href="${url}" target="_blank">↓ download</a>
+        </div>`;
+      grid.appendChild(card);
+    }
+    _clipsLoaded=true;
+  }catch(e){
+    loading.textContent='Failed to load clips.';
+    console.error(e);
+  }
+}
 </script>
 <div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
   <div id="rd-modal-box">
@@ -6644,5 +6903,67 @@ window.renderPlayersList=function(){if(_origRPS)_origRPS();_anPopulateDropdowns(
     </div>
   </div>
 </div>
+<!-- SUGGEST PAIR MODAL -->
+<div class="am-overlay" id="suggest-pair-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="am-box" style="max-width:380px">
+    <h2>Suggest a Doubles Pair</h2>
+    <p style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.6">Enter two player names to suggest them as a team. Admin will confirm before the bracket is created.</p>
+    <div class="field">
+      <label>Player 1</label>
+      <input type="text" id="pair-p1-input" placeholder="Player name…" list="pair-p1-datalist" autocomplete="off">
+      <datalist id="pair-p1-datalist"></datalist>
+    </div>
+    <div class="field">
+      <label>Player 2</label>
+      <input type="text" id="pair-p2-input" placeholder="Player name…" list="pair-p2-datalist" autocomplete="off">
+      <datalist id="pair-p2-datalist"></datalist>
+    </div>
+    <div style="display:flex;gap:.65rem;margin-top:.5rem">
+      <button class="btn" onclick="submitDoublePair()">Submit Pair</button>
+      <button class="btn-ghost" onclick="document.getElementById('suggest-pair-overlay').classList.remove('open')">Cancel</button>
+    </div>
+    <div class="msg" id="suggest-pair-msg" style="margin-top:.65rem"></div>
+  </div>
+</div>
+
+<!-- CREATE DOUBLES BRACKET MODAL -->
+<div class="am-overlay" id="doubles-bracket-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="am-box" style="max-width:420px">
+    <h2>New Doubles Bracket</h2>
+    <div class="field"><label>Tournament Name</label><input type="text" id="doubles-bracket-name-input" placeholder="e.g. Doubles Slam 2025"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+      <div class="field" style="margin-bottom:0">
+        <label>Format</label>
+        <select id="doubles-bracket-format">
+          <option value="single">Single Elimination</option>
+          <option value="double">Double Elimination</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Seeding</label>
+        <select id="doubles-bracket-seeding">
+          <option value="random">Random draw</option>
+          <option value="order">As confirmed</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-top:.9rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem">
+        <label style="margin:0">Select Pairs for Bracket</label>
+        <div style="display:flex;gap:.35rem">
+          <button class="btn-ghost" style="padding:.25rem .55rem;font-size:.52rem" onclick="document.querySelectorAll('.dp-br-check').forEach(el=>el.checked=true)">All</button>
+          <button class="btn-ghost" style="padding:.25rem .55rem;font-size:.52rem" onclick="document.querySelectorAll('.dp-br-check').forEach(el=>el.checked=false)">None</button>
+        </div>
+      </div>
+      <div id="doubles-bracket-pairs-list" style="background:var(--bg);border:1px solid var(--border);padding:.5rem .75rem;max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:.35rem;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text)"></div>
+    </div>
+    <div style="display:flex;gap:.65rem;margin-top:.5rem">
+      <button class="btn" onclick="createDoublesBracket()">Create Bracket</button>
+      <button class="btn-ghost" onclick="document.getElementById('doubles-bracket-overlay').classList.remove('open')">Cancel</button>
+    </div>
+    <div class="msg" id="doubles-bracket-create-msg" style="margin-top:.65rem"></div>
+  </div>
+</div>
+
 </body>
 </html>
