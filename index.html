@@ -1164,11 +1164,11 @@ const FIREBASE_CONFIG = {
   appId:"1:902138155809:web:0860c66b77d07746952460"
 };
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getStorage,ref as storRef,listAll,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
 import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,getDoc,getDocs,onSnapshot,query,orderBy,serverTimestamp,runTransaction,writeBatch,Timestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp(FIREBASE_CONFIG);
 const db=getFirestore(app);
-const stor=getStorage(app);
+
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let players=[],matches=[],isAdmin=false,curProfileId=null;
@@ -6803,24 +6803,21 @@ async function renderClips(){
   const loading=document.getElementById('clips-loading');
   const empty=document.getElementById('clips-empty');
   try{
-    const listRef=storRef(stor,'highlights/');
-    const res=await listAll(listRef);
+    const snap=await getDocs(query(collection(db,'clips'),orderBy('clip_num','desc')));
     loading.style.display='none';
-    if(res.items.length===0){empty.style.display='';return;}
-    const items=[...res.items].sort((a,b)=>b.name.localeCompare(a.name));
+    if(snap.empty){empty.style.display='';return;}
     grid.style.display='';
-    for(const item of items){
-      const url=await getDownloadURL(item);
-      const num=item.name.replace('highlight_','').replace('.mp4','');
+    snap.forEach(d=>{
+      const {url,clip_num}=d.data();
       const card=document.createElement('div');
       card.className='clip-card';
       card.innerHTML=`<video src="${url}" controls playsinline preload="metadata"></video>
         <div class="clip-card-meta">
-          <span class="clip-num">CLIP #${num}</span>
+          <span class="clip-num">CLIP #${clip_num}</span>
           <a class="clip-dl" href="${url}" target="_blank">↓ download</a>
         </div>`;
       grid.appendChild(card);
-    }
+    });
     _clipsLoaded=true;
   }catch(e){
     loading.textContent='Failed to load clips.';
