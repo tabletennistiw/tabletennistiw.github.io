@@ -502,10 +502,15 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
 .clip-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
 .clip-card:hover{border-color:var(--accent);}
 .clip-card video{width:100%;display:block;background:#000;max-height:200px;}
-.clip-card-meta{padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center;}
-.clip-num{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.06em;}
+.clip-card-meta{padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;}
+.clip-name{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.06em;cursor:pointer;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.clip-name:hover{color:var(--text);}
+.clip-name-input{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.06em;background:transparent;border:none;border-bottom:1px solid var(--accent);outline:none;width:100%;padding:0;}
+.clip-actions{display:flex;align-items:center;gap:.4rem;flex-shrink:0;}
 .clip-dl{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);text-decoration:none;letter-spacing:.05em;}
 .clip-dl:hover{color:var(--text);}
+.clip-del{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--loss);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.05em;opacity:.7;}
+.clip-del:hover{opacity:1;}
 </style>
 </head>
 <body>
@@ -1288,6 +1293,7 @@ window.openAdminLogin=function(){
     document.getElementById('admin-btn').classList.remove('on');
     document.getElementById('admin-tab-btn').style.display='none';
     renderPastTournaments();renderHistory();
+    _clipsLoaded=false;document.getElementById('clips-grid').innerHTML='';document.getElementById('clips-loading').style.display='';
     showPanel('leaderboard',document.querySelector('nav button'));return;
   }
   document.getElementById('admin-pw').value='';document.getElementById('admin-login-msg').style.display='none';
@@ -1299,6 +1305,7 @@ window.submitAdminLogin=function(){
     isAdmin=true;
     try{localStorage.setItem('tttiw_admin','1');}catch(e){}
     document.getElementById('admin-login-overlay').classList.remove('open');
+    _clipsLoaded=false;document.getElementById('clips-grid').innerHTML='';document.getElementById('clips-loading').style.display='';
     applyAdminUI();
   }else{const m=document.getElementById('admin-login-msg');m.textContent='Incorrect password.';m.className='msg err';m.style.display='block';}
 };
@@ -6805,16 +6812,25 @@ async function renderClips(){
   try{
     const snap=await getDocs(query(collection(db,'clips'),orderBy('clip_num','desc')));
     loading.style.display='none';
+    grid.innerHTML='';
     if(snap.empty){empty.style.display='';return;}
+    empty.style.display='none';
     grid.style.display='';
     snap.forEach(d=>{
-      const {url,clip_num}=d.data();
+      const data=d.data();
+      const {url,clip_num}=data;
+      const label=data.name||`CLIP #${clip_num}`;
       const card=document.createElement('div');
       card.className='clip-card';
+      card.dataset.id=d.id;
+      const delBtn=isAdmin?`<button class="clip-del" onclick="deleteClip('${d.id}',this)" title="Delete clip">✕ delete</button>`:'';
       card.innerHTML=`<video src="${url}" controls playsinline preload="metadata"></video>
         <div class="clip-card-meta">
-          <span class="clip-num">CLIP #${clip_num}</span>
-          <a class="clip-dl" href="${url}" target="_blank">↓ download</a>
+          <span class="clip-name" title="Click to rename" onclick="startRenameClip(this,'${d.id}')">${label}</span>
+          <div class="clip-actions">
+            ${delBtn}
+            <a class="clip-dl" href="${url}" target="_blank">↓ dl</a>
+          </div>
         </div>`;
       grid.appendChild(card);
     });
@@ -6823,6 +6839,44 @@ async function renderClips(){
     loading.textContent='Failed to load clips.';
     console.error(e);
   }
+}
+function startRenameClip(span,docId){
+  const cur=span.textContent;
+  const input=document.createElement('input');
+  input.className='clip-name-input';
+  input.value=cur;
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+  async function save(){
+    const newName=input.value.trim()||cur;
+    const labelSpan=document.createElement('span');
+    labelSpan.className='clip-name';
+    labelSpan.title='Click to rename';
+    labelSpan.textContent=newName;
+    labelSpan.onclick=()=>startRenameClip(labelSpan,docId);
+    input.replaceWith(labelSpan);
+    if(newName!==cur){
+      try{await updateDoc(doc(db,'clips',docId),{name:newName});}
+      catch(e){console.error('rename failed',e);}
+    }
+  }
+  input.addEventListener('blur',save);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=cur;input.blur();}});
+}
+async function deleteClip(docId,btn){
+  if(!isAdmin)return;
+  if(!confirm('Delete this clip from the website?'))return;
+  try{
+    await deleteDoc(doc(db,'clips',docId));
+    const card=btn.closest('.clip-card');
+    card.remove();
+    const grid=document.getElementById('clips-grid');
+    if(!grid.children.length){
+      grid.style.display='none';
+      document.getElementById('clips-empty').style.display='';
+    }
+  }catch(e){alert('Delete failed: '+e.message);}
 }
 </script>
 <div id="rd-modal-overlay" onclick="if(event.target===this)closeRDModal()">
