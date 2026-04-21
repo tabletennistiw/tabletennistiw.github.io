@@ -916,8 +916,12 @@ input:not([type=checkbox]):not([type=radio])::placeholder,textarea::placeholder{
   <!-- SETTINGS / THEME -->
   <!-- CLIPS -->
   <div id="panel-clips" class="panel">
+    <div id="clips-search-bar" style="display:none;padding:.75rem 1.25rem .25rem;max-width:400px;">
+      <input id="clips-search-input" type="text" placeholder="Search clips…" oninput="filterClips()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.72rem;padding:.5rem .85rem;outline:none;border-radius:0;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
     <div id="clips-loading" class="loading">Loading clips…</div>
     <div id="clips-empty" class="empty" style="display:none">No clips yet. Hit the button on court!</div>
+    <div id="clips-no-results" class="empty" style="display:none">No clips match your search.</div>
     <div id="clips-grid" style="display:none"></div>
   </div>
 
@@ -6805,6 +6809,8 @@ window.renderPlayersList=function(){if(_origRPS)_origRPS();_anPopulateDropdowns(
 
 // ── CLIPS ─────────────────────────────────────────────────────────────────
 let _clipsLoaded=false;
+let _allClipCards=[];  // {el, label, num} — kept for search filter
+
 function _fmtClipTs(ts){
   if(!ts)return'';
   let d;
@@ -6814,27 +6820,62 @@ function _fmtClipTs(ts){
   if(isNaN(d))return'';
   return d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
 }
+
+// Filter visible cards based on search input
+window.filterClips=function(){
+  const q=(document.getElementById('clips-search-input').value||'').trim().toLowerCase();
+  let shown=0;
+  _allClipCards.forEach(({el,label})=>{
+    const match=!q||label.toLowerCase().includes(q);
+    el.style.display=match?'':'none';
+    if(match)shown++;
+  });
+  const noRes=document.getElementById('clips-no-results');
+  if(noRes)noRes.style.display=(shown===0&&_allClipCards.length>0)?'':'none';
+};
+
 async function renderClips(){
   if(_clipsLoaded)return;
   const grid=document.getElementById('clips-grid');
   const loading=document.getElementById('clips-loading');
   const empty=document.getElementById('clips-empty');
   try{
-    const snap=await getDocs(query(collection(db,'clips'),orderBy('clip_num','desc')));
+    // Sort ascending by clip_num (earliest first)
+    const snap=await getDocs(query(collection(db,'clips'),orderBy('clip_num','asc')));
     loading.style.display='none';
     grid.innerHTML='';
+    _allClipCards=[];
     if(snap.empty){empty.style.display='';return;}
     empty.style.display='none';
     grid.style.display='';
-    snap.forEach(d=>{
+
+    // Build ordered list so we can assign sequential names
+    const docs=[];
+    snap.forEach(d=>docs.push(d));
+
+    // Determine the name of the first clip so subsequent names increment from it.
+    // Strategy: find the lowest existing numeric suffix among named clips,
+    // then just number them 1,2,3,... based on their sorted position.
+    // If the first doc already has a custom name we leave all custom names alone
+    // and only auto-name docs that still have no name field.
+    docs.forEach((d,i)=>{
       const data=d.data();
       const {url,clip_num}=data;
-      const label=data.name||`CLIP #${clip_num}`;
+      // Linear name: CLIP 1, CLIP 2, … based on sorted position (1-indexed)
+      const autoLabel=`CLIP ${i+1}`;
+      const label=data.name||autoLabel;
       const ts=_fmtClipTs(data.created_at);
       const card=document.createElement('div');
       card.className='clip-card';
       card.dataset.id=d.id;
-      const delBtn=isAdmin?`<button class="clip-del" onclick="window.deleteClip('${d.id}',this)" title="Delete clip">✕ delete</button>`:'';
+
+      // Admin: checkbox for bulk delete + individual delete button
+      const adminMeta=isAdmin?`
+        <label style="display:flex;align-items:center;gap:.35rem;cursor:pointer;flex-shrink:0;" title="Select for deletion">
+          <input type="checkbox" class="clip-select-cb" data-id="${d.id}" style="accent-color:var(--loss);cursor:pointer;">
+        </label>
+        <button class="clip-del" onclick="window.deleteClip('${d.id}',this)" title="Delete clip">✕</button>`:'';
+
       const tsHtml=ts?`<span class="clip-ts">${ts}</span>`:'';
       card.innerHTML=`<video src="${url}" controls playsinline preload="metadata"></video>
         <div class="clip-card-meta">
@@ -6843,18 +6884,86 @@ async function renderClips(){
             ${tsHtml}
           </div>
           <div class="clip-actions">
-            ${delBtn}
+            ${adminMeta}
             <a class="clip-dl" href="${url}" target="_blank">↓ dl</a>
           </div>
         </div>`;
       grid.appendChild(card);
+      _allClipCards.push({el:card,label,num:clip_num});
     });
+
+    // Show search bar now that clips are loaded
+    const sb=document.getElementById('clips-search-bar');
+    if(sb)sb.style.display='';
+
+    // Show admin bulk-delete toolbar if admin
+    if(isAdmin){
+      const existing=document.getElementById('clips-bulk-bar');
+      if(!existing){
+        const bar=document.createElement('div');
+        bar.id='clips-bulk-bar';
+        bar.style.cssText='display:flex;align-items:center;gap:.75rem;padding:.6rem 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;';
+        bar.innerHTML=`
+          <span style="font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--admin);">Admin</span>
+          <button class="btn-ghost" style="font-size:.58rem;padding:.28rem .6rem;" onclick="window.clipsSelectAll(true)">Select all</button>
+          <button class="btn-ghost" style="font-size:.58rem;padding:.28rem .6rem;" onclick="window.clipsSelectAll(false)">None</button>
+          <button class="btn-danger" style="font-size:.58rem;padding:.28rem .6rem;" onclick="window.deletSelectedClips()">Delete selected</button>
+          <span id="clips-sel-count" style="font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);margin-left:auto;"></span>`;
+        // Insert before search bar
+        const panel=document.getElementById('panel-clips');
+        panel.insertBefore(bar,panel.firstChild);
+        // Update count on checkbox change (delegated)
+        grid.addEventListener('change',e=>{
+          if(e.target.classList.contains('clip-select-cb'))window._updateClipsSelCount();
+        });
+      }
+    }
+
     _clipsLoaded=true;
   }catch(e){
     loading.textContent='Failed to load clips.';
     console.error(e);
   }
 }
+
+window._updateClipsSelCount=function(){
+  const total=document.querySelectorAll('.clip-select-cb:checked').length;
+  const el=document.getElementById('clips-sel-count');
+  if(el)el.textContent=total?`${total} selected`:'';
+};
+window.clipsSelectAll=function(val){
+  document.querySelectorAll('.clip-select-cb').forEach(cb=>{
+    const card=cb.closest('.clip-card');
+    if(!card||card.style.display==='none')return;
+    cb.checked=val;
+  });
+  window._updateClipsSelCount();
+};
+window.deletSelectedClips=async function(){
+  const cbs=[...document.querySelectorAll('.clip-select-cb:checked')];
+  if(!cbs.length){alert('No clips selected.');return;}
+  if(!confirm(`Delete ${cbs.length} clip(s)? This cannot be undone.`))return;
+  for(const cb of cbs){
+    const id=cb.dataset.id;
+    try{
+      await deleteDoc(doc(db,'clips',id));
+      const card=cb.closest('.clip-card');
+      if(card){
+        _allClipCards=_allClipCards.filter(c=>c.el!==card);
+        card.remove();
+      }
+    }catch(e){console.error('delete failed',id,e);}
+  }
+  window._updateClipsSelCount();
+  const grid=document.getElementById('clips-grid');
+  if(!grid.children.length){
+    grid.style.display='none';
+    document.getElementById('clips-empty').style.display='';
+    const sb=document.getElementById('clips-search-bar');
+    if(sb)sb.style.display='none';
+  }
+};
+
 window.startRenameClip=function(span,docId){
   const cur=span.textContent;
   const input=document.createElement('input');
@@ -6871,6 +6980,9 @@ window.startRenameClip=function(span,docId){
     labelSpan.textContent=newName;
     labelSpan.onclick=()=>window.startRenameClip(labelSpan,docId);
     input.replaceWith(labelSpan);
+    // Update search index
+    const entry=_allClipCards.find(c=>c.el===labelSpan.closest('.clip-card'));
+    if(entry)entry.label=newName;
     if(newName!==cur){
       try{await updateDoc(doc(db,'clips',docId),{name:newName});}
       catch(e){console.error('rename failed',e);}
@@ -6881,16 +6993,22 @@ window.startRenameClip=function(span,docId){
 };
 window.deleteClip=async function(docId,btn){
   if(!isAdmin)return;
-  if(!confirm('Delete this clip from the website?'))return;
+  if(!confirm('Delete this clip?'))return;
   try{
     await deleteDoc(doc(db,'clips',docId));
     const card=btn.closest('.clip-card');
-    card.remove();
+    if(card){
+      _allClipCards=_allClipCards.filter(c=>c.el!==card);
+      card.remove();
+    }
     const grid=document.getElementById('clips-grid');
     if(!grid.children.length){
       grid.style.display='none';
       document.getElementById('clips-empty').style.display='';
+      const sb=document.getElementById('clips-search-bar');
+      if(sb)sb.style.display='none';
     }
+    window._updateClipsSelCount();
   }catch(e){alert('Delete failed: '+e.message);}
 };
 </script>
